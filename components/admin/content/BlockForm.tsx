@@ -129,7 +129,7 @@ function ArrayFieldEditor({
       {items.length === 0 ? (
         <p className="text-xs text-slate-400">Nessuna voce.</p>
       ) : (
-        <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+        <DndContext id={`content-${field.key}`} sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
           <SortableContext items={items.map((_, i) => String(i))} strategy={verticalListSortingStrategy}>
             <div className="space-y-2">
               {items.map((item, i) => (
