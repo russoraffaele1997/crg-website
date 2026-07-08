@@ -1,0 +1,120 @@
+"use client";
+
+import Link from "next/link";
+import { motion } from "framer-motion";
+
+const container = {
+  hidden: {},
+  show: { transition: { staggerChildren: 0.13, delayChildren: 0.25 } },
+};
+const item = {
+  hidden: { opacity: 0, y: 28 },
+  show: { opacity: 1, y: 0, transition: { duration: 0.85, ease: [0.25, 0, 0, 1] } },
+};
+
+export default function HeroSection() {
+  return (
+    <section className="relative min-h-screen bg-charcoal flex items-center justify-center overflow-hidden">
+      {/* Fine grid texture */}
+      <div
+        className="absolute inset-0 opacity-[0.035]"
+        style={{
+          backgroundImage: `
+            linear-gradient(rgba(200,16,46,1) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(200,16,46,1) 1px, transparent 1px)
+          `,
+          backgroundSize: "56px 56px",
+        }}
+      />
+
+      {/* Radial red glow (bottom center) */}
+      <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[600px] h-[300px] bg-crg-red/5 blur-3xl rounded-full" />
+
+      <div className="container-custom relative z-10 text-center pt-36 pb-32">
+        <motion.div variants={container} initial="hidden" animate="show">
+
+          <motion.div variants={item} className="flex items-center justify-center gap-3 mb-10">
+            <div className="h-px w-8 bg-crg-red" />
+            <span className="font-sans text-[10px] tracking-[0.5em] uppercase text-crg-red">
+              Crafted Residential Group
+            </span>
+            <div className="h-px w-8 bg-crg-red" />
+          </motion.div>
+
+          <motion.h1
+            variants={item}
+            className="font-heading font-bold text-[46px] md:text-[70px] lg:text-[84px] text-white leading-[1.04] mb-6 max-w-4xl mx-auto"
+          >
+            Dal terreno
+            <br />
+            <span className="text-crg-red">al valore.</span>
+          </motion.h1>
+
+          <motion.p
+            variants={item}
+            className="font-sans text-[11px] tracking-[0.28em] uppercase text-white/35 mb-3"
+          >
+            Acquisiamo · Costruiamo · Valorizziamo
+          </motion.p>
+
+          <motion.p
+            variants={item}
+            className="font-sans text-[15px] text-white/40 max-w-xl mx-auto mb-14 leading-relaxed mt-6"
+          >
+            CRG sviluppa progetti immobiliari residenziali, commerciali e
+            industriali, trasformando aree e fabbricati in spazi moderni,
+            efficienti e sostenibili.
+          </motion.p>
+
+          <motion.div
+            variants={item}
+            className="flex flex-col sm:flex-row gap-4 justify-center"
+          >
+            <Link href="/progetti/palazzo-rue" className="btn-primary">
+              Scopri Palazzo Rue
+            </Link>
+            <Link href="/contatti" className="btn-outline-light">
+              Prenota un appuntamento
+            </Link>
+          </motion.div>
+
+          {/* Stats */}
+          <motion.div
+            variants={item}
+            className="mt-20 pt-10 border-t border-white/8 grid grid-cols-3 gap-8 max-w-sm mx-auto"
+          >
+            {[
+              { value: "1", label: "Progetto" },
+              { value: "5", label: "Unità" },
+              { value: "NZEB", label: "Energetico" },
+            ].map((s) => (
+              <div key={s.label} className="flex flex-col items-center gap-1">
+                <span className="font-heading font-bold text-3xl text-crg-red">{s.value}</span>
+                <span className="font-sans text-[9px] tracking-widest uppercase text-white/25">
+                  {s.label}
+                </span>
+              </div>
+            ))}
+          </motion.div>
+        </motion.div>
+      </div>
+
+      {/* Scroll cue */}
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 2.2 }}
+        className="absolute bottom-9 left-1/2 -translate-x-1/2"
+      >
+        <motion.svg
+          animate={{ y: [0, 8, 0] }}
+          transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+          className="w-4 h-4 text-white/15"
+          fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}
+        >
+          <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+        </motion.svg>
+      </motion.div>
+    </section>
+  );
+}

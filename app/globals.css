@@ -1,0 +1,73 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-cream text-charcoal font-sans;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-heading;
+  }
+}
+
+@layer components {
+  /* ─── Buttons ───────────────────────────────────────────────────── */
+  .btn-primary {
+    @apply inline-flex items-center justify-center px-8 py-3.5
+           bg-crg-red text-white font-sans text-xs tracking-[0.18em] uppercase
+           transition-all duration-300
+           hover:bg-crg-red-dark
+           focus:outline-none focus:ring-2 focus:ring-crg-red focus:ring-offset-2;
+  }
+
+  .btn-outline {
+    @apply inline-flex items-center justify-center px-8 py-3.5
+           border border-charcoal text-charcoal font-sans text-xs tracking-[0.18em] uppercase
+           transition-all duration-300
+           hover:bg-charcoal hover:text-white
+           focus:outline-none focus:ring-2 focus:ring-charcoal focus:ring-offset-2;
+  }
+
+  .btn-outline-light {
+    @apply inline-flex items-center justify-center px-8 py-3.5
+           border border-white/30 text-white font-sans text-xs tracking-[0.18em] uppercase
+           transition-all duration-300
+           hover:border-crg-red hover:text-crg-red
+           focus:outline-none focus:ring-2 focus:ring-crg-red focus:ring-offset-2;
+  }
+
+  /* ─── Layout ────────────────────────────────────────────────────── */
+  .container-custom {
+    @apply max-w-7xl mx-auto px-5 sm:px-8 lg:px-12;
+  }
+
+  /* ─── Typography helpers ────────────────────────────────────────── */
+  .section-label {
+    @apply font-sans text-[10px] tracking-[0.38em] uppercase text-crg-red;
+  }
+
+  .section-title {
+    @apply font-heading text-4xl md:text-5xl lg:text-[52px] text-charcoal leading-[1.08] font-bold;
+  }
+
+  .section-title-light {
+    @apply font-heading text-4xl md:text-5xl lg:text-[52px] text-white leading-[1.08] font-bold;
+  }
+
+  /* ─── Forms ─────────────────────────────────────────────────────── */
+  .input-field {
+    @apply w-full bg-transparent border border-border-warm px-4 py-3
+           font-sans text-sm text-charcoal placeholder:text-mid-gray
+           focus:outline-none focus:border-crg-red transition-colors duration-200;
+  }
+
+  .input-label {
+    @apply block font-sans text-[10px] tracking-[0.22em] uppercase text-mid-gray mb-2;
+  }
+}
