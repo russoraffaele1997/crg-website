@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import slugify from "slugify";
 import { createProject, updateProjectGeneral, deleteProject, type ProjectGeneralInput } from "@/app/admin/(protected)/progetti/actions";
 import { categoryOptions, projectStatusOptions, publishStatusOptions } from "@/lib/admin/project-options";
-import SimpleImageUpload from "@/components/admin/SimpleImageUpload";
+import MediaField from "@/components/admin/MediaField";
 import type { MediaLibraryItem } from "@/lib/types/media";
 
 interface Props {
@@ -197,7 +197,7 @@ export default function ProjectGeneralForm({ mode, projectId, initial }: Props) 
         />
       </div>
 
-      <SimpleImageUpload label="Immagine di copertina" value={coverImage} onChange={setCoverImage} />
+      <MediaField label="Immagine di copertina" value={coverImage} onChange={setCoverImage} />
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 items-end">
         <div className="flex items-center gap-2 pb-2.5">

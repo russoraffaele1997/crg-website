@@ -3,9 +3,9 @@
 import { useState } from "react";
 import { DndContext, closestCenter, PointerSensor, useSensor, useSensors, type DragEndEvent } from "@dnd-kit/core";
 import { SortableContext, verticalListSortingStrategy, arrayMove } from "@dnd-kit/sortable";
-import { X } from "lucide-react";
+import { Plus, X } from "lucide-react";
 import SortableItem from "@/components/admin/SortableItem";
-import SimpleImageUpload from "@/components/admin/SimpleImageUpload";
+import MediaLibraryModal from "@/components/admin/MediaLibraryModal";
 import { addGalleryImage, removeGalleryImage, reorderGalleryImages } from "@/app/admin/(protected)/progetti/actions";
 import type { MediaLibraryItem } from "@/lib/types/media";
 
@@ -22,14 +22,12 @@ export default function GalleryManager({
   initialItems: GalleryItem[];
 }) {
   const [items, setItems] = useState(initialItems);
-  const [uploadKey, setUploadKey] = useState(0);
+  const [pickerOpen, setPickerOpen] = useState(false);
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }));
 
-  const handleUpload = async (media: MediaLibraryItem | null) => {
-    if (!media) return;
+  const handleSelect = async (media: MediaLibraryItem) => {
     await addGalleryImage(projectId, media.id, items.length);
     setItems((prev) => [...prev, { id: crypto.randomUUID(), media: { id: media.id, url: media.url, original_filename: media.original_filename } }]);
-    setUploadKey((k) => k + 1); // reset the uploader to an empty state
   };
 
   const handleRemove = async (id: string) => {
@@ -50,7 +48,16 @@ export default function GalleryManager({
   return (
     <div className="max-w-2xl">
       <div className="mb-6">
-        <SimpleImageUpload key={uploadKey} label="Aggiungi immagine alla gallery" value={null} onChange={handleUpload} />
+        <label className="block text-xs tracking-wider uppercase text-slate-500 mb-2">Aggiungi immagine alla gallery</label>
+        <button
+          type="button"
+          onClick={() => setPickerOpen(true)}
+          className="flex flex-col items-center justify-center gap-2 h-32 w-40 rounded-lg border-2 border-dashed border-slate-300 text-slate-400 hover:border-crg-red hover:text-crg-red transition-colors"
+        >
+          <Plus className="w-5 h-5" />
+          <span className="text-xs">Scegli immagine</span>
+        </button>
+        <MediaLibraryModal open={pickerOpen} onClose={() => setPickerOpen(false)} onSelect={handleSelect} kindFilter="image" />
       </div>
 
       {items.length === 0 ? (
