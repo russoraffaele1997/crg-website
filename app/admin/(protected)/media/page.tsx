@@ -1,13 +1,16 @@
-import { Image as ImageIcon } from "lucide-react";
-import ComingSoon from "@/components/admin/ComingSoon";
+import { getMediaFolders, getMediaItems } from "@/lib/admin/data/media";
+import MediaLibraryManager from "@/components/admin/media/MediaLibraryManager";
 
-export default function MediaLibraryAdminPage() {
+export default async function MediaLibraryAdminPage() {
+  const [folders, { items }] = await Promise.all([getMediaFolders(), getMediaItems()]);
+
   return (
-    <ComingSoon
-      title="Media Library"
-      description="Carica, organizza e riusa immagini, video e documenti."
-      icon={ImageIcon}
-      phase="Arriva nella Fase 2, subito dopo che il CMS Progetti sarà collegato al frontend."
-    />
+    <div>
+      <div className="mb-8">
+        <h1 className="text-2xl font-semibold text-slate-900">Media Library</h1>
+        <p className="text-sm text-slate-500 mt-1">Carica, organizza e riusa immagini, video e documenti.</p>
+      </div>
+      <MediaLibraryManager initialFolders={folders} initialItems={items} />
+    </div>
   );
 }
