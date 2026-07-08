@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { motion } from "framer-motion";
+import type { HeroContent } from "@/lib/data/site-content";
 
 const container = {
   hidden: {},
@@ -12,7 +13,7 @@ const item = {
   show: { opacity: 1, y: 0, transition: { duration: 0.85, ease: [0.25, 0, 0, 1] } },
 };
 
-export default function HeroSection() {
+export default function HeroSection({ content }: { content: HeroContent }) {
   return (
     <section className="relative min-h-screen bg-charcoal flex items-center justify-center overflow-hidden">
       {/* Fine grid texture */}
@@ -36,7 +37,7 @@ export default function HeroSection() {
           <motion.div variants={item} className="flex items-center justify-center gap-3 mb-10">
             <div className="h-px w-8 bg-crg-red" />
             <span className="font-sans text-[10px] tracking-[0.5em] uppercase text-crg-red">
-              Crafted Residential Group
+              {content.eyebrow}
             </span>
             <div className="h-px w-8 bg-crg-red" />
           </motion.div>
@@ -45,36 +46,34 @@ export default function HeroSection() {
             variants={item}
             className="font-heading font-bold text-[46px] md:text-[70px] lg:text-[84px] text-white leading-[1.04] mb-6 max-w-4xl mx-auto"
           >
-            Dal terreno
+            {content.titleLine1}
             <br />
-            <span className="text-crg-red">al valore.</span>
+            <span className="text-crg-red">{content.titleLine2}</span>
           </motion.h1>
 
           <motion.p
             variants={item}
             className="font-sans text-[11px] tracking-[0.28em] uppercase text-white/35 mb-3"
           >
-            Acquisiamo · Costruiamo · Valorizziamo
+            {content.tagline}
           </motion.p>
 
           <motion.p
             variants={item}
             className="font-sans text-[15px] text-white/40 max-w-xl mx-auto mb-14 leading-relaxed mt-6"
           >
-            CRG sviluppa progetti immobiliari residenziali, commerciali e
-            industriali, trasformando aree e fabbricati in spazi moderni,
-            efficienti e sostenibili.
+            {content.body}
           </motion.p>
 
           <motion.div
             variants={item}
             className="flex flex-col sm:flex-row gap-4 justify-center"
           >
-            <Link href="/progetti/palazzo-rue" className="btn-primary">
-              Scopri Palazzo Rue
+            <Link href={content.ctaPrimaryHref} className="btn-primary">
+              {content.ctaPrimaryLabel}
             </Link>
-            <Link href="/contatti" className="btn-outline-light">
-              Prenota un appuntamento
+            <Link href={content.ctaSecondaryHref} className="btn-outline-light">
+              {content.ctaSecondaryLabel}
             </Link>
           </motion.div>
 
@@ -83,11 +82,7 @@ export default function HeroSection() {
             variants={item}
             className="mt-20 pt-10 border-t border-white/8 grid grid-cols-3 gap-8 max-w-sm mx-auto"
           >
-            {[
-              { value: "1", label: "Progetto" },
-              { value: "5", label: "Unità" },
-              { value: "NZEB", label: "Energetico" },
-            ].map((s) => (
+            {content.stats.map((s) => (
               <div key={s.label} className="flex flex-col items-center gap-1">
                 <span className="font-heading font-bold text-3xl text-crg-red">{s.value}</span>
                 <span className="font-sans text-[9px] tracking-widest uppercase text-white/25">

@@ -7,6 +7,14 @@ import FeaturedProjects from "@/components/FeaturedProjects";
 import PalazzoRueSection from "@/components/home/PalazzoRueSection";
 import FinalCTA from "@/components/FinalCTA";
 import { getFeaturedProjects } from "@/lib/data/projects";
+import {
+  getHeroContent,
+  getConstructionParallaxContent,
+  getWhatWeDoContent,
+  getWhyCrgContent,
+  getPalazzoRueSpotlightContent,
+  getHomeFinalCtaContent,
+} from "@/lib/data/site-content";
 
 export const revalidate = 300;
 
@@ -17,17 +25,25 @@ export const metadata: Metadata = {
 };
 
 export default async function HomePage() {
-  const featured = await getFeaturedProjects(3);
+  const [featured, hero, parallax, whatWeDo, whyCrg, palazzoRue, finalCta] = await Promise.all([
+    getFeaturedProjects(3),
+    getHeroContent(),
+    getConstructionParallaxContent(),
+    getWhatWeDoContent(),
+    getWhyCrgContent(),
+    getPalazzoRueSpotlightContent(),
+    getHomeFinalCtaContent(),
+  ]);
 
   return (
     <>
-      <HeroSection />
-      <ConstructionParallax />
-      <WhatWeDoSection />
-      <WhyCRGSection />
+      <HeroSection content={hero} />
+      <ConstructionParallax content={parallax} />
+      <WhatWeDoSection content={whatWeDo} />
+      <WhyCRGSection content={whyCrg} />
       <FeaturedProjects featured={featured} />
-      <PalazzoRueSection />
-      <FinalCTA />
+      <PalazzoRueSection content={palazzoRue} />
+      <FinalCTA content={finalCta} />
     </>
   );
 }

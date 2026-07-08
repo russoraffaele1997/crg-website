@@ -3,8 +3,9 @@
 import Link from "next/link";
 import { motion, useInView } from "framer-motion";
 import { useRef } from "react";
+import type { FinalCtaContent } from "@/lib/data/site-content";
 
-export default function FinalCTA() {
+export default function FinalCTA({ content }: { content: FinalCtaContent }) {
   const ref = useRef<HTMLDivElement>(null);
   const inView = useInView(ref, { once: true, margin: "-80px" });
 
@@ -26,16 +27,15 @@ export default function FinalCTA() {
           animate={inView ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.8 }}
         >
-          <span className="section-label block mb-6">Inizia ora</span>
+          <span className="section-label block mb-6">{content.eyebrow}</span>
           <h2 className="section-title-light max-w-3xl mx-auto mb-6">
-            Stai cercando un immobile o vuoi conoscere i nostri prossimi sviluppi?
+            {content.title}
           </h2>
           <p className="font-sans text-sm text-white/35 max-w-lg mx-auto mb-12">
-            Il nostro team è disponibile per rispondere a ogni domanda e
-            accompagnarti in ogni fase del processo di acquisto o locazione.
+            {content.body}
           </p>
           <Link href="/contatti" className="btn-primary">
-            Prenota un appuntamento
+            {content.ctaLabel}
           </Link>
         </motion.div>
       </div>

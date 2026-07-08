@@ -1,8 +1,15 @@
 import Link from "next/link";
 import Image from "next/image";
 import type { Project } from "@/lib/types/project";
+import type { CompanyInfoContent } from "@/lib/data/site-content";
 
-export default function Footer({ projects }: { projects: Project[] }) {
+export default function Footer({
+  projects,
+  companyInfo,
+}: {
+  projects: Project[];
+  companyInfo: CompanyInfoContent;
+}) {
   return (
     <footer className="bg-charcoal text-white">
       <div className="container-custom py-20">
@@ -20,19 +27,17 @@ export default function Footer({ projects }: { projects: Project[] }) {
               />
             </div>
             <p className="font-sans text-sm text-white/40 leading-relaxed max-w-sm">
-              Sviluppo immobiliare residenziale, commerciale e industriale.
-              Trasformiamo aree e fabbricati in spazi moderni, efficienti e
-              sostenibili.
+              {companyInfo.brandDescription}
             </p>
             <div className="mt-8 flex flex-col gap-2 text-sm text-white/30 font-sans">
-              <span>Via Traversa Michelangelo, 66 — 80026 Casoria, NA</span>
-              <a href="mailto:crgsrl2025@gmail.com"
+              <span>{companyInfo.address}</span>
+              <a href={`mailto:${companyInfo.email}`}
                  className="hover:text-crg-red transition-colors">
-                crgsrl2025@gmail.com
+                {companyInfo.email}
               </a>
-              <a href="tel:+393318364042"
+              <a href={`tel:${companyInfo.phone.replace(/\s+/g, "")}`}
                  className="hover:text-crg-red transition-colors">
-                +39 331 836 4042
+                {companyInfo.phone}
               </a>
             </div>
           </div>

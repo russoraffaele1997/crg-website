@@ -2,6 +2,7 @@
 
 import { useRef } from "react";
 import { motion, useScroll, useTransform, MotionValue } from "framer-motion";
+import type { ConstructionParallaxContent } from "@/lib/data/site-content";
 
 // ─── Scene geometry constants ──────────────────────────────────────────────
 // All values are in SVG user units (viewBox 0 0 1200 680)
@@ -41,52 +42,32 @@ for (let f = 0; f < B.floors; f++) {
   }
 }
 
-// ─── Phase text content ────────────────────────────────────────────────────
-const PHASES = [
-  {
-    range: [0.00, 0.14] as [number, number],
-    tag: "01 — Acquisizione",
-    title: "Dal terreno\nalla visione",
-    sub: "Ogni grande progetto inizia con un'analisi attenta del territorio.",
-  },
-  {
-    range: [0.17, 0.31] as [number, number],
-    tag: "02 — Cantiere",
-    title: "Costruiamo\nvalore",
-    sub: "Demolizione certificata e preparazione del sito con rigore tecnico.",
-  },
-  {
-    range: [0.33, 0.47] as [number, number],
-    tag: "03 — Fondazioni",
-    title: "Strutture\nantisismiche",
-    sub: "Fondazioni certificate per resistere al tempo e garantire sicurezza.",
-  },
-  {
-    range: [0.50, 0.63] as [number, number],
-    tag: "04 — Costruzione",
-    title: "Materiali di\nultima generazione",
-    sub: "Selezioniamo solo il meglio per qualità costruttiva duratura.",
-  },
-  {
-    range: [0.66, 0.79] as [number, number],
-    tag: "05 — Efficienza",
-    title: "Zero\nemissioni",
-    sub: "Classe energetica A+, impianti fotovoltaici e domotica integrata.",
-  },
-  {
-    range: [0.83, 0.97] as [number, number],
-    tag: "06 — Completamento",
-    title: "Spazi pensati\nper durare",
-    sub: "Residenze moderne, sicure e sostenibili. Costruiamo il futuro.",
-  },
+// ─── Phase scroll ranges ────────────────────────────────────────────────────
+// Fixed animation timing, not admin-editable — only the tag/title/sub text
+// (see lib/content/block-registry.ts "construction_parallax" block, passed
+// in as `content` below) is. The count must stay 6 to match this array.
+const PHASE_RANGES: { range: [number, number] }[] = [
+  { range: [0.00, 0.14] },
+  { range: [0.17, 0.31] },
+  { range: [0.33, 0.47] },
+  { range: [0.50, 0.63] },
+  { range: [0.66, 0.79] },
+  { range: [0.83, 0.97] },
 ];
+
+interface Phase {
+  range: [number, number];
+  tag: string;
+  title: string;
+  sub: string;
+}
 
 // ─── Phase text component ─────────────────────────────────────────────────
 function PhaseText({
   phase,
   scrollYProgress,
 }: {
-  phase: (typeof PHASES)[0];
+  phase: Phase;
   scrollYProgress: MotionValue<number>;
 }) {
   const [start, end] = phase.range;
@@ -155,8 +136,9 @@ function PhaseDot({
 }
 
 // ─── Main component ────────────────────────────────────────────────────────
-export default function ConstructionParallax() {
+export default function ConstructionParallax({ content }: { content: ConstructionParallaxContent }) {
   const containerRef = useRef<HTMLDivElement>(null);
+  const phases: Phase[] = PHASE_RANGES.map((r, i) => ({ ...r, ...content.phases[i] }));
 
   const { scrollYProgress } = useScroll({
     target: containerRef,
@@ -188,7 +170,7 @@ export default function ConstructionParallax() {
     <div
       ref={containerRef}
       className="relative"
-      style={{ height: `${PHASES.length * 100}vh` }}
+      style={{ height: `${phases.length * 100}vh` }}
     >
       <div className="sticky top-0 h-screen overflow-hidden" style={{ background: "#0C0C10" }}>
 
@@ -493,14 +475,14 @@ export default function ConstructionParallax() {
 
         {/* ── Text overlays (HTML for crisp rendering) ───────────────── */}
         <div className="absolute inset-0 pointer-events-none">
-          {PHASES.map((phase, i) => (
+          {phases.map((phase, i) => (
             <PhaseText key={i} phase={phase} scrollYProgress={scrollYProgress} />
           ))}
         </div>
 
         {/* ── Phase indicator dots (right side) ──────────────────────── */}
         <div className="absolute right-5 md:right-8 top-1/2 -translate-y-1/2 flex flex-col gap-3 z-10">
-          {PHASES.map((phase, i) => (
+          {phases.map((phase, i) => (
             <PhaseDot
               key={i}
               index={i}
