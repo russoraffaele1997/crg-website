@@ -1,8 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { Plus, Pencil, Trash2, X, Check } from "lucide-react";
+import { Plus, Pencil, Trash2, X, Check, FileImage } from "lucide-react";
 import UnitStatusSelect from "./UnitStatusSelect";
+import UnitDocumentsPanel from "./UnitDocumentsPanel";
 import { createUnit, updateUnit, deleteUnit, type UnitInput } from "@/app/admin/(protected)/progetti/actions";
 import type { UnitStatus } from "@/lib/types/project";
 
@@ -73,6 +74,7 @@ export default function UnitsManager({
   const [saving, setSaving] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editUnit, setEditUnit] = useState<UnitInput>(emptyForm);
+  const [docsUnit, setDocsUnit] = useState<Unit | null>(null);
 
   const handleAdd = async () => {
     if (!newUnit.unitCode.trim() || !newUnit.name.trim()) return;
@@ -216,6 +218,15 @@ export default function UnitsManager({
                       <div className="flex items-center justify-end gap-1">
                         <button
                           type="button"
+                          onClick={() => setDocsUnit(u)}
+                          className="text-slate-400 hover:text-slate-700 p-1.5"
+                          aria-label="Planimetrie e documenti"
+                          title="Planimetrie e documenti"
+                        >
+                          <FileImage className="w-4 h-4" />
+                        </button>
+                        <button
+                          type="button"
                           onClick={() => startEdit(u)}
                           className="text-slate-400 hover:text-slate-700 p-1.5"
                           aria-label="Modifica"
@@ -238,6 +249,15 @@ export default function UnitsManager({
             </tbody>
           </table>
         </div>
+      )}
+
+      {docsUnit && (
+        <UnitDocumentsPanel
+          unitId={docsUnit.id}
+          unitName={docsUnit.name}
+          open={!!docsUnit}
+          onClose={() => setDocsUnit(null)}
+        />
       )}
     </div>
   );

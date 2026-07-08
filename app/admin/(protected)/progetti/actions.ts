@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import slugify from "slugify";
 import { requireRole, requireAdmin } from "@/lib/auth/require-role";
 import { createServiceClient } from "@/lib/supabase/service";
+import { getUnitDocuments } from "@/lib/admin/data/units";
 import type { ProjectCategory, ProjectStatus, UnitStatus } from "@/lib/types/project";
 
 function revalidatePublicSite() {
@@ -318,5 +319,35 @@ export async function reorderTimelineEvents(orderedIds: string[]) {
       service.from("project_timeline_events").update({ order_index: index }).eq("id", id)
     )
   );
+  revalidatePublicSite();
+}
+
+// ─── Unit documents (planimetrie) ──────────────────────────────────────────
+
+export async function fetchUnitDocuments(unitId: string) {
+  await requireAdmin();
+  return getUnitDocuments(unitId);
+}
+
+export async function addUnitDocument(
+  unitId: string,
+  mediaId: string,
+  docType: "floorplan" | "document",
+  orderIndex: number
+) {
+  await requireRole(["super_admin", "editor"]);
+  const service = createServiceClient();
+  const { error } = await service
+    .from("unit_documents")
+    .insert({ unit_id: unitId, media_id: mediaId, doc_type: docType, order_index: orderIndex });
+  if (error) throw new Error(error.message);
+  revalidatePublicSite();
+}
+
+export async function removeUnitDocument(id: string) {
+  await requireRole(["super_admin", "editor"]);
+  const service = createServiceClient();
+  const { error } = await service.from("unit_documents").delete().eq("id", id);
+  if (error) throw new Error(error.message);
   revalidatePublicSite();
 }
