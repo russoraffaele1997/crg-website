@@ -4,7 +4,21 @@ import { revalidatePath } from "next/cache";
 import { requireAdmin, requireRole } from "@/lib/auth/require-role";
 import { createServiceClient } from "@/lib/supabase/service";
 import { getPublicMediaUrl } from "@/lib/supabase/storage-url";
+import { getMediaFolders, getMediaItems, type GetMediaItemsParams } from "@/lib/admin/data/media";
 import type { MediaKind, MediaLibraryItem } from "@/lib/types/media";
+
+/** Client components (e.g. the MediaLibraryModal picker) can't import the
+ * server-only data layer directly, so these two thin wrappers expose it as
+ * callable Server Actions. */
+export async function fetchMediaFolders() {
+  await requireAdmin();
+  return getMediaFolders();
+}
+
+export async function fetchMediaItems(params: GetMediaItemsParams) {
+  await requireAdmin();
+  return getMediaItems(params);
+}
 
 interface CreateMediaRecordInput {
   storagePath: string;
