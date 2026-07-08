@@ -1,8 +1,6 @@
 import type { Metadata } from "next";
 import { Inter, Sora } from "next/font/google";
 import "./globals.css";
-import Header from "@/components/Header";
-import Footer from "@/components/Footer";
 
 // Body / UI font — geometric sans-serif, clean and professional
 const inter = Inter({
@@ -43,9 +41,7 @@ export default function RootLayout({
   return (
     <html lang="it">
       <body className={`${inter.variable} ${sora.variable} antialiased bg-cream`}>
-        <Header />
-        <main>{children}</main>
-        <Footer />
+        {children}
       </body>
     </html>
   );
