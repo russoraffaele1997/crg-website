@@ -13,6 +13,14 @@ export async function middleware(request: NextRequest) {
 
   const { response, user } = await updateSession(request);
 
+  // Server Actions (e.g. recordLogin, called from LoginForm right after
+  // sign-in) POST to the current page's URL. Redirecting those responses as
+  // if they were page navigations would swallow the action before Next.js
+  // ever executes it, so page-level redirects only apply to GET requests.
+  if (request.method !== "GET") {
+    return response;
+  }
+
   const { pathname } = request.nextUrl;
   const isLoginRoute = pathname === "/admin/login";
 
