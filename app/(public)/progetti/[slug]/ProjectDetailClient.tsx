@@ -3,7 +3,7 @@
 import { useState, useRef } from "react";
 import Link from "next/link";
 import { motion, useInView } from "framer-motion";
-import type { Project, ProjectUnit } from "@/data/projects";
+import type { Project, ProjectUnit } from "@/lib/types/project";
 import ClientImage from "@/components/ClientImage";
 
 const categoryGradients: Record<string, string> = {
@@ -17,6 +17,7 @@ const unitStatusConfig: Record<string, { label: string; cls: string }> = {
   optioned:  { label: "Opzionata",   cls: "bg-amber-50 text-amber-700 border-amber-200" },
   sold:      { label: "Venduta",     cls: "bg-red-50 text-red-700 border-red-200" },
   rented:    { label: "Affittata",   cls: "bg-blue-50 text-blue-700 border-blue-200" },
+  reserved:  { label: "Riservata",   cls: "bg-purple-50 text-purple-700 border-purple-200" },
 };
 
 // ─── Gallery ─────────────────────────────────────────────────────────────────

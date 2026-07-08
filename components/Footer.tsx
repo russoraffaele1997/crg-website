@@ -1,8 +1,8 @@
 import Link from "next/link";
 import Image from "next/image";
-import { projects } from "@/data/projects";
+import type { Project } from "@/lib/types/project";
 
-export default function Footer() {
+export default function Footer({ projects }: { projects: Project[] }) {
   return (
     <footer className="bg-charcoal text-white">
       <div className="container-custom py-20">

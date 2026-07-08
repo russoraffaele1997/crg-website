@@ -6,6 +6,9 @@ import WhyCRGSection from "@/components/WhyCRGSection";
 import FeaturedProjects from "@/components/FeaturedProjects";
 import PalazzoRueSection from "@/components/home/PalazzoRueSection";
 import FinalCTA from "@/components/FinalCTA";
+import { getFeaturedProjects } from "@/lib/data/projects";
+
+export const revalidate = 300;
 
 export const metadata: Metadata = {
   title: "CRG | Crafted Residential Group — Sviluppo Immobiliare Premium",
@@ -13,14 +16,16 @@ export const metadata: Metadata = {
     "Dal terreno al valore. CRG sviluppa progetti immobiliari residenziali, commerciali e industriali in Italia.",
 };
 
-export default function HomePage() {
+export default async function HomePage() {
+  const featured = await getFeaturedProjects(3);
+
   return (
     <>
       <HeroSection />
       <ConstructionParallax />
       <WhatWeDoSection />
       <WhyCRGSection />
-      <FeaturedProjects />
+      <FeaturedProjects featured={featured} />
       <PalazzoRueSection />
       <FinalCTA />
     </>

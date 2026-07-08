@@ -5,9 +5,9 @@ import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { projects } from "@/data/projects";
+import type { Project } from "@/lib/types/project";
 
-export default function Header() {
+export default function Header({ projects }: { projects: Project[] }) {
   const [scrolled, setScrolled]           = useState(false);
   const [mobileOpen, setMobileOpen]       = useState(false);
   const [dropdownOpen, setDropdownOpen]   = useState(false);

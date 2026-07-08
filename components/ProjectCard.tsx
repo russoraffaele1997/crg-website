@@ -1,5 +1,5 @@
 import Link from "next/link";
-import type { Project } from "@/data/projects";
+import type { Project } from "@/lib/types/project";
 import ClientImage from "./ClientImage";
 
 const categoryLabels: Record<string, string> = {

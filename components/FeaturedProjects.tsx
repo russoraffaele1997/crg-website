@@ -3,13 +3,12 @@
 import Link from "next/link";
 import { motion, useInView } from "framer-motion";
 import { useRef } from "react";
-import { getFeaturedProjects } from "@/data/projects";
+import type { Project } from "@/lib/types/project";
 import ProjectCard from "./ProjectCard";
 
-export default function FeaturedProjects() {
+export default function FeaturedProjects({ featured }: { featured: Project[] }) {
   const ref = useRef<HTMLDivElement>(null);
   const inView = useInView(ref, { once: true, margin: "-80px" });
-  const featured = getFeaturedProjects(3);
 
   return (
     <section className="py-28 lg:py-36 bg-cream" ref={ref}>
