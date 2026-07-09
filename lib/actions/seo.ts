@@ -20,7 +20,11 @@ export interface SeoFieldsInput {
 export async function upsertSeoMeta(existingSeoMetaId: string | null, input: SeoFieldsInput): Promise<string | null> {
   const hasAnyValue =
     input.seoMetaTitle || input.seoMetaDescription || input.ogTitle || input.ogDescription || input.canonicalUrl;
-  if (!hasAnyValue) return existingSeoMetaId;
+  // Only skip the write when there's nothing to save AND nothing to clear —
+  // an entity that has never touched SEO shouldn't accumulate an empty
+  // seo_meta row. Once a row exists, always write through so the fields can
+  // be cleared back to empty from the form.
+  if (!hasAnyValue && !existingSeoMetaId) return null;
 
   const service = createServiceClient();
   const payload = {

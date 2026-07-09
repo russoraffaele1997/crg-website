@@ -11,7 +11,7 @@ export interface AdminPageSeoSummary {
 
 export async function listAdminPageSeo(): Promise<AdminPageSeoSummary[]> {
   const supabase = createServiceClient();
-  const { data } = await supabase.from("page_seo").select("page_path");
+  const { data } = await supabase.from("page_seo").select("page_path").not("seo_meta_id", "is", null);
   const configuredPaths = new Set((data ?? []).map((r) => r.page_path));
   return staticPages.map((p) => ({ key: p.key, path: p.path, label: p.label, configured: configuredPaths.has(p.path) }));
 }
