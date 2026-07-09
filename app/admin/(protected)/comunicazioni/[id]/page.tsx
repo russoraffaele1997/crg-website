@@ -33,6 +33,10 @@ export default async function EditComunicazionePage({
           isFeatured: comm.isFeatured,
           publishStatus: comm.publishStatus as "draft" | "published" | "archived",
           publishedAt: comm.publishedAt,
+          seoMetaTitle: comm.seoMetaTitle,
+          seoMetaDescription: comm.seoMetaDescription,
+          ogTitle: comm.ogTitle,
+          ogDescription: comm.ogDescription,
           coverImage: comm.coverImage
             ? {
                 id: comm.coverImage.id,

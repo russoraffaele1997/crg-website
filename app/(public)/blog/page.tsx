@@ -1,13 +1,18 @@
 import type { Metadata } from "next";
 import { getBlogPosts, getBlogCategories } from "@/lib/data/blog";
+import { getPageSeo } from "@/lib/data/seo";
+import { buildMetadata } from "@/lib/seo/build-metadata";
 import BlogFilters from "./BlogFilters";
 
 export const revalidate = 300;
 
-export const metadata: Metadata = {
-  title: "Blog — CRG | Crafted Residential Group",
-  description: "Approfondimenti, novità e guide sul mondo dello sviluppo immobiliare firmati CRG.",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const seo = await getPageSeo("/blog");
+  return buildMetadata(seo, {
+    title: "Blog — CRG | Crafted Residential Group",
+    description: "Approfondimenti, novità e guide sul mondo dello sviluppo immobiliare firmati CRG.",
+  });
+}
 
 export default async function BlogPage() {
   const [posts, categories] = await Promise.all([getBlogPosts(), getBlogCategories()]);

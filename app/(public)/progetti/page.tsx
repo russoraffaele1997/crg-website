@@ -1,7 +1,18 @@
+import type { Metadata } from "next";
 import { getProjects } from "@/lib/data/projects";
+import { getPageSeo } from "@/lib/data/seo";
+import { buildMetadata } from "@/lib/seo/build-metadata";
 import ProgettiFilters from "./ProgettiFilters";
 
 export const revalidate = 300;
+
+export async function generateMetadata(): Promise<Metadata> {
+  const seo = await getPageSeo("/progetti");
+  return buildMetadata(seo, {
+    title: "Progetti — CRG | Crafted Residential Group",
+    description: "Esplora il portfolio CRG: sviluppi residenziali, commerciali e industriali in diverse fasi di avanzamento.",
+  });
+}
 
 export default async function ProgettiPage() {
   const projects = await getProjects();

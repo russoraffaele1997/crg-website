@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import slugify from "slugify";
 import { requireRole, requireAdmin } from "@/lib/auth/require-role";
 import { createServiceClient } from "@/lib/supabase/service";
+import { upsertSeoMeta } from "@/lib/actions/seo";
 
 function revalidatePublicSite() {
   revalidatePath("/", "layout");
@@ -51,33 +52,11 @@ async function syncTags(postId: string, tagIds: string[]) {
   }
 }
 
-async function syncSeoMeta(existingSeoMetaId: string | null, input: BlogPostInput): Promise<string | null> {
-  if (!input.seoMetaTitle && !input.seoMetaDescription && !input.ogTitle && !input.ogDescription) {
-    return existingSeoMetaId;
-  }
-  const service = createServiceClient();
-  const payload = {
-    meta_title: input.seoMetaTitle || null,
-    meta_description: input.seoMetaDescription || null,
-    og_title: input.ogTitle || null,
-    og_description: input.ogDescription || null,
-  };
-
-  if (existingSeoMetaId) {
-    await service.from("seo_meta").update(payload).eq("id", existingSeoMetaId);
-    return existingSeoMetaId;
-  }
-
-  const { data, error } = await service.from("seo_meta").insert(payload).select("id").single();
-  if (error || !data) return null;
-  return data.id;
-}
-
 export async function createBlogPost(input: BlogPostInput): Promise<{ id: string }> {
   await requireRole(["super_admin", "editor"]);
   const service = createServiceClient();
 
-  const seoMetaId = await syncSeoMeta(null, input);
+  const seoMetaId = await upsertSeoMeta(null, input);
 
   const { data, error } = await service
     .from("blog_posts")
@@ -117,7 +96,7 @@ export async function updateBlogPost(id: string, input: BlogPostInput) {
     });
   }
 
-  const seoMetaId = await syncSeoMeta(existing?.seo_meta_id ?? null, input);
+  const seoMetaId = await upsertSeoMeta(existing?.seo_meta_id ?? null, input);
 
   const { error } = await service
     .from("blog_posts")

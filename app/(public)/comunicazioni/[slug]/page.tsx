@@ -3,6 +3,8 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { FileText, Download } from "lucide-react";
 import { getCommunicationBySlug, getCommunications } from "@/lib/data/communications";
+import { getEntitySeoBySlug } from "@/lib/data/seo";
+import { buildMetadata } from "@/lib/seo/build-metadata";
 import ClientImage from "@/components/ClientImage";
 
 export const revalidate = 300;
@@ -18,12 +20,12 @@ export async function generateStaticParams() {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
-  const communication = await getCommunicationBySlug(slug);
+  const [communication, seo] = await Promise.all([getCommunicationBySlug(slug), getEntitySeoBySlug("communications", slug)]);
   if (!communication) return {};
-  return {
+  return buildMetadata(seo, {
     title: `${communication.title} — CRG | Crafted Residential Group`,
-    description: communication.excerpt ?? undefined,
-  };
+    description: communication.excerpt ?? communication.title,
+  });
 }
 
 function formatDate(iso: string | null) {

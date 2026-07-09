@@ -6,14 +6,19 @@ import {
   getAboutProcessContent,
   getAboutCtaContent,
 } from "@/lib/data/site-content";
+import { getPageSeo } from "@/lib/data/seo";
+import { buildMetadata } from "@/lib/seo/build-metadata";
 
 export const revalidate = 300;
 
-export const metadata: Metadata = {
-  title: "Chi siamo — CRG | Crafted Residential Group",
-  description:
-    "CRG nasce con l'obiettivo di trasformare terreni e fabbricati in progetti immobiliari moderni, funzionali e sostenibili. Scopri la nostra storia e il nostro metodo.",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const seo = await getPageSeo("/chi-siamo");
+  return buildMetadata(seo, {
+    title: "Chi siamo — CRG | Crafted Residential Group",
+    description:
+      "CRG nasce con l'obiettivo di trasformare terreni e fabbricati in progetti immobiliari moderni, funzionali e sostenibili. Scopri la nostra storia e il nostro metodo.",
+  });
+}
 
 export default async function ChiSiamoPage() {
   const [hero, mission, values, process, cta] = await Promise.all([

@@ -27,6 +27,10 @@ export default async function ProjectGeneralPage({
         isFeatured: project.isFeatured,
         featuredOrder: project.featuredOrder,
         publishStatus: project.publishStatus as "draft" | "published" | "archived",
+        seoMetaTitle: project.seoMetaTitle,
+        seoMetaDescription: project.seoMetaDescription,
+        ogTitle: project.ogTitle,
+        ogDescription: project.ogDescription,
         coverImage: project.coverImage
           ? {
               id: project.coverImage.id,

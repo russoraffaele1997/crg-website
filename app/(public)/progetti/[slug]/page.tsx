@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getProjects, getProjectBySlug } from "@/lib/data/projects";
+import { getEntitySeoBySlug } from "@/lib/data/seo";
+import { buildMetadata } from "@/lib/seo/build-metadata";
 import ProjectDetailClient from "./ProjectDetailClient";
 
 interface Props {
@@ -16,12 +18,12 @@ export async function generateStaticParams() {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
-  const project = await getProjectBySlug(slug);
+  const [project, seo] = await Promise.all([getProjectBySlug(slug), getEntitySeoBySlug("projects", slug)]);
   if (!project) return {};
-  return {
+  return buildMetadata(seo, {
     title: `${project.title} — CRG | Crafted Residential Group`,
     description: project.shortDescription,
-  };
+  });
 }
 
 export default async function ProjectDetailPage({ params }: Props) {

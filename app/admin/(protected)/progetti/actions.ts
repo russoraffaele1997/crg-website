@@ -6,6 +6,7 @@ import slugify from "slugify";
 import { requireRole, requireAdmin } from "@/lib/auth/require-role";
 import { createServiceClient } from "@/lib/supabase/service";
 import { getUnitDocuments } from "@/lib/admin/data/units";
+import { upsertSeoMeta } from "@/lib/actions/seo";
 import type { ProjectCategory, ProjectStatus, UnitStatus } from "@/lib/types/project";
 
 function revalidatePublicSite() {
@@ -29,6 +30,10 @@ export interface ProjectGeneralInput {
   isFeatured: boolean;
   featuredOrder: number | null;
   publishStatus: "draft" | "published" | "archived";
+  seoMetaTitle: string;
+  seoMetaDescription: string;
+  ogTitle: string;
+  ogDescription: string;
 }
 
 function slugFromTitle(title: string) {
@@ -43,6 +48,8 @@ export async function suggestProjectSlug(title: string) {
 export async function createProject(input: ProjectGeneralInput): Promise<{ id: string }> {
   const admin = await requireRole(["super_admin", "editor"]);
   const service = createServiceClient();
+
+  const seoMetaId = await upsertSeoMeta(null, input);
 
   const { data, error } = await service
     .from("projects")
@@ -59,6 +66,7 @@ export async function createProject(input: ProjectGeneralInput): Promise<{ id: s
       is_featured: input.isFeatured,
       featured_order: input.featuredOrder,
       publish_status: input.publishStatus,
+      seo_meta_id: seoMetaId,
       created_by: admin.id,
     })
     .select("id")
@@ -76,6 +84,9 @@ export async function updateProjectGeneral(id: string, input: ProjectGeneralInpu
   await requireRole(["super_admin", "editor"]);
   const service = createServiceClient();
 
+  const { data: existing } = await service.from("projects").select("seo_meta_id").eq("id", id).single();
+  const seoMetaId = await upsertSeoMeta(existing?.seo_meta_id ?? null, input);
+
   const { error } = await service
     .from("projects")
     .update({
@@ -91,6 +102,7 @@ export async function updateProjectGeneral(id: string, input: ProjectGeneralInpu
       is_featured: input.isFeatured,
       featured_order: input.featuredOrder,
       publish_status: input.publishStatus,
+      seo_meta_id: seoMetaId,
     })
     .eq("id", id);
 

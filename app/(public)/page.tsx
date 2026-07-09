@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+import { getPageSeo } from "@/lib/data/seo";
+import { buildMetadata } from "@/lib/seo/build-metadata";
 import HeroSection from "@/components/HeroSection";
 import ConstructionParallax from "@/components/home/ConstructionParallax";
 import WhatWeDoSection from "@/components/WhatWeDoSection";
@@ -18,11 +20,14 @@ import {
 
 export const revalidate = 300;
 
-export const metadata: Metadata = {
-  title: "CRG | Crafted Residential Group — Sviluppo Immobiliare Premium",
-  description:
-    "Dal terreno al valore. CRG sviluppa progetti immobiliari residenziali, commerciali e industriali in Italia.",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const seo = await getPageSeo("/");
+  return buildMetadata(seo, {
+    title: "CRG | Crafted Residential Group — Sviluppo Immobiliare Premium",
+    description:
+      "Dal terreno al valore. CRG sviluppa progetti immobiliari residenziali, commerciali e industriali in Italia.",
+  });
+}
 
 export default async function HomePage() {
   const [featured, hero, parallax, whatWeDo, whyCrg, palazzoRue, finalCta] = await Promise.all([

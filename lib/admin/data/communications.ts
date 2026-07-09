@@ -55,6 +55,10 @@ export interface AdminCommunicationDetail {
   isFeatured: boolean;
   publishStatus: string;
   publishedAt: string | null;
+  seoMetaTitle: string;
+  seoMetaDescription: string;
+  ogTitle: string;
+  ogDescription: string;
   coverImage: MediaRef | null;
   attachments: { id: string; media: MediaRef | null }[];
 }
@@ -65,6 +69,7 @@ export async function getAdminCommunicationById(id: string): Promise<AdminCommun
     .from("communications")
     .select(`
       id, slug, title, subtitle, excerpt, body, category_id, is_featured, publish_status, published_at,
+      seo_meta:seo_meta_id(meta_title, meta_description, og_title, og_description),
       cover_media:media_library!cover_image_id(id, storage_path, bucket, original_filename, kind),
       communication_attachments(id, media:media_library(id, storage_path, bucket, original_filename, kind))
     `)
@@ -76,6 +81,7 @@ export async function getAdminCommunicationById(id: string): Promise<AdminCommun
   const row = data as unknown as {
     id: string; slug: string; title: string; subtitle: string | null; excerpt: string | null;
     body: string; category_id: string | null; is_featured: boolean; publish_status: string; published_at: string | null;
+    seo_meta: { meta_title: string | null; meta_description: string | null; og_title: string | null; og_description: string | null } | null;
     cover_media: { id: string; storage_path: string; bucket: string; original_filename: string; kind: string } | null;
     communication_attachments: { id: string; media: { id: string; storage_path: string; bucket: string; original_filename: string; kind: string } | null }[];
   };
@@ -94,6 +100,10 @@ export async function getAdminCommunicationById(id: string): Promise<AdminCommun
     isFeatured: row.is_featured,
     publishStatus: row.publish_status,
     publishedAt: row.published_at,
+    seoMetaTitle: row.seo_meta?.meta_title ?? "",
+    seoMetaDescription: row.seo_meta?.meta_description ?? "",
+    ogTitle: row.seo_meta?.og_title ?? "",
+    ogDescription: row.seo_meta?.og_description ?? "",
     coverImage: toRef(row.cover_media),
     attachments: row.communication_attachments.map((a) => ({ id: a.id, media: toRef(a.media) })),
   };

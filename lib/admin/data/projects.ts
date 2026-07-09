@@ -56,6 +56,11 @@ export interface AdminProjectDetail {
   isFeatured: boolean;
   featuredOrder: number | null;
   publishStatus: string;
+  seoMetaId: string | null;
+  seoMetaTitle: string;
+  seoMetaDescription: string;
+  ogTitle: string;
+  ogDescription: string;
   coverImage: MediaRef | null;
   gallery: { id: string; orderIndex: number; media: MediaRef | null }[];
   highlights: { id: string; title: string; orderIndex: number }[];
@@ -101,6 +106,7 @@ export async function getAdminProjectById(id: string): Promise<AdminProjectDetai
     .select(`
       id, slug, title, location, category, status, status_label,
       short_description, description, is_featured, featured_order, publish_status,
+      seo_meta_id, seo_meta:seo_meta_id(meta_title, meta_description, og_title, og_description),
       cover_media:media_library!cover_image_id(id, storage_path, bucket, original_filename, kind),
       project_gallery_images(id, order_index, media:media_library(id, storage_path, bucket, original_filename, kind)),
       project_features(id, kind, title, order_index),
@@ -125,6 +131,8 @@ export async function getAdminProjectById(id: string): Promise<AdminProjectDetai
     is_featured: boolean;
     featured_order: number | null;
     publish_status: string;
+    seo_meta_id: string | null;
+    seo_meta: { meta_title: string | null; meta_description: string | null; og_title: string | null; og_description: string | null } | null;
     cover_media: { id: string; storage_path: string; bucket: string; original_filename: string; kind: string } | null;
     project_gallery_images: { id: string; order_index: number; media: { id: string; storage_path: string; bucket: string; original_filename: string; kind: string } | null }[];
     project_features: { id: string; kind: string; title: string; order_index: number }[];
@@ -149,6 +157,11 @@ export async function getAdminProjectById(id: string): Promise<AdminProjectDetai
     isFeatured: row.is_featured,
     featuredOrder: row.featured_order,
     publishStatus: row.publish_status,
+    seoMetaId: row.seo_meta_id,
+    seoMetaTitle: row.seo_meta?.meta_title ?? "",
+    seoMetaDescription: row.seo_meta?.meta_description ?? "",
+    ogTitle: row.seo_meta?.og_title ?? "",
+    ogDescription: row.seo_meta?.og_description ?? "",
     coverImage: toMediaRef(row.cover_media),
     gallery: [...row.project_gallery_images]
       .sort((a, b) => a.order_index - b.order_index)

@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import slugify from "slugify";
 import { requireRole, requireAdmin } from "@/lib/auth/require-role";
 import { createServiceClient } from "@/lib/supabase/service";
+import { upsertSeoMeta } from "@/lib/actions/seo";
 
 function revalidatePublicSite() {
   revalidatePath("/", "layout");
@@ -30,11 +31,17 @@ export interface CommunicationInput {
   isFeatured: boolean;
   publishStatus: "draft" | "published" | "archived";
   publishedAt: string | null; // ISO — null when draft, "now" or future when published
+  seoMetaTitle: string;
+  seoMetaDescription: string;
+  ogTitle: string;
+  ogDescription: string;
 }
 
 export async function createCommunication(input: CommunicationInput): Promise<{ id: string }> {
   const admin = await requireRole(["super_admin", "editor"]);
   const service = createServiceClient();
+
+  const seoMetaId = await upsertSeoMeta(null, input);
 
   const { data, error } = await service
     .from("communications")
@@ -49,6 +56,7 @@ export async function createCommunication(input: CommunicationInput): Promise<{ 
       is_featured: input.isFeatured,
       publish_status: input.publishStatus,
       published_at: input.publishedAt,
+      seo_meta_id: seoMetaId,
       created_by: admin.id,
     })
     .select("id")
@@ -64,6 +72,9 @@ export async function updateCommunication(id: string, input: CommunicationInput)
   await requireRole(["super_admin", "editor"]);
   const service = createServiceClient();
 
+  const { data: existing } = await service.from("communications").select("seo_meta_id").eq("id", id).single();
+  const seoMetaId = await upsertSeoMeta(existing?.seo_meta_id ?? null, input);
+
   const { error } = await service
     .from("communications")
     .update({
@@ -77,6 +88,7 @@ export async function updateCommunication(id: string, input: CommunicationInput)
       is_featured: input.isFeatured,
       publish_status: input.publishStatus,
       published_at: input.publishedAt,
+      seo_meta_id: seoMetaId,
     })
     .eq("id", id);
 

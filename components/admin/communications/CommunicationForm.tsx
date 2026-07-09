@@ -44,6 +44,10 @@ export default function CommunicationForm({ mode, communicationId, categories: i
   const [newCategory, setNewCategory] = useState("");
   const [isFeatured, setIsFeatured] = useState(initial?.isFeatured ?? false);
   const [coverImage, setCoverImage] = useState<MediaLibraryItem | null>(initial?.coverImage ?? null);
+  const [seoMetaTitle, setSeoMetaTitle] = useState(initial?.seoMetaTitle ?? "");
+  const [seoMetaDescription, setSeoMetaDescription] = useState(initial?.seoMetaDescription ?? "");
+  const [ogTitle, setOgTitle] = useState(initial?.ogTitle ?? "");
+  const [ogDescription, setOgDescription] = useState(initial?.ogDescription ?? "");
 
   const initialMode: PublishMode =
     initial?.publishStatus === "published"
@@ -93,6 +97,10 @@ export default function CommunicationForm({ mode, communicationId, categories: i
       isFeatured,
       publishStatus: publishMode === "draft" ? "draft" : "published",
       publishedAt,
+      seoMetaTitle,
+      seoMetaDescription,
+      ogTitle,
+      ogDescription,
     };
 
     try {
@@ -258,6 +266,30 @@ export default function CommunicationForm({ mode, communicationId, categories: i
             className="border border-slate-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-crg-red"
           />
         )}
+      </div>
+
+      <div className="border-t border-slate-200 pt-6">
+        <h2 className="text-sm font-semibold text-slate-900 mb-4">SEO</h2>
+        <div className="space-y-4">
+          <div>
+            <label className="block text-xs tracking-wider uppercase text-slate-500 mb-2">Meta title</label>
+            <input value={seoMetaTitle} onChange={(e) => setSeoMetaTitle(e.target.value)} className="w-full border border-slate-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-crg-red" />
+          </div>
+          <div>
+            <label className="block text-xs tracking-wider uppercase text-slate-500 mb-2">Meta description</label>
+            <textarea value={seoMetaDescription} onChange={(e) => setSeoMetaDescription(e.target.value)} rows={2} className="w-full border border-slate-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-crg-red resize-none" />
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-xs tracking-wider uppercase text-slate-500 mb-2">Open Graph title</label>
+              <input value={ogTitle} onChange={(e) => setOgTitle(e.target.value)} className="w-full border border-slate-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-crg-red" />
+            </div>
+            <div>
+              <label className="block text-xs tracking-wider uppercase text-slate-500 mb-2">Open Graph description</label>
+              <input value={ogDescription} onChange={(e) => setOgDescription(e.target.value)} className="w-full border border-slate-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-crg-red" />
+            </div>
+          </div>
+        </div>
       </div>
 
       {error && <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg px-4 py-3">{error}</p>}

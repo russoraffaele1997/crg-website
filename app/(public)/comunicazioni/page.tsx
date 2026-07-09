@@ -1,13 +1,18 @@
 import type { Metadata } from "next";
 import { getCommunications, getCommunicationCategories } from "@/lib/data/communications";
+import { getPageSeo } from "@/lib/data/seo";
+import { buildMetadata } from "@/lib/seo/build-metadata";
 import ComunicazioniFilters from "./ComunicazioniFilters";
 
 export const revalidate = 300;
 
-export const metadata: Metadata = {
-  title: "Comunicazioni — CRG | Crafted Residential Group",
-  description: "Tutte le comunicazioni e gli aggiornamenti di CRG | Crafted Residential Group.",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const seo = await getPageSeo("/comunicazioni");
+  return buildMetadata(seo, {
+    title: "Comunicazioni — CRG | Crafted Residential Group",
+    description: "Tutte le comunicazioni e gli aggiornamenti di CRG | Crafted Residential Group.",
+  });
+}
 
 export default async function ComunicazioniPage() {
   const [communications, categories] = await Promise.all([

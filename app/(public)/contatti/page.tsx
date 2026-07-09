@@ -1,10 +1,16 @@
 import type { Metadata } from "next";
 import { getContactHeroContent, getContactFinalCtaContent, getCompanyInfoContent } from "@/lib/data/site-content";
+import { getPageSeo } from "@/lib/data/seo";
+import { buildMetadata } from "@/lib/seo/build-metadata";
 import ContactForm from "./ContactForm";
 
-export const metadata: Metadata = {
-  title: "Contatti — CRG | Crafted Residential Group",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const seo = await getPageSeo("/contatti");
+  return buildMetadata(seo, {
+    title: "Contatti — CRG | Crafted Residential Group",
+    description: "Contatta CRG | Crafted Residential Group per informazioni sui nostri progetti immobiliari o per fissare un appuntamento.",
+  });
+}
 
 export const revalidate = 300;
 
