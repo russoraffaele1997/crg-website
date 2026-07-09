@@ -36,7 +36,10 @@ interface Props {
   categories: BlogCategory[];
   tags: BlogTag[];
   authors: AdminAuthorOption[];
-  initial?: Partial<BlogPostInput> & { coverImage?: MediaLibraryItem | null };
+  initial?: Partial<Omit<BlogPostInput, "contentJson">> & {
+    contentJson?: JSONContent;
+    coverImage?: MediaLibraryItem | null;
+  };
 }
 
 export default function BlogPostForm({ mode, postId, categories: initialCategories, tags: initialTags, authors, initial }: Props) {
@@ -45,7 +48,7 @@ export default function BlogPostForm({ mode, postId, categories: initialCategori
   const [slug, setSlug] = useState(initial?.slug ?? "");
   const [slugTouched, setSlugTouched] = useState(mode === "edit");
   const [excerpt, setExcerpt] = useState(initial?.excerpt ?? "");
-  const [content, setContent] = useState<JSONContent>((initial?.contentJson as JSONContent) ?? { type: "doc", content: [{ type: "paragraph" }] });
+  const [content, setContent] = useState<JSONContent>(initial?.contentJson ?? { type: "doc", content: [{ type: "paragraph" }] });
   const [categories, setCategories] = useState(initialCategories);
   const [categoryId, setCategoryId] = useState(initial?.categoryId ?? "");
   const [newCategory, setNewCategory] = useState("");
@@ -114,7 +117,7 @@ export default function BlogPostForm({ mode, postId, categories: initialCategori
       slug,
       title,
       excerpt,
-      contentJson: content,
+      contentJson: JSON.stringify(content),
       categoryId: categoryId || null,
       authorId: authorId || null,
       tagIds,

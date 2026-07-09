@@ -56,7 +56,11 @@ export const ButtonBlock = Node.create({
       insertButtonBlock:
         (attrs) =>
         ({ commands }) =>
-          commands.insertContent({ type: this.name, attrs }),
+          // Atom nodes leave a NodeSelection after insertion, so a second
+          // insert-block click would replace this one instead of adding a
+          // new block — appending an empty paragraph moves the cursor into
+          // text so subsequent insertions land after, not on top of, it.
+          commands.insertContent([{ type: this.name, attrs }, { type: "paragraph" }]),
     };
   },
 });

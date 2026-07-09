@@ -58,9 +58,15 @@ export default function BlockEditor({
   editable?: boolean;
 }) {
   const [imagePickerOpen, setImagePickerOpen] = useState(false);
+  // Extensions must stay referentially stable across renders — computing a
+  // fresh array (with fresh custom Node instances) on every render was
+  // causing Tiptap to treat the editor as needing re-init, which silently
+  // dropped NodeView attribute edits (button label/href, FAQ items, video
+  // url) before they ever reached onUpdate.
+  const [extensions] = useState(() => getEditorExtensions());
 
   const editor = useEditor({
-    extensions: getEditorExtensions(),
+    extensions,
     content: initialContent,
     immediatelyRender: false,
     editable,

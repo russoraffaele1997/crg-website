@@ -23,7 +23,14 @@ export interface BlogPostInput {
   slug: string;
   title: string;
   excerpt: string;
-  contentJson: Record<string, unknown>;
+  /**
+   * JSON-encoded string, not a plain object. Tiptap's JSONContent tree
+   * (nested `attrs` objects on custom nodes) was silently losing those
+   * `attrs` somewhere in Next.js's Server Action argument serialization —
+   * passing it pre-stringified and JSON.parse()-ing server-side sidesteps
+   * whatever that was and round-trips reliably.
+   */
+  contentJson: string;
   categoryId: string | null;
   authorId: string | null;
   tagIds: string[];
@@ -78,7 +85,7 @@ export async function createBlogPost(input: BlogPostInput): Promise<{ id: string
       slug: input.slug || slugFromTitle(input.title),
       title: input.title,
       excerpt: input.excerpt || null,
-      content_json: input.contentJson,
+      content_json: JSON.parse(input.contentJson),
       category_id: input.categoryId,
       author_id: input.authorId,
       cover_image_id: input.coverImageId,
@@ -118,7 +125,7 @@ export async function updateBlogPost(id: string, input: BlogPostInput) {
       slug: input.slug || slugFromTitle(input.title),
       title: input.title,
       excerpt: input.excerpt || null,
-      content_json: input.contentJson,
+      content_json: JSON.parse(input.contentJson),
       category_id: input.categoryId,
       author_id: input.authorId,
       cover_image_id: input.coverImageId,

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link2, Check } from "lucide-react";
 
 function FacebookIcon() {
@@ -21,7 +21,12 @@ function LinkedinIcon() {
 
 export default function ShareButtons({ title }: { title: string }) {
   const [copied, setCopied] = useState(false);
-  const url = typeof window !== "undefined" ? window.location.href : "";
+  // Read the real URL only after mount — reading window.location.href during
+  // render makes the server (which has no window) and the client's first
+  // render disagree, which is a hydration mismatch. Share links are inert
+  // until JS loads anyway, so this one-frame delay is harmless.
+  const [url, setUrl] = useState("");
+  useEffect(() => setUrl(window.location.href), []);
 
   const handleCopy = async () => {
     await navigator.clipboard.writeText(window.location.href);

@@ -55,7 +55,7 @@ export const FaqBlock = Node.create({
       insertFaqBlock:
         (attrs) =>
         ({ commands }) =>
-          commands.insertContent({ type: this.name, attrs }),
+          commands.insertContent([{ type: this.name, attrs }, { type: "paragraph" }]),
     };
   },
 });

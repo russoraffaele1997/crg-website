@@ -61,7 +61,7 @@ export const VideoBlock = Node.create({
       insertVideoBlock:
         (attrs) =>
         ({ commands }) =>
-          commands.insertContent({ type: this.name, attrs }),
+          commands.insertContent([{ type: this.name, attrs }, { type: "paragraph" }]),
     };
   },
 });
