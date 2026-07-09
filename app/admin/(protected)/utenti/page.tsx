@@ -1,13 +1,12 @@
-import { Users } from "lucide-react";
-import ComingSoon from "@/components/admin/ComingSoon";
+import { redirect } from "next/navigation";
+import { requireAdmin } from "@/lib/auth/require-role";
+import { listAdminUsers } from "@/lib/admin/data/users";
+import UsersManager from "@/components/admin/users/UsersManager";
 
-export default function UtentiAdminPage() {
-  return (
-    <ComingSoon
-      title="Utenti Admin"
-      description="Invita collaboratori e assegna i ruoli: Super Admin, Editor, Collaboratore."
-      icon={Users}
-      phase="Arriva nella Fase 6, insieme a Impostazioni e all'audit dei permessi per ruolo."
-    />
-  );
+export default async function UtentiAdminPage() {
+  const admin = await requireAdmin();
+  if (admin.role !== "super_admin") redirect("/admin");
+  const users = await listAdminUsers();
+
+  return <UsersManager currentUserId={admin.id} initialUsers={users} />;
 }
