@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useEditor, EditorContent, type JSONContent } from "@tiptap/react";
 import {
   Bold,
@@ -51,9 +51,11 @@ function ToolbarButton({
 export default function BlockEditor({
   initialContent,
   onChange,
+  editable = true,
 }: {
   initialContent: JSONContent;
   onChange: (content: JSONContent) => void;
+  editable?: boolean;
 }) {
   const [imagePickerOpen, setImagePickerOpen] = useState(false);
 
@@ -61,6 +63,7 @@ export default function BlockEditor({
     extensions: getEditorExtensions(),
     content: initialContent,
     immediatelyRender: false,
+    editable,
     onUpdate: ({ editor }) => onChange(editor.getJSON()),
     editorProps: {
       attributes: {
@@ -69,6 +72,10 @@ export default function BlockEditor({
       },
     },
   });
+
+  useEffect(() => {
+    if (editor && editor.isEditable !== editable) editor.setEditable(editable);
+  }, [editor, editable]);
 
   if (!editor) return null;
 
@@ -84,6 +91,7 @@ export default function BlockEditor({
 
   return (
     <div className="border border-slate-300 rounded-lg overflow-hidden">
+      {editable && (
       <div className="flex flex-wrap items-center gap-1 border-b border-slate-200 bg-slate-50 p-2">
         <ToolbarButton onClick={() => editor.chain().focus().toggleBold().run()} active={editor.isActive("bold")} title="Grassetto">
           <Bold className="w-4 h-4" />
@@ -140,6 +148,7 @@ export default function BlockEditor({
           <Redo className="w-4 h-4" />
         </ToolbarButton>
       </div>
+      )}
 
       <div className="p-4">
         <EditorContent editor={editor} />
