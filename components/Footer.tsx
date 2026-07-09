@@ -53,6 +53,7 @@ export default function Footer({
                 { label: "Chi siamo",      href: "/chi-siamo" },
                 { label: "Progetti",       href: "/progetti" },
                 { label: "Comunicazioni",  href: "/comunicazioni" },
+                { label: "Blog",           href: "/blog" },
                 { label: "Contatti",       href: "/contatti" },
               ].map((link) => (
                 <li key={link.href}>

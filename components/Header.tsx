@@ -128,6 +128,10 @@ export default function Header({ projects }: { projects: Project[] }) {
               Comunicazioni
             </Link>
 
+            <Link href="/blog" className={`${navBase} ${navColor}`}>
+              Blog
+            </Link>
+
             <Link href="/contatti" className={`${navBase} ${navColor}`}>
               Contatti
             </Link>
@@ -225,6 +229,13 @@ export default function Header({ projects }: { projects: Project[] }) {
                 className="font-sans text-xs tracking-[0.22em] uppercase text-charcoal py-4 border-b border-border-warm hover:text-crg-red transition-colors"
               >
                 Comunicazioni
+              </Link>
+
+              <Link
+                href="/blog"
+                className="font-sans text-xs tracking-[0.22em] uppercase text-charcoal py-4 border-b border-border-warm hover:text-crg-red transition-colors"
+              >
+                Blog
               </Link>
 
               <Link
