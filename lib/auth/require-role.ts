@@ -55,3 +55,34 @@ export async function requireRole(roles: AppRole[]): Promise<AdminUser> {
   }
   return admin;
 }
+
+/**
+ * Projects, communications and blog posts are the three entities whose RLS
+ * policies let a collaborator insert/update rows they own, but only while
+ * `publish_status = 'draft'` — collaborators draft content, editors and
+ * super admins publish it. Use this instead of `requireRole` for any action
+ * that creates/edits those entities (or their sub-resources).
+ */
+export async function requireContentEditor(): Promise<AdminUser> {
+  return requireRole(["super_admin", "editor", "collaborator"]);
+}
+
+/**
+ * Sub-resource tables (gallery images, units, timeline, attachments, tags...)
+ * have no `publish_status` of their own and are RLS-writable by any active
+ * admin — the fine-grained "collaborators only touch drafts" rule is
+ * enforced here, at the application layer, by checking the parent entity.
+ * No-ops for super_admin/editor.
+ */
+export async function assertCollaboratorDraftOnly(
+  admin: AdminUser,
+  table: "projects" | "communications" | "blog_posts",
+  entityId: string
+): Promise<void> {
+  if (admin.role !== "collaborator") return;
+  const service = createServiceClient();
+  const { data } = await service.from(table).select("publish_status").eq("id", entityId).maybeSingle();
+  if (!data || data.publish_status !== "draft") {
+    throw new Error("Come collaboratore puoi modificare solo contenuti ancora in bozza.");
+  }
+}

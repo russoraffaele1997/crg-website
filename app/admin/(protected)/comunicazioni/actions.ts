@@ -3,9 +3,10 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import slugify from "slugify";
-import { requireRole, requireAdmin } from "@/lib/auth/require-role";
+import { requireAdmin, requireContentEditor, assertCollaboratorDraftOnly } from "@/lib/auth/require-role";
 import { createServiceClient } from "@/lib/supabase/service";
 import { upsertSeoMeta } from "@/lib/actions/seo";
+import type { AdminUser } from "@/lib/types/admin";
 
 function revalidatePublicSite() {
   revalidatePath("/", "layout");
@@ -13,6 +14,11 @@ function revalidatePublicSite() {
 
 function slugFromTitle(title: string) {
   return slugify(title, { lower: true, strict: true, locale: "it" });
+}
+
+/** A collaborator can only ever write draft rows — force it server-side rather than trust the client. */
+function resolvePublishStatus(admin: AdminUser, requested: "draft" | "published" | "archived") {
+  return admin.role === "collaborator" ? "draft" : requested;
 }
 
 export async function suggestCommunicationSlug(title: string) {
@@ -38,10 +44,11 @@ export interface CommunicationInput {
 }
 
 export async function createCommunication(input: CommunicationInput): Promise<{ id: string }> {
-  const admin = await requireRole(["super_admin", "editor"]);
+  const admin = await requireContentEditor();
   const service = createServiceClient();
 
   const seoMetaId = await upsertSeoMeta(null, input);
+  const publishStatus = resolvePublishStatus(admin, input.publishStatus);
 
   const { data, error } = await service
     .from("communications")
@@ -54,8 +61,8 @@ export async function createCommunication(input: CommunicationInput): Promise<{ 
       category_id: input.categoryId,
       cover_image_id: input.coverImageId,
       is_featured: input.isFeatured,
-      publish_status: input.publishStatus,
-      published_at: input.publishedAt,
+      publish_status: publishStatus,
+      published_at: publishStatus === "draft" ? null : input.publishedAt,
       seo_meta_id: seoMetaId,
       created_by: admin.id,
     })
@@ -69,11 +76,13 @@ export async function createCommunication(input: CommunicationInput): Promise<{ 
 }
 
 export async function updateCommunication(id: string, input: CommunicationInput) {
-  await requireRole(["super_admin", "editor"]);
+  const admin = await requireContentEditor();
+  await assertCollaboratorDraftOnly(admin, "communications", id);
   const service = createServiceClient();
 
   const { data: existing } = await service.from("communications").select("seo_meta_id").eq("id", id).single();
   const seoMetaId = await upsertSeoMeta(existing?.seo_meta_id ?? null, input);
+  const publishStatus = resolvePublishStatus(admin, input.publishStatus);
 
   const { error } = await service
     .from("communications")
@@ -86,8 +95,8 @@ export async function updateCommunication(id: string, input: CommunicationInput)
       category_id: input.categoryId,
       cover_image_id: input.coverImageId,
       is_featured: input.isFeatured,
-      publish_status: input.publishStatus,
-      published_at: input.publishedAt,
+      publish_status: publishStatus,
+      published_at: publishStatus === "draft" ? null : input.publishedAt,
       seo_meta_id: seoMetaId,
     })
     .eq("id", id);
@@ -97,7 +106,8 @@ export async function updateCommunication(id: string, input: CommunicationInput)
 }
 
 export async function deleteCommunication(id: string) {
-  await requireRole(["super_admin", "editor"]);
+  const admin = await requireContentEditor();
+  await assertCollaboratorDraftOnly(admin, "communications", id);
   const service = createServiceClient();
   const { error } = await service.from("communications").delete().eq("id", id);
   if (error) throw new Error(error.message);
@@ -106,7 +116,10 @@ export async function deleteCommunication(id: string) {
 }
 
 export async function duplicateCommunication(id: string): Promise<{ id: string }> {
-  const admin = await requireRole(["super_admin", "editor"]);
+  // Duplicating always produces a fresh draft copy, never touching the
+  // source row, so collaborators may duplicate any communication regardless
+  // of its own publish status.
+  const admin = await requireContentEditor();
   const service = createServiceClient();
 
   const { data: original, error: fetchError } = await service
@@ -169,7 +182,8 @@ export async function createCommunicationCategory(name: string): Promise<{ id: s
 // ─── Attachments ────────────────────────────────────────────────────────────
 
 export async function addCommunicationAttachment(communicationId: string, mediaId: string, orderIndex: number) {
-  await requireRole(["super_admin", "editor"]);
+  const admin = await requireContentEditor();
+  await assertCollaboratorDraftOnly(admin, "communications", communicationId);
   const service = createServiceClient();
   const { error } = await service
     .from("communication_attachments")
@@ -179,8 +193,12 @@ export async function addCommunicationAttachment(communicationId: string, mediaI
 }
 
 export async function removeCommunicationAttachment(id: string) {
-  await requireRole(["super_admin", "editor"]);
+  const admin = await requireContentEditor();
   const service = createServiceClient();
+  const { data: attachment } = await service.from("communication_attachments").select("communication_id").eq("id", id).single();
+  if (attachment) {
+    await assertCollaboratorDraftOnly(admin, "communications", attachment.communication_id);
+  }
   const { error } = await service.from("communication_attachments").delete().eq("id", id);
   if (error) throw new Error(error.message);
   revalidatePublicSite();

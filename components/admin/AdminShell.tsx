@@ -15,10 +15,11 @@ const roleLabels: Record<AdminUser["role"], string> = {
   collaborator: "Collaboratore",
 };
 
-function NavLinks({ pathname, onNavigate }: { pathname: string; onNavigate?: () => void }) {
+function NavLinks({ pathname, role, onNavigate }: { pathname: string; role: AdminUser["role"]; onNavigate?: () => void }) {
+  const items = adminNavItems.filter((item) => !item.roles || item.roles.includes(role));
   return (
     <nav className="flex flex-col gap-1">
-      {adminNavItems.map((item) => {
+      {items.map((item) => {
         const active =
           item.href === "/admin" ? pathname === "/admin" : pathname.startsWith(item.href);
         const Icon = item.icon;
@@ -69,7 +70,7 @@ export default function AdminShell({
           </span>
         </div>
         <div className="flex-1 overflow-y-auto px-3 py-5">
-          <NavLinks pathname={pathname} />
+          <NavLinks pathname={pathname} role={admin.role} />
         </div>
         <div className="px-3 py-4 border-t border-white/10">
           <div className="px-3 py-2 mb-1">
@@ -119,7 +120,7 @@ export default function AdminShell({
               </button>
             </div>
             <div className="flex-1 overflow-y-auto px-3 py-5">
-              <NavLinks pathname={pathname} onNavigate={() => setMobileOpen(false)} />
+              <NavLinks pathname={pathname} role={admin.role} onNavigate={() => setMobileOpen(false)} />
             </div>
             <div className="px-3 py-4 border-t border-white/10">
               <div className="px-3 py-2 mb-1">

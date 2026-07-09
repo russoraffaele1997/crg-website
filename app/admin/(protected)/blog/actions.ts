@@ -3,9 +3,15 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import slugify from "slugify";
-import { requireRole, requireAdmin } from "@/lib/auth/require-role";
+import { requireAdmin, requireContentEditor, assertCollaboratorDraftOnly } from "@/lib/auth/require-role";
 import { createServiceClient } from "@/lib/supabase/service";
 import { upsertSeoMeta } from "@/lib/actions/seo";
+import type { AdminUser } from "@/lib/types/admin";
+
+/** A collaborator can only ever write draft rows — force it server-side rather than trust the client. */
+function resolvePublishStatus(admin: AdminUser, requested: "draft" | "published" | "archived") {
+  return admin.role === "collaborator" ? "draft" : requested;
+}
 
 function revalidatePublicSite() {
   revalidatePath("/", "layout");
@@ -53,10 +59,11 @@ async function syncTags(postId: string, tagIds: string[]) {
 }
 
 export async function createBlogPost(input: BlogPostInput): Promise<{ id: string }> {
-  await requireRole(["super_admin", "editor"]);
+  const admin = await requireContentEditor();
   const service = createServiceClient();
 
   const seoMetaId = await upsertSeoMeta(null, input);
+  const publishStatus = resolvePublishStatus(admin, input.publishStatus);
 
   const { data, error } = await service
     .from("blog_posts")
@@ -68,8 +75,8 @@ export async function createBlogPost(input: BlogPostInput): Promise<{ id: string
       category_id: input.categoryId,
       author_id: input.authorId,
       cover_image_id: input.coverImageId,
-      publish_status: input.publishStatus,
-      published_at: input.publishedAt,
+      publish_status: publishStatus,
+      published_at: publishStatus === "draft" ? null : input.publishedAt,
       seo_meta_id: seoMetaId,
     })
     .select("id")
@@ -83,7 +90,8 @@ export async function createBlogPost(input: BlogPostInput): Promise<{ id: string
 }
 
 export async function updateBlogPost(id: string, input: BlogPostInput) {
-  const admin = await requireRole(["super_admin", "editor"]);
+  const admin = await requireContentEditor();
+  await assertCollaboratorDraftOnly(admin, "blog_posts", id);
   const service = createServiceClient();
 
   const { data: existing } = await service.from("blog_posts").select("*").eq("id", id).single();
@@ -97,6 +105,7 @@ export async function updateBlogPost(id: string, input: BlogPostInput) {
   }
 
   const seoMetaId = await upsertSeoMeta(existing?.seo_meta_id ?? null, input);
+  const publishStatus = resolvePublishStatus(admin, input.publishStatus);
 
   const { error } = await service
     .from("blog_posts")
@@ -108,8 +117,8 @@ export async function updateBlogPost(id: string, input: BlogPostInput) {
       category_id: input.categoryId,
       author_id: input.authorId,
       cover_image_id: input.coverImageId,
-      publish_status: input.publishStatus,
-      published_at: input.publishedAt,
+      publish_status: publishStatus,
+      published_at: publishStatus === "draft" ? null : input.publishedAt,
       seo_meta_id: seoMetaId,
     })
     .eq("id", id);
@@ -121,7 +130,8 @@ export async function updateBlogPost(id: string, input: BlogPostInput) {
 }
 
 export async function deleteBlogPost(id: string) {
-  await requireRole(["super_admin", "editor"]);
+  const admin = await requireContentEditor();
+  await assertCollaboratorDraftOnly(admin, "blog_posts", id);
   const service = createServiceClient();
   const { error } = await service.from("blog_posts").delete().eq("id", id);
   if (error) throw new Error(error.message);
@@ -130,7 +140,10 @@ export async function deleteBlogPost(id: string) {
 }
 
 export async function duplicateBlogPost(id: string): Promise<{ id: string }> {
-  await requireRole(["super_admin", "editor"]);
+  // Duplicating always produces a fresh draft copy, never touching the
+  // source row, so collaborators may duplicate any post regardless of its
+  // own publish status.
+  await requireContentEditor();
   const service = createServiceClient();
 
   const { data: original, error: fetchError } = await service.from("blog_posts").select("*").eq("id", id).single();
@@ -201,7 +214,8 @@ export async function createBlogTag(name: string): Promise<{ id: string }> {
 // ─── Gallery ────────────────────────────────────────────────────────────────
 
 export async function addBlogGalleryImage(postId: string, mediaId: string, orderIndex: number) {
-  await requireRole(["super_admin", "editor"]);
+  const admin = await requireContentEditor();
+  await assertCollaboratorDraftOnly(admin, "blog_posts", postId);
   const service = createServiceClient();
   const { error } = await service.from("blog_gallery_images").insert({ post_id: postId, media_id: mediaId, order_index: orderIndex });
   if (error) throw new Error(error.message);
@@ -209,8 +223,12 @@ export async function addBlogGalleryImage(postId: string, mediaId: string, order
 }
 
 export async function removeBlogGalleryImage(id: string) {
-  await requireRole(["super_admin", "editor"]);
+  const admin = await requireContentEditor();
   const service = createServiceClient();
+  const { data: image } = await service.from("blog_gallery_images").select("post_id").eq("id", id).single();
+  if (image) {
+    await assertCollaboratorDraftOnly(admin, "blog_posts", image.post_id);
+  }
   const { error } = await service.from("blog_gallery_images").delete().eq("id", id);
   if (error) throw new Error(error.message);
   revalidatePublicSite();
@@ -226,7 +244,7 @@ export interface PostRevisionSummary {
 }
 
 export async function getBlogPostHistory(postId: string): Promise<PostRevisionSummary[]> {
-  await requireRole(["super_admin", "editor"]);
+  await requireAdmin();
   const service = createServiceClient();
   const { data } = await service
     .from("content_revisions")
@@ -247,7 +265,8 @@ export async function getBlogPostHistory(postId: string): Promise<PostRevisionSu
 }
 
 export async function restoreBlogPostRevision(postId: string, revisionId: string) {
-  const admin = await requireRole(["super_admin", "editor"]);
+  const admin = await requireContentEditor();
+  await assertCollaboratorDraftOnly(admin, "blog_posts", postId);
   const service = createServiceClient();
   const { data: revision, error } = await service.from("content_revisions").select("snapshot").eq("id", revisionId).single();
   if (error || !revision) throw new Error("Versione non trovata.");
@@ -264,6 +283,8 @@ export async function restoreBlogPostRevision(postId: string, revisionId: string
     });
   }
 
+  const publishStatus = resolvePublishStatus(admin, snapshot.publish_status as "draft" | "published" | "archived");
+
   await service
     .from("blog_posts")
     .update({
@@ -273,8 +294,8 @@ export async function restoreBlogPostRevision(postId: string, revisionId: string
       category_id: snapshot.category_id,
       author_id: snapshot.author_id,
       cover_image_id: snapshot.cover_image_id,
-      publish_status: snapshot.publish_status,
-      published_at: snapshot.published_at,
+      publish_status: publishStatus,
+      published_at: publishStatus === "draft" ? null : snapshot.published_at,
     })
     .eq("id", postId);
 

@@ -3,10 +3,11 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import slugify from "slugify";
-import { requireRole, requireAdmin } from "@/lib/auth/require-role";
+import { requireAdmin, requireContentEditor, assertCollaboratorDraftOnly } from "@/lib/auth/require-role";
 import { createServiceClient } from "@/lib/supabase/service";
 import { getUnitDocuments } from "@/lib/admin/data/units";
 import { upsertSeoMeta } from "@/lib/actions/seo";
+import type { AdminUser } from "@/lib/types/admin";
 import type { ProjectCategory, ProjectStatus, UnitStatus } from "@/lib/types/project";
 
 function revalidatePublicSite() {
@@ -15,6 +16,18 @@ function revalidatePublicSite() {
   // single layout-level revalidation is simpler and safer than tracking
   // every affected path individually.
   revalidatePath("/", "layout");
+}
+
+/** A collaborator can only ever write draft rows — force it server-side rather than trust the client. */
+function resolvePublishStatus(admin: AdminUser, requested: "draft" | "published" | "archived") {
+  return admin.role === "collaborator" ? "draft" : requested;
+}
+
+async function projectIdOf(table: string, id: string): Promise<string> {
+  const service = createServiceClient();
+  const { data, error } = await service.from(table).select("project_id").eq("id", id).single();
+  if (error || !data) throw new Error("Elemento non trovato.");
+  return data.project_id as string;
 }
 
 export interface ProjectGeneralInput {
@@ -46,7 +59,7 @@ export async function suggestProjectSlug(title: string) {
 }
 
 export async function createProject(input: ProjectGeneralInput): Promise<{ id: string }> {
-  const admin = await requireRole(["super_admin", "editor"]);
+  const admin = await requireContentEditor();
   const service = createServiceClient();
 
   const seoMetaId = await upsertSeoMeta(null, input);
@@ -65,7 +78,7 @@ export async function createProject(input: ProjectGeneralInput): Promise<{ id: s
       cover_image_id: input.coverImageId,
       is_featured: input.isFeatured,
       featured_order: input.featuredOrder,
-      publish_status: input.publishStatus,
+      publish_status: resolvePublishStatus(admin, input.publishStatus),
       seo_meta_id: seoMetaId,
       created_by: admin.id,
     })
@@ -81,7 +94,8 @@ export async function createProject(input: ProjectGeneralInput): Promise<{ id: s
 }
 
 export async function updateProjectGeneral(id: string, input: ProjectGeneralInput) {
-  await requireRole(["super_admin", "editor"]);
+  const admin = await requireContentEditor();
+  await assertCollaboratorDraftOnly(admin, "projects", id);
   const service = createServiceClient();
 
   const { data: existing } = await service.from("projects").select("seo_meta_id").eq("id", id).single();
@@ -101,7 +115,7 @@ export async function updateProjectGeneral(id: string, input: ProjectGeneralInpu
       cover_image_id: input.coverImageId,
       is_featured: input.isFeatured,
       featured_order: input.featuredOrder,
-      publish_status: input.publishStatus,
+      publish_status: resolvePublishStatus(admin, input.publishStatus),
       seo_meta_id: seoMetaId,
     })
     .eq("id", id);
@@ -111,7 +125,8 @@ export async function updateProjectGeneral(id: string, input: ProjectGeneralInpu
 }
 
 export async function deleteProject(id: string) {
-  await requireRole(["super_admin", "editor"]);
+  const admin = await requireContentEditor();
+  await assertCollaboratorDraftOnly(admin, "projects", id);
   const service = createServiceClient();
   const { error } = await service.from("projects").delete().eq("id", id);
   if (error) throw new Error(error.message);
@@ -122,7 +137,8 @@ export async function deleteProject(id: string) {
 // ─── Gallery ──────────────────────────────────────────────────────────────
 
 export async function addGalleryImage(projectId: string, mediaId: string, orderIndex: number) {
-  await requireRole(["super_admin", "editor"]);
+  const admin = await requireContentEditor();
+  await assertCollaboratorDraftOnly(admin, "projects", projectId);
   const service = createServiceClient();
   const { error } = await service
     .from("project_gallery_images")
@@ -132,7 +148,8 @@ export async function addGalleryImage(projectId: string, mediaId: string, orderI
 }
 
 export async function removeGalleryImage(id: string) {
-  await requireRole(["super_admin", "editor"]);
+  const admin = await requireContentEditor();
+  await assertCollaboratorDraftOnly(admin, "projects", await projectIdOf("project_gallery_images", id));
   const service = createServiceClient();
   const { error } = await service.from("project_gallery_images").delete().eq("id", id);
   if (error) throw new Error(error.message);
@@ -140,7 +157,10 @@ export async function removeGalleryImage(id: string) {
 }
 
 export async function reorderGalleryImages(orderedIds: string[]) {
-  await requireRole(["super_admin", "editor"]);
+  const admin = await requireContentEditor();
+  if (orderedIds.length > 0) {
+    await assertCollaboratorDraftOnly(admin, "projects", await projectIdOf("project_gallery_images", orderedIds[0]));
+  }
   const service = createServiceClient();
   await Promise.all(
     orderedIds.map((id, index) =>
@@ -153,7 +173,8 @@ export async function reorderGalleryImages(orderedIds: string[]) {
 // ─── Features (highlights + technical) ─────────────────────────────────────
 
 export async function addFeature(projectId: string, kind: "highlight" | "technical", title: string, orderIndex: number) {
-  await requireRole(["super_admin", "editor"]);
+  const admin = await requireContentEditor();
+  await assertCollaboratorDraftOnly(admin, "projects", projectId);
   const service = createServiceClient();
   const { error } = await service
     .from("project_features")
@@ -163,7 +184,8 @@ export async function addFeature(projectId: string, kind: "highlight" | "technic
 }
 
 export async function updateFeature(id: string, title: string) {
-  await requireRole(["super_admin", "editor"]);
+  const admin = await requireContentEditor();
+  await assertCollaboratorDraftOnly(admin, "projects", await projectIdOf("project_features", id));
   const service = createServiceClient();
   const { error } = await service.from("project_features").update({ title }).eq("id", id);
   if (error) throw new Error(error.message);
@@ -171,7 +193,8 @@ export async function updateFeature(id: string, title: string) {
 }
 
 export async function deleteFeature(id: string) {
-  await requireRole(["super_admin", "editor"]);
+  const admin = await requireContentEditor();
+  await assertCollaboratorDraftOnly(admin, "projects", await projectIdOf("project_features", id));
   const service = createServiceClient();
   const { error } = await service.from("project_features").delete().eq("id", id);
   if (error) throw new Error(error.message);
@@ -179,7 +202,10 @@ export async function deleteFeature(id: string) {
 }
 
 export async function reorderFeatures(orderedIds: string[]) {
-  await requireRole(["super_admin", "editor"]);
+  const admin = await requireContentEditor();
+  if (orderedIds.length > 0) {
+    await assertCollaboratorDraftOnly(admin, "projects", await projectIdOf("project_features", orderedIds[0]));
+  }
   const service = createServiceClient();
   await Promise.all(
     orderedIds.map((id, index) => service.from("project_features").update({ order_index: index }).eq("id", id))
@@ -213,7 +239,8 @@ async function syncTotalUnits(projectId: string) {
 }
 
 export async function createUnit(projectId: string, input: UnitInput, orderIndex: number) {
-  await requireRole(["super_admin", "editor"]);
+  const admin = await requireContentEditor();
+  await assertCollaboratorDraftOnly(admin, "projects", projectId);
   const service = createServiceClient();
   const { error } = await service.from("project_units").insert({
     project_id: projectId,
@@ -236,7 +263,8 @@ export async function createUnit(projectId: string, input: UnitInput, orderIndex
 }
 
 export async function updateUnit(id: string, projectId: string, input: UnitInput) {
-  await requireRole(["super_admin", "editor"]);
+  const admin = await requireContentEditor();
+  await assertCollaboratorDraftOnly(admin, "projects", projectId);
   const service = createServiceClient();
   const { error } = await service
     .from("project_units")
@@ -256,7 +284,6 @@ export async function updateUnit(id: string, projectId: string, input: UnitInput
     .eq("id", id);
   if (error) throw new Error(error.message);
   revalidatePublicSite();
-  void projectId;
 }
 
 /**
@@ -266,7 +293,8 @@ export async function updateUnit(id: string, projectId: string, input: UnitInput
  * can call it directly from an inline <select> with no full form roundtrip.
  */
 export async function updateUnitStatus(id: string, status: UnitStatus) {
-  await requireRole(["super_admin", "editor"]);
+  const admin = await requireContentEditor();
+  await assertCollaboratorDraftOnly(admin, "projects", await projectIdOf("project_units", id));
   const service = createServiceClient();
   const { error } = await service.from("project_units").update({ status }).eq("id", id);
   if (error) throw new Error(error.message);
@@ -274,7 +302,8 @@ export async function updateUnitStatus(id: string, status: UnitStatus) {
 }
 
 export async function deleteUnit(id: string, projectId: string) {
-  await requireRole(["super_admin", "editor"]);
+  const admin = await requireContentEditor();
+  await assertCollaboratorDraftOnly(admin, "projects", projectId);
   const service = createServiceClient();
   const { error } = await service.from("project_units").delete().eq("id", id);
   if (error) throw new Error(error.message);
@@ -291,7 +320,8 @@ export interface TimelineInput {
 }
 
 export async function createTimelineEvent(projectId: string, input: TimelineInput, orderIndex: number) {
-  await requireRole(["super_admin", "editor"]);
+  const admin = await requireContentEditor();
+  await assertCollaboratorDraftOnly(admin, "projects", projectId);
   const service = createServiceClient();
   const { error } = await service.from("project_timeline_events").insert({
     project_id: projectId,
@@ -305,7 +335,8 @@ export async function createTimelineEvent(projectId: string, input: TimelineInpu
 }
 
 export async function updateTimelineEvent(id: string, input: TimelineInput) {
-  await requireRole(["super_admin", "editor"]);
+  const admin = await requireContentEditor();
+  await assertCollaboratorDraftOnly(admin, "projects", await projectIdOf("project_timeline_events", id));
   const service = createServiceClient();
   const { error } = await service
     .from("project_timeline_events")
@@ -316,7 +347,8 @@ export async function updateTimelineEvent(id: string, input: TimelineInput) {
 }
 
 export async function deleteTimelineEvent(id: string) {
-  await requireRole(["super_admin", "editor"]);
+  const admin = await requireContentEditor();
+  await assertCollaboratorDraftOnly(admin, "projects", await projectIdOf("project_timeline_events", id));
   const service = createServiceClient();
   const { error } = await service.from("project_timeline_events").delete().eq("id", id);
   if (error) throw new Error(error.message);
@@ -324,7 +356,10 @@ export async function deleteTimelineEvent(id: string) {
 }
 
 export async function reorderTimelineEvents(orderedIds: string[]) {
-  await requireRole(["super_admin", "editor"]);
+  const admin = await requireContentEditor();
+  if (orderedIds.length > 0) {
+    await assertCollaboratorDraftOnly(admin, "projects", await projectIdOf("project_timeline_events", orderedIds[0]));
+  }
   const service = createServiceClient();
   await Promise.all(
     orderedIds.map((id, index) =>
@@ -341,13 +376,21 @@ export async function fetchUnitDocuments(unitId: string) {
   return getUnitDocuments(unitId);
 }
 
+async function projectIdOfUnit(unitId: string): Promise<string> {
+  const service = createServiceClient();
+  const { data, error } = await service.from("project_units").select("project_id").eq("id", unitId).single();
+  if (error || !data) throw new Error("Unità non trovata.");
+  return data.project_id;
+}
+
 export async function addUnitDocument(
   unitId: string,
   mediaId: string,
   docType: "floorplan" | "document",
   orderIndex: number
 ) {
-  await requireRole(["super_admin", "editor"]);
+  const admin = await requireContentEditor();
+  await assertCollaboratorDraftOnly(admin, "projects", await projectIdOfUnit(unitId));
   const service = createServiceClient();
   const { error } = await service
     .from("unit_documents")
@@ -357,8 +400,12 @@ export async function addUnitDocument(
 }
 
 export async function removeUnitDocument(id: string) {
-  await requireRole(["super_admin", "editor"]);
+  const admin = await requireContentEditor();
   const service = createServiceClient();
+  const { data: doc } = await service.from("unit_documents").select("unit_id").eq("id", id).single();
+  if (doc) {
+    await assertCollaboratorDraftOnly(admin, "projects", await projectIdOfUnit(doc.unit_id));
+  }
   const { error } = await service.from("unit_documents").delete().eq("id", id);
   if (error) throw new Error(error.message);
   revalidatePublicSite();
