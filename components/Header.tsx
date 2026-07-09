@@ -124,6 +124,10 @@ export default function Header({ projects }: { projects: Project[] }) {
               </AnimatePresence>
             </div>
 
+            <Link href="/comunicazioni" className={`${navBase} ${navColor}`}>
+              Comunicazioni
+            </Link>
+
             <Link href="/contatti" className={`${navBase} ${navColor}`}>
               Contatti
             </Link>
@@ -215,6 +219,13 @@ export default function Header({ projects }: { projects: Project[] }) {
                   )}
                 </AnimatePresence>
               </div>
+
+              <Link
+                href="/comunicazioni"
+                className="font-sans text-xs tracking-[0.22em] uppercase text-charcoal py-4 border-b border-border-warm hover:text-crg-red transition-colors"
+              >
+                Comunicazioni
+              </Link>
 
               <Link
                 href="/contatti"
