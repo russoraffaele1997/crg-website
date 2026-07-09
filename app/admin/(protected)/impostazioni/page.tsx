@@ -1,13 +1,12 @@
-import { Settings } from "lucide-react";
-import ComingSoon from "@/components/admin/ComingSoon";
+import { redirect } from "next/navigation";
+import { requireAdmin } from "@/lib/auth/require-role";
+import { listSettings } from "@/lib/admin/data/settings";
+import SettingsManager from "@/components/admin/settings/SettingsManager";
 
-export default function ImpostazioniAdminPage() {
-  return (
-    <ComingSoon
-      title="Impostazioni"
-      description="Parametri generali del sito e dell'area amministrazione."
-      icon={Settings}
-      phase="Arriva nella Fase 6, insieme alla gestione utenti e all'audit dei permessi."
-    />
-  );
+export default async function ImpostazioniAdminPage() {
+  const admin = await requireAdmin();
+  if (admin.role !== "super_admin") redirect("/admin");
+  const settings = await listSettings();
+
+  return <SettingsManager initialSettings={settings} />;
 }
