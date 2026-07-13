@@ -1,7 +1,7 @@
 import "server-only";
 import { createServiceClient } from "@/lib/supabase/service";
 import { getPublicMediaUrl } from "@/lib/supabase/storage-url";
-import type { Project, ProjectUnit, ProjectTimelineItem } from "@/lib/types/project";
+import type { Project, ProjectUnit, ProjectTimelineItem, UnitFloorplan } from "@/lib/types/project";
 
 const PROJECT_SELECT = `
   id, slug, title, location, category, status, status_label,
@@ -9,7 +9,10 @@ const PROJECT_SELECT = `
   cover_media:media_library!cover_image_id(storage_path, bucket),
   project_gallery_images(order_index, media:media_library(storage_path, bucket)),
   project_features(kind, title, order_index),
-  project_units(id, unit_code, name, typology, floor, interno, sqm, outdoor_sqm, rooms, destination, price, status, order_index),
+  project_units(
+    id, unit_code, name, typology, floor, interno, sqm, outdoor_sqm, rooms, destination, price, status, order_index, description,
+    unit_documents(id, doc_type, order_index, media:media_library(id, storage_path, bucket, original_filename, kind))
+  ),
   project_timeline_events(label, date_label, completed, order_index)
 `;
 
@@ -45,6 +48,13 @@ interface ProjectRow {
     price: string | null;
     status: ProjectUnit["status"];
     order_index: number;
+    description: string | null;
+    unit_documents: {
+      id: string;
+      doc_type: string;
+      order_index: number;
+      media: { id: string; storage_path: string; bucket: string; original_filename: string; kind: string } | null;
+    }[];
   }[];
   project_timeline_events: {
     label: string;
@@ -84,6 +94,16 @@ function mapProject(row: ProjectRow): Project {
       destination: u.destination ?? undefined,
       price: u.price ?? undefined,
       status: u.status,
+      description: u.description ?? undefined,
+      floorplans: [...u.unit_documents]
+        .filter((d) => d.doc_type === "floorplan" && d.media)
+        .sort((a, b) => a.order_index - b.order_index)
+        .map((d) => ({
+          id: d.id,
+          url: getPublicMediaUrl(d.media!.storage_path, d.media!.bucket),
+          filename: d.media!.original_filename,
+          kind: d.media!.kind as UnitFloorplan["kind"],
+        })),
     }));
 
   const timeline: ProjectTimelineItem[] = [...row.project_timeline_events]

@@ -84,8 +84,129 @@ function Timeline({ items }: { items: Project["timeline"] }) {
   );
 }
 
+// ─── Unit detail popup ──────────────────────────────────────────────────────
+function UnitDetailModal({ unit, onClose }: { unit: ProjectUnit; onClose: () => void }) {
+  const images = unit.floorplans.filter((f) => f.kind === "image");
+  const otherDocs = unit.floorplans.filter((f) => f.kind !== "image");
+
+  return (
+    <div className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4" onClick={onClose}>
+      <div
+        className="bg-white max-w-2xl w-full max-h-[85vh] overflow-y-auto relative"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <button
+          className="absolute top-5 right-5 text-mid-gray hover:text-charcoal font-sans text-sm tracking-widest uppercase z-10"
+          onClick={onClose}
+        >
+          Chiudi ✕
+        </button>
+
+        <div className="p-8 sm:p-10">
+          <span className={`inline-block font-sans text-[10px] tracking-wider uppercase px-3 py-1 border mb-4 ${unitStatusConfig[unit.status].cls}`}>
+            {unitStatusConfig[unit.status].label}
+          </span>
+          <h3 className="font-heading text-3xl font-bold text-charcoal mb-1">{unit.name}</h3>
+          <p className="font-sans text-sm text-mid-gray mb-8">
+            {unit.typology}
+            {unit.floor ? ` — Piano ${unit.floor}` : ""}
+            {unit.interno ? `, int. ${unit.interno}` : ""}
+          </p>
+
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 mb-8 pb-8 border-b border-border-warm">
+            <div>
+              <div className="font-heading font-bold text-xl text-charcoal">
+                {unit.sqm} mq{unit.outdoorSqm ? ` + ${unit.outdoorSqm}` : ""}
+              </div>
+              <div className="font-sans text-[10px] tracking-widest uppercase text-mid-gray mt-1">
+                {unit.outdoorSqm ? "Interni + esterni" : "Superficie"}
+              </div>
+            </div>
+            {unit.rooms && (
+              <div>
+                <div className="font-heading font-bold text-xl text-charcoal">{unit.rooms}</div>
+                <div className="font-sans text-[10px] tracking-widest uppercase text-mid-gray mt-1">Vani</div>
+              </div>
+            )}
+            {unit.destination && (
+              <div>
+                <div className="font-heading font-bold text-xl text-charcoal">{unit.destination}</div>
+                <div className="font-sans text-[10px] tracking-widest uppercase text-mid-gray mt-1">Destinazione</div>
+              </div>
+            )}
+            {unit.price && (
+              <div>
+                <div className="font-heading font-bold text-xl text-crg-red">{unit.price}</div>
+                <div className="font-sans text-[10px] tracking-widest uppercase text-mid-gray mt-1">Prezzo</div>
+              </div>
+            )}
+          </div>
+
+          {unit.description && (
+            <div className="mb-8">
+              <h4 className="font-sans text-[10px] tracking-[0.2em] uppercase text-mid-gray mb-3">Descrizione</h4>
+              <p className="font-sans text-[15px] text-mid-gray leading-relaxed whitespace-pre-line">{unit.description}</p>
+            </div>
+          )}
+
+          {images.length > 0 && (
+            <div className="mb-8">
+              <h4 className="font-sans text-[10px] tracking-[0.2em] uppercase text-mid-gray mb-3">Planimetria</h4>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {images.map((img) => (
+                  <ClientImage
+                    key={img.id}
+                    src={img.url}
+                    alt={`Planimetria ${unit.name}`}
+                    className="w-full border border-border-warm object-contain"
+                    fallbackClass="w-full h-48 bg-light-gray"
+                  />
+                ))}
+              </div>
+            </div>
+          )}
+
+          {otherDocs.length > 0 && (
+            <div>
+              <h4 className="font-sans text-[10px] tracking-[0.2em] uppercase text-mid-gray mb-3">Documenti</h4>
+              <div className="space-y-2">
+                {otherDocs.map((doc) => (
+                  <a
+                    key={doc.id}
+                    href={doc.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-2 font-sans text-sm text-crg-red hover:underline"
+                  >
+                    <svg className="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m6 12h-6m6 3h-6m2.25-9h-2.25m9-6l-6 6h4.5a2.25 2.25 0 012.25 2.25V19.5A2.25 2.25 0 0116.5 21.75H7.5A2.25 2.25 0 015.25 19.5V4.5A2.25 2.25 0 017.5 2.25h5.379a2.25 2.25 0 011.591.659l5.121 5.121a2.25 2.25 0 01.659 1.591z" />
+                    </svg>
+                    {doc.filename}
+                  </a>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {unit.status === "available" && (
+            <a
+              href="#appuntamento"
+              onClick={onClose}
+              className="btn-primary mt-8 inline-block"
+            >
+              Richiedi appuntamento
+            </a>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ─── Units table ──────────────────────────────────────────────────────────────
 function UnitsTable({ units }: { units: ProjectUnit[] }) {
+  const [selected, setSelected] = useState<ProjectUnit | null>(null);
+
   return (
     <div className="overflow-x-auto">
       <table className="w-full">
@@ -100,7 +221,11 @@ function UnitsTable({ units }: { units: ProjectUnit[] }) {
         </thead>
         <tbody>
           {units.map((unit) => (
-            <tr key={unit.id} className={`border-b border-border-warm/50 transition-colors ${unit.status === "available" ? "hover:bg-crg-red-light" : "opacity-55"}`}>
+            <tr
+              key={unit.id}
+              onClick={() => setSelected(unit)}
+              className={`border-b border-border-warm/50 transition-colors cursor-pointer ${unit.status === "available" ? "hover:bg-crg-red-light" : "opacity-55"}`}
+            >
               <td className="font-heading text-sm font-semibold text-charcoal py-4 px-4">{unit.name}</td>
               <td className="font-sans text-sm text-mid-gray py-4 px-4">{unit.typology}</td>
               <td className="font-sans text-sm text-mid-gray py-4 px-4">{unit.floor ?? "—"}</td>
@@ -122,6 +247,8 @@ function UnitsTable({ units }: { units: ProjectUnit[] }) {
           ))}
         </tbody>
       </table>
+
+      {selected && <UnitDetailModal unit={selected} onClose={() => setSelected(null)} />}
     </div>
   );
 }

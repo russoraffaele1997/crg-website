@@ -53,7 +53,7 @@ export default function Header({ projects }: { projects: Project[] }) {
                 alt="CRG | Crafted Residential Group"
                 width={160}
                 height={58}
-                className="h-12 w-auto transition-opacity duration-300 group-hover:opacity-80"
+                className="h-16 w-auto transition-opacity duration-300 group-hover:opacity-80"
                 priority
               />
             </div>

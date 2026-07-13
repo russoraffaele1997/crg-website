@@ -79,6 +79,7 @@ export interface AdminProjectDetail {
     price: string | null;
     status: string;
     orderIndex: number;
+    description: string | null;
   }[];
   timeline: {
     id: string;
@@ -110,7 +111,7 @@ export async function getAdminProjectById(id: string): Promise<AdminProjectDetai
       cover_media:media_library!cover_image_id(id, storage_path, bucket, original_filename, kind),
       project_gallery_images(id, order_index, media:media_library(id, storage_path, bucket, original_filename, kind)),
       project_features(id, kind, title, order_index),
-      project_units(id, unit_code, name, typology, floor, interno, sqm, outdoor_sqm, rooms, destination, price, status, order_index),
+      project_units(id, unit_code, name, typology, floor, interno, sqm, outdoor_sqm, rooms, destination, price, status, order_index, description),
       project_timeline_events(id, label, date_label, completed, order_index)
     `)
     .eq("id", id)
@@ -140,6 +141,7 @@ export async function getAdminProjectById(id: string): Promise<AdminProjectDetai
       id: string; unit_code: string; name: string; typology: string; floor: string | null;
       interno: string | null; sqm: number; outdoor_sqm: number | null; rooms: string | null;
       destination: string | null; price: string | null; status: string; order_index: number;
+      description: string | null;
     }[];
     project_timeline_events: { id: string; label: string; date_label: string; completed: boolean; order_index: number }[];
   };
@@ -188,6 +190,7 @@ export async function getAdminProjectById(id: string): Promise<AdminProjectDetai
         rooms: u.rooms,
         destination: u.destination,
         price: u.price,
+        description: u.description,
         status: u.status,
         orderIndex: u.order_index,
       })),

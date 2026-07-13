@@ -227,6 +227,7 @@ export interface UnitInput {
   destination: string;
   price: string;
   status: UnitStatus;
+  description: string;
 }
 
 async function syncTotalUnits(projectId: string) {
@@ -255,6 +256,7 @@ export async function createUnit(projectId: string, input: UnitInput, orderIndex
     destination: input.destination || null,
     price: input.price || null,
     status: input.status,
+    description: input.description || null,
     order_index: orderIndex,
   });
   if (error) throw new Error(error.message);
@@ -280,6 +282,7 @@ export async function updateUnit(id: string, projectId: string, input: UnitInput
       destination: input.destination || null,
       price: input.price || null,
       status: input.status,
+      description: input.description || null,
     })
     .eq("id", id);
   if (error) throw new Error(error.message);

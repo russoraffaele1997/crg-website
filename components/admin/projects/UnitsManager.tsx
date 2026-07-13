@@ -20,6 +20,7 @@ interface Unit {
   destination: string | null;
   price: string | null;
   status: string;
+  description: string | null;
 }
 
 const emptyForm: UnitInput = {
@@ -34,6 +35,7 @@ const emptyForm: UnitInput = {
   destination: "",
   price: "",
   status: "available",
+  description: "",
 };
 
 function UnitFields({
@@ -57,6 +59,13 @@ function UnitFields({
       <input placeholder="Vani" value={value.rooms} onChange={(e) => set("rooms", e.target.value)} className="border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-crg-red" />
       <input placeholder="Destinazione" value={value.destination} onChange={(e) => set("destination", e.target.value)} className="border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-crg-red" />
       <input placeholder="Prezzo" value={value.price} onChange={(e) => set("price", e.target.value)} className="border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-crg-red" />
+      <textarea
+        placeholder="Descrizione (mostrata nel popup dell'immobile sul sito)"
+        value={value.description}
+        onChange={(e) => set("description", e.target.value)}
+        rows={2}
+        className="col-span-2 sm:col-span-4 border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-crg-red resize-none"
+      />
     </div>
   );
 }
@@ -103,6 +112,7 @@ export default function UnitsManager({
       destination: unit.destination ?? "",
       price: unit.price ?? "",
       status: unit.status as UnitStatus,
+      description: unit.description ?? "",
     });
   };
 

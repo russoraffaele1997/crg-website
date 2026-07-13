@@ -2,6 +2,13 @@ export type UnitStatus = "available" | "optioned" | "sold" | "rented" | "reserve
 export type ProjectCategory = "residential" | "commercial" | "industrial";
 export type ProjectStatus = "for-sale" | "under-construction" | "coming-soon" | "for-rent";
 
+export interface UnitFloorplan {
+  id: string;
+  url: string;
+  filename: string;
+  kind: "image" | "pdf" | "video" | "document";
+}
+
 export interface ProjectUnit {
   id: string;
   name: string;
@@ -14,6 +21,8 @@ export interface ProjectUnit {
   destination?: string;
   price?: string;
   status: UnitStatus;
+  description?: string;
+  floorplans: UnitFloorplan[];
 }
 
 export interface ProjectTimelineItem {

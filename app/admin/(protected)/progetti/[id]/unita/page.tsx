@@ -27,6 +27,7 @@ export default async function ProjectUnitaPage({
         destination: u.destination,
         price: u.price,
         status: u.status,
+        description: u.description,
       }))}
     />
   );
