@@ -33,8 +33,6 @@ export interface HeroContent {
   titleLine2: string;
   tagline: string;
   body: string;
-  ctaPrimaryLabel: string;
-  ctaPrimaryHref: string;
   ctaSecondaryLabel: string;
   ctaSecondaryHref: string;
 }

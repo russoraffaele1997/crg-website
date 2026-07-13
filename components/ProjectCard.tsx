@@ -27,7 +27,7 @@ export default function ProjectCard({ project, className = "" }: Props) {
   const availableUnits = project.units.filter((u) => u.status === "available").length;
 
   return (
-    <article className={`group bg-white border border-border-warm hover:shadow-lg transition-all duration-500 flex flex-col ${className}`}>
+    <article className={`group bg-white border border-border-warm hover:shadow-lg transition-all duration-500 flex flex-col h-full ${className}`}>
 
       {/* Image */}
       <div className="relative overflow-hidden aspect-[4/3]">

@@ -13,31 +13,6 @@ const item = {
   show: { opacity: 1, y: 0, transition: { duration: 0.85, ease: [0.25, 0, 0, 1] } },
 };
 
-function scrollToHash(href: string) {
-  const target = document.querySelector(href);
-  if (!target) return;
-
-  // Constant speed (no ease-in/ease-out) — instead of the near-instant
-  // native smooth-scroll — so the construction parallax animation in
-  // between is actually visible the whole way down, at an even pace,
-  // rather than skipped past or rushed at the end. A plain button (not a
-  // Link) drives this so Next.js's own hash-navigation logic never gets a
-  // chance to race it.
-  const startY = window.scrollY;
-  const targetY = target.getBoundingClientRect().top + startY;
-  const distance = targetY - startY;
-  const duration = 3200;
-  const startTime = performance.now();
-
-  function step(now: number) {
-    const elapsed = now - startTime;
-    const progress = Math.min(elapsed / duration, 1);
-    window.scrollTo(0, startY + distance * progress);
-    if (progress < 1) requestAnimationFrame(step);
-  }
-  requestAnimationFrame(step);
-}
-
 export default function HeroSection({ content }: { content: HeroContent }) {
   return (
     <section className="relative min-h-screen bg-charcoal flex items-center justify-center overflow-hidden">
@@ -94,19 +69,6 @@ export default function HeroSection({ content }: { content: HeroContent }) {
             variants={item}
             className="flex flex-col sm:flex-row gap-4 justify-center"
           >
-            {content.ctaPrimaryHref.startsWith("#") ? (
-              <button
-                type="button"
-                onClick={() => scrollToHash(content.ctaPrimaryHref)}
-                className="btn-primary"
-              >
-                {content.ctaPrimaryLabel}
-              </button>
-            ) : (
-              <Link href={content.ctaPrimaryHref} className="btn-primary">
-                {content.ctaPrimaryLabel}
-              </Link>
-            )}
             <Link href={content.ctaSecondaryHref} className="btn-outline-light">
               {content.ctaSecondaryLabel}
             </Link>
@@ -119,8 +81,11 @@ export default function HeroSection({ content }: { content: HeroContent }) {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 2.2 }}
-        className="absolute bottom-9 left-1/2 -translate-x-1/2"
+        className="absolute bottom-9 left-1/2 -translate-x-1/2 flex flex-col items-center gap-3"
       >
+        <span className="font-sans text-[10px] tracking-[0.3em] uppercase text-white/30">
+          Scorri per scoprire i nostri progetti
+        </span>
         <motion.svg
           animate={{ y: [0, 8, 0] }}
           transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}

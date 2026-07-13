@@ -11,7 +11,7 @@ export default function FeaturedProjects({ featured }: { featured: Project[] }) 
   const inView = useInView(ref, { once: true, margin: "-80px" });
 
   return (
-    <section id="progetti" className="py-28 lg:py-36 bg-cream scroll-mt-[72px]" ref={ref}>
+    <section className="py-28 lg:py-36 bg-cream" ref={ref}>
       <div className="container-custom">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
