@@ -203,50 +203,110 @@ function UnitDetailModal({ unit, onClose }: { unit: ProjectUnit; onClose: () => 
   );
 }
 
-// ─── Units table ──────────────────────────────────────────────────────────────
+// ─── Units table, grouped by floor ─────────────────────────────────────────
+// Free-text field entered per-project by the admin ("Piano 1", "3", "T"...)
+// — extract the first number as a sort key, treating a non-numeric floor
+// (ground floor, usually "T") as coming before floor 1.
+function floorSortKey(floor: string | undefined): number {
+  if (!floor) return 999;
+  const match = floor.match(/-?\d+/);
+  return match ? parseInt(match[0], 10) : -1;
+}
+
 function UnitsTable({ units }: { units: ProjectUnit[] }) {
+  const groups: [string, ProjectUnit[]][] = [];
+  for (const unit of units) {
+    const key = unit.floor ?? "Piano non specificato";
+    const existing = groups.find(([floor]) => floor === key);
+    if (existing) existing[1].push(unit);
+    else groups.push([key, [unit]]);
+  }
+  groups.sort((a, b) => floorSortKey(a[0]) - floorSortKey(b[0]));
+
+  const [expanded, setExpanded] = useState<Set<string>>(() => new Set(groups[0] ? [groups[0][0]] : []));
   const [selected, setSelected] = useState<ProjectUnit | null>(null);
 
+  const toggle = (floor: string) => {
+    setExpanded((prev) => {
+      const next = new Set(prev);
+      if (next.has(floor)) next.delete(floor);
+      else next.add(floor);
+      return next;
+    });
+  };
+
   return (
-    <div className="overflow-x-auto">
-      <table className="w-full">
-        <thead>
-          <tr className="border-b border-border-warm">
-            {["Unità", "Tipologia", "Piano", "Superficie", "Dettagli", "Prezzo", "Stato"].map((col) => (
-              <th key={col} className="font-sans text-[10px] tracking-[0.2em] uppercase text-mid-gray py-4 px-4 text-left">
-                {col}
-              </th>
-            ))}
-          </tr>
-        </thead>
-        <tbody>
-          {units.map((unit) => (
-            <tr
-              key={unit.id}
-              onClick={() => setSelected(unit)}
-              className={`border-b border-border-warm/50 transition-colors cursor-pointer ${unit.status === "available" ? "hover:bg-crg-red-light" : "opacity-55"}`}
+    <div className="border-t border-border-warm">
+      {groups.map(([floor, floorUnits]) => {
+        const available = floorUnits.filter((u) => u.status === "available").length;
+        const isOpen = expanded.has(floor);
+
+        return (
+          <div key={floor} className="border-b border-border-warm">
+            <button
+              type="button"
+              onClick={() => toggle(floor)}
+              className="w-full flex items-center justify-between gap-4 py-5 hover:bg-crg-red-light/40 transition-colors text-left"
+              aria-expanded={isOpen}
             >
-              <td className="font-heading text-sm font-semibold text-charcoal py-4 px-4">{unit.name}</td>
-              <td className="font-sans text-sm text-mid-gray py-4 px-4">{unit.typology}</td>
-              <td className="font-sans text-sm text-mid-gray py-4 px-4">{unit.floor ?? "—"}</td>
-              <td className="font-sans text-sm text-mid-gray py-4 px-4">
-                {unit.outdoorSqm
-                  ? `${unit.sqm} mq int. + ${unit.outdoorSqm} mq est.`
-                  : `${unit.sqm} mq`}
-              </td>
-              <td className="font-sans text-sm text-mid-gray py-4 px-4">
-                {unit.rooms ? `${unit.rooms} vani` : unit.destination ?? "—"}
-              </td>
-              <td className="font-sans text-sm text-charcoal font-medium py-4 px-4">{unit.price ?? "—"}</td>
-              <td className="py-4 px-4">
-                <span className={`inline-block font-sans text-[10px] tracking-wider uppercase px-3 py-1 border ${unitStatusConfig[unit.status].cls}`}>
-                  {unitStatusConfig[unit.status].label}
-                </span>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+              <div className="flex items-center gap-4">
+                <svg
+                  className={`w-3.5 h-3.5 text-mid-gray shrink-0 transition-transform duration-300 ${isOpen ? "rotate-90" : ""}`}
+                  fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                </svg>
+                <span className="font-heading text-lg font-bold text-charcoal">{floor}</span>
+              </div>
+              <span className="font-sans text-[11px] tracking-wider uppercase text-mid-gray shrink-0">
+                {available} su {floorUnits.length} disponibil{available === 1 ? "e" : "i"}
+              </span>
+            </button>
+
+            {isOpen && (
+              <div className="overflow-x-auto pb-2">
+                <table className="w-full">
+                  <thead>
+                    <tr className="border-b border-border-warm/50">
+                      {["Unità", "Tipologia", "Superficie", "Dettagli", "Prezzo", "Stato"].map((col) => (
+                        <th key={col} className="font-sans text-[10px] tracking-[0.2em] uppercase text-mid-gray py-3 px-4 text-left">
+                          {col}
+                        </th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {floorUnits.map((unit) => (
+                      <tr
+                        key={unit.id}
+                        onClick={() => setSelected(unit)}
+                        className={`border-b border-border-warm/30 last:border-0 transition-colors cursor-pointer ${unit.status === "available" ? "hover:bg-crg-red-light" : "opacity-55"}`}
+                      >
+                        <td className="font-heading text-sm font-semibold text-charcoal py-4 px-4">{unit.name}</td>
+                        <td className="font-sans text-sm text-mid-gray py-4 px-4">{unit.typology}</td>
+                        <td className="font-sans text-sm text-mid-gray py-4 px-4">
+                          {unit.outdoorSqm
+                            ? `${unit.sqm} mq int. + ${unit.outdoorSqm} mq est.`
+                            : `${unit.sqm} mq`}
+                        </td>
+                        <td className="font-sans text-sm text-mid-gray py-4 px-4">
+                          {unit.rooms ? `${unit.rooms} vani` : unit.destination ?? "—"}
+                        </td>
+                        <td className="font-sans text-sm text-charcoal font-medium py-4 px-4">{unit.price ?? "—"}</td>
+                        <td className="py-4 px-4">
+                          <span className={`inline-block font-sans text-[10px] tracking-wider uppercase px-3 py-1 border ${unitStatusConfig[unit.status].cls}`}>
+                            {unitStatusConfig[unit.status].label}
+                          </span>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+        );
+      })}
 
       {selected && <UnitDetailModal unit={selected} onClose={() => setSelected(null)} />}
     </div>

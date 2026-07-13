@@ -1,5 +1,6 @@
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import ScrollRestoration from "@/components/ScrollRestoration";
 import { getProjects } from "@/lib/data/projects";
 import { getCompanyInfoContent } from "@/lib/data/site-content";
 
@@ -14,6 +15,7 @@ export default async function PublicLayout({
 
   return (
     <>
+      <ScrollRestoration />
       <Header projects={projects} />
       <main>{children}</main>
       <Footer projects={projects} companyInfo={companyInfo} />
