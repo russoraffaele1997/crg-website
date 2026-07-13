@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { motion } from "framer-motion";
 import type { HeroContent } from "@/lib/data/site-content";
+import type { Project } from "@/lib/types/project";
 
 const container = {
   hidden: {},
@@ -13,7 +14,12 @@ const item = {
   show: { opacity: 1, y: 0, transition: { duration: 0.85, ease: [0.25, 0, 0, 1] } },
 };
 
-export default function HeroSection({ content }: { content: HeroContent }) {
+export default function HeroSection({ content, projects }: { content: HeroContent; projects: Project[] }) {
+  // Avoid listing the same project the primary CTA already links to.
+  const otherProjects = projects.filter(
+    (p) => `/progetti/${p.slug}` !== content.ctaPrimaryHref
+  );
+
   return (
     <section className="relative min-h-screen bg-charcoal flex items-center justify-center overflow-hidden">
       {/* Fine grid texture */}
@@ -77,20 +83,31 @@ export default function HeroSection({ content }: { content: HeroContent }) {
             </Link>
           </motion.div>
 
-          {/* Stats */}
-          <motion.div
-            variants={item}
-            className="mt-20 pt-10 border-t border-white/8 grid grid-cols-3 gap-8 max-w-sm mx-auto"
-          >
-            {content.stats.map((s) => (
-              <div key={s.label} className="flex flex-col items-center gap-1">
-                <span className="font-heading font-bold text-3xl text-crg-red">{s.value}</span>
-                <span className="font-sans text-[9px] tracking-widest uppercase text-white/25">
-                  {s.label}
-                </span>
-              </div>
-            ))}
-          </motion.div>
+          {/* Other projects */}
+          {otherProjects.length > 0 && (
+            <motion.div
+              variants={item}
+              className="mt-14 flex flex-wrap items-center justify-center gap-3"
+            >
+              {otherProjects.map((project) => {
+                const available = project.units.filter((u) => u.status === "available").length;
+                return (
+                  <Link
+                    key={project.id}
+                    href={`/progetti/${project.slug}`}
+                    className="flex items-center gap-2 font-sans text-[11px] tracking-[0.15em] uppercase text-white/60 hover:text-white border border-white/15 hover:border-white/40 rounded-full px-5 py-2.5 transition-colors"
+                  >
+                    Scopri {project.title}
+                    {available > 0 && (
+                      <span className="text-crg-red font-semibold">
+                        {available} disponibil{available === 1 ? "e" : "i"}
+                      </span>
+                    )}
+                  </Link>
+                );
+              })}
+            </motion.div>
+          )}
         </motion.div>
       </div>
 

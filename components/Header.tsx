@@ -14,8 +14,12 @@ export default function Header({ projects }: { projects: Project[] }) {
   const [mobileProjects, setMobileProjects] = useState(false);
   const pathname = usePathname();
 
-  // Header is "light" (dark bg) only on homepage before scroll
-  const isLight = !scrolled && pathname === "/" && !mobileOpen;
+  // Transparent-over-dark-hero treatment only makes sense on the homepage,
+  // whose hero is dark — every other page's header must stay solid, or its
+  // dark nav text disappears against that page's own (often dark) hero.
+  const isHome = pathname === "/";
+  const transparent = isHome && !scrolled && !mobileOpen;
+  const isLight = transparent;
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 60);
@@ -34,9 +38,9 @@ export default function Header({ projects }: { projects: Project[] }) {
   return (
     <header
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
-        scrolled || mobileOpen
-          ? "bg-white border-b border-border-warm shadow-sm"
-          : "bg-transparent"
+        transparent
+          ? "bg-transparent"
+          : "bg-white border-b border-border-warm shadow-sm"
       }`}
     >
       <div className="container-custom">

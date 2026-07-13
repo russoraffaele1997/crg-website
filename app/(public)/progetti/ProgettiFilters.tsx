@@ -98,7 +98,7 @@ export default function ProgettiFilters({ projects }: { projects: Project[] }) {
               <p className="font-sans text-xs text-mid-gray mb-8">
                 {filtered.length} progett{filtered.length === 1 ? "o" : "i"}
               </p>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-px bg-border-warm">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 <AnimatePresence>
                   {filtered.map((project, i) => (
                     <motion.div

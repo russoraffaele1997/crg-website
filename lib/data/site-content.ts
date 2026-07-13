@@ -37,7 +37,6 @@ export interface HeroContent {
   ctaPrimaryHref: string;
   ctaSecondaryLabel: string;
   ctaSecondaryHref: string;
-  stats: StatItem[];
 }
 export async function getHeroContent(): Promise<HeroContent> {
   return getBlockData("home", "hero");

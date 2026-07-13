@@ -48,16 +48,6 @@ export const blockDefinitions: BlockDefinition[] = [
       { key: "ctaPrimaryHref", label: "CTA primaria — link", type: "text" },
       { key: "ctaSecondaryLabel", label: "CTA secondaria — testo", type: "text" },
       { key: "ctaSecondaryHref", label: "CTA secondaria — link", type: "text" },
-      {
-        key: "stats",
-        label: "Statistiche",
-        type: "array",
-        itemLabel: "Statistica",
-        fields: [
-          { key: "value", label: "Valore", type: "text" },
-          { key: "label", label: "Etichetta", type: "text" },
-        ],
-      },
     ],
     defaultData: {
       eyebrow: "Crafted Residential Group",
@@ -69,11 +59,6 @@ export const blockDefinitions: BlockDefinition[] = [
       ctaPrimaryHref: "/progetti/palazzo-rue",
       ctaSecondaryLabel: "Prenota un appuntamento",
       ctaSecondaryHref: "/contatti",
-      stats: [
-        { value: "1", label: "Progetto" },
-        { value: "5", label: "Unità" },
-        { value: "NZEB", label: "Energetico" },
-      ],
     },
   },
   {

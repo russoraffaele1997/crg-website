@@ -42,11 +42,11 @@ export default async function HomePage() {
 
   return (
     <>
-      <HeroSection content={hero} />
+      <HeroSection content={hero} projects={featured} />
       <ConstructionParallax content={parallax} />
+      <FeaturedProjects featured={featured} />
       <WhatWeDoSection content={whatWeDo} />
       <WhyCRGSection content={whyCrg} />
-      <FeaturedProjects featured={featured} />
       <PalazzoRueSection content={palazzoRue} />
       <FinalCTA content={finalCta} />
     </>
