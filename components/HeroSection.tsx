@@ -13,6 +13,34 @@ const item = {
   show: { opacity: 1, y: 0, transition: { duration: 0.85, ease: [0.25, 0, 0, 1] } },
 };
 
+// easeInOutCubic
+function ease(t: number) {
+  return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+}
+
+function scrollToHash(href: string) {
+  const target = document.querySelector(href);
+  if (!target) return;
+
+  // A slow, eased scroll (instead of the near-instant native smooth-scroll)
+  // so the construction parallax animation in between actually gets seen
+  // rather than skipped past. A plain button (not a Link) drives this so
+  // Next.js's own hash-navigation logic never gets a chance to race it.
+  const startY = window.scrollY;
+  const targetY = target.getBoundingClientRect().top + startY;
+  const distance = targetY - startY;
+  const duration = 3200;
+  const startTime = performance.now();
+
+  function step(now: number) {
+    const elapsed = now - startTime;
+    const progress = Math.min(elapsed / duration, 1);
+    window.scrollTo(0, startY + distance * ease(progress));
+    if (progress < 1) requestAnimationFrame(step);
+  }
+  requestAnimationFrame(step);
+}
+
 export default function HeroSection({ content }: { content: HeroContent }) {
   return (
     <section className="relative min-h-screen bg-charcoal flex items-center justify-center overflow-hidden">
@@ -69,9 +97,19 @@ export default function HeroSection({ content }: { content: HeroContent }) {
             variants={item}
             className="flex flex-col sm:flex-row gap-4 justify-center"
           >
-            <Link href={content.ctaPrimaryHref} className="btn-primary">
-              {content.ctaPrimaryLabel}
-            </Link>
+            {content.ctaPrimaryHref.startsWith("#") ? (
+              <button
+                type="button"
+                onClick={() => scrollToHash(content.ctaPrimaryHref)}
+                className="btn-primary"
+              >
+                {content.ctaPrimaryLabel}
+              </button>
+            ) : (
+              <Link href={content.ctaPrimaryHref} className="btn-primary">
+                {content.ctaPrimaryLabel}
+              </Link>
+            )}
             <Link href={content.ctaSecondaryHref} className="btn-outline-light">
               {content.ctaSecondaryLabel}
             </Link>
