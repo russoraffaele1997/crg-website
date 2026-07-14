@@ -389,7 +389,7 @@ async function projectIdOfUnit(unitId: string): Promise<string> {
 export async function addUnitDocument(
   unitId: string,
   mediaId: string,
-  docType: "floorplan" | "document",
+  docType: "floorplan" | "photo",
   orderIndex: number
 ) {
   const admin = await requireContentEditor();

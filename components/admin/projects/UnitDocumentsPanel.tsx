@@ -15,7 +15,7 @@ function DocSection({
   onRemove,
 }: {
   title: string;
-  docType: "floorplan" | "document";
+  docType: "floorplan" | "photo";
   items: UnitDocument[];
   onAdd: () => void;
   onRemove: (id: string) => void;
@@ -77,7 +77,7 @@ export default function UnitDocumentsPanel({
 }) {
   const [items, setItems] = useState<UnitDocument[]>([]);
   const [loading, setLoading] = useState(true);
-  const [pickerFor, setPickerFor] = useState<"floorplan" | "document" | null>(null);
+  const [pickerFor, setPickerFor] = useState<"floorplan" | "photo" | null>(null);
 
   useEffect(() => {
     if (!open) return;
@@ -109,7 +109,7 @@ export default function UnitDocumentsPanel({
       <div className="bg-white rounded-xl w-full max-w-2xl max-h-[85vh] overflow-y-auto p-6">
         <div className="flex items-center justify-between mb-6">
           <div>
-            <h2 className="text-sm font-semibold text-slate-900">Planimetrie e documenti</h2>
+            <h2 className="text-sm font-semibold text-slate-900">Planimetria e foto</h2>
             <p className="text-xs text-slate-500 mt-0.5">{unitName}</p>
           </div>
           <button type="button" onClick={onClose} className="text-slate-400 hover:text-slate-700 p-1">
@@ -124,17 +124,17 @@ export default function UnitDocumentsPanel({
         ) : (
           <>
             <DocSection
-              title="Planimetrie"
+              title="Planimetria"
               docType="floorplan"
               items={items}
               onAdd={() => setPickerFor("floorplan")}
               onRemove={handleRemove}
             />
             <DocSection
-              title="Documenti (PDF, allegati)"
-              docType="document"
+              title="Foto appartamento (anteprima nel popup)"
+              docType="photo"
               items={items}
-              onAdd={() => setPickerFor("document")}
+              onAdd={() => setPickerFor("photo")}
               onRemove={handleRemove}
             />
           </>

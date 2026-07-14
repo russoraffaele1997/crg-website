@@ -23,6 +23,7 @@ export interface ProjectUnit {
   status: UnitStatus;
   description?: string;
   floorplans: UnitFloorplan[];
+  photos: UnitFloorplan[];
 }
 
 export interface ProjectTimelineItem {

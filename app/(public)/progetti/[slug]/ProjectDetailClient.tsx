@@ -88,6 +88,7 @@ function Timeline({ items }: { items: Project["timeline"] }) {
 function UnitDetailModal({ unit, onClose }: { unit: ProjectUnit; onClose: () => void }) {
   const images = unit.floorplans.filter((f) => f.kind === "image");
   const otherDocs = unit.floorplans.filter((f) => f.kind !== "image");
+  const photos = unit.photos.filter((p) => p.kind === "image");
 
   return (
     <div className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4" onClick={onClose}>
@@ -107,11 +108,25 @@ function UnitDetailModal({ unit, onClose }: { unit: ProjectUnit; onClose: () => 
             {unitStatusConfig[unit.status].label}
           </span>
           <h3 className="font-heading text-3xl font-bold text-charcoal mb-1">{unit.name}</h3>
-          <p className="font-sans text-sm text-mid-gray mb-8">
+          <p className="font-sans text-sm text-mid-gray mb-6">
             {unit.typology}
             {unit.floor ? ` — Piano ${unit.floor}` : ""}
             {unit.interno ? `, int. ${unit.interno}` : ""}
           </p>
+
+          {photos.length > 0 && (
+            <div className="grid grid-cols-3 gap-2 mb-8">
+              {photos.map((photo) => (
+                <ClientImage
+                  key={photo.id}
+                  src={photo.url}
+                  alt={`Foto ${unit.name}`}
+                  className="aspect-square w-full object-cover"
+                  fallbackClass="aspect-square w-full bg-light-gray"
+                />
+              ))}
+            </div>
+          )}
 
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 mb-8 pb-8 border-b border-border-warm">
             <div>

@@ -104,6 +104,15 @@ function mapProject(row: ProjectRow): Project {
           filename: d.media!.original_filename,
           kind: d.media!.kind as UnitFloorplan["kind"],
         })),
+      photos: [...u.unit_documents]
+        .filter((d) => d.doc_type === "photo" && d.media)
+        .sort((a, b) => a.order_index - b.order_index)
+        .map((d) => ({
+          id: d.id,
+          url: getPublicMediaUrl(d.media!.storage_path, d.media!.bucket),
+          filename: d.media!.original_filename,
+          kind: d.media!.kind as UnitFloorplan["kind"],
+        })),
     }));
 
   const timeline: ProjectTimelineItem[] = [...row.project_timeline_events]

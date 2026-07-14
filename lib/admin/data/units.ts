@@ -11,7 +11,7 @@ export interface UnitDocumentMedia {
 
 export interface UnitDocument {
   id: string;
-  docType: "floorplan" | "document";
+  docType: "floorplan" | "photo";
   orderIndex: number;
   media: UnitDocumentMedia | null;
 }
@@ -28,7 +28,7 @@ export async function getUnitDocuments(unitId: string): Promise<UnitDocument[]> 
 
   return (data as unknown as {
     id: string;
-    doc_type: "floorplan" | "document";
+    doc_type: "floorplan" | "photo";
     order_index: number;
     media: { id: string; storage_path: string; bucket: string; original_filename: string; kind: string } | null;
   }[]).map((row) => ({
