@@ -44,8 +44,7 @@ export const blockDefinitions: BlockDefinition[] = [
       { key: "titleLine2", label: "Titolo — riga 2 (accento rosso)", type: "text" },
       { key: "tagline", label: "Sottotitolo maiuscolo", type: "text" },
       { key: "body", label: "Testo descrittivo", type: "textarea" },
-      { key: "ctaSecondaryLabel", label: "CTA — testo", type: "text" },
-      { key: "ctaSecondaryHref", label: "CTA — link", type: "text" },
+      { key: "urgencyText", label: "Testo urgenza (sopra i pulsanti progetti)", type: "text" },
     ],
     defaultData: {
       eyebrow: "Crafted Residential Group",
@@ -53,8 +52,7 @@ export const blockDefinitions: BlockDefinition[] = [
       titleLine2: "al valore.",
       tagline: "Acquisiamo · Costruiamo · Valorizziamo",
       body: "CRG sviluppa progetti immobiliari residenziali, commerciali e industriali, trasformando aree e fabbricati in spazi moderni, efficienti e sostenibili.",
-      ctaSecondaryLabel: "Prenota un appuntamento",
-      ctaSecondaryHref: "/contatti",
+      urgencyText: "Le nostre soluzioni abitative si esauriscono rapidamente",
     },
   },
   {

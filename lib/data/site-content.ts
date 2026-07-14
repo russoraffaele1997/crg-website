@@ -33,8 +33,7 @@ export interface HeroContent {
   titleLine2: string;
   tagline: string;
   body: string;
-  ctaSecondaryLabel: string;
-  ctaSecondaryHref: string;
+  urgencyText: string;
 }
 export async function getHeroContent(): Promise<HeroContent> {
   return getBlockData("home", "hero");

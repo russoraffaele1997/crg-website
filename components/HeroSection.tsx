@@ -4,6 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { motion } from "framer-motion";
 import type { HeroContent } from "@/lib/data/site-content";
+import type { Project } from "@/lib/types/project";
 
 const container = {
   hidden: {},
@@ -14,7 +15,7 @@ const item = {
   show: { opacity: 1, y: 0, transition: { duration: 0.85, ease: [0.25, 0, 0, 1] } },
 };
 
-export default function HeroSection({ content }: { content: HeroContent }) {
+export default function HeroSection({ content, projects }: { content: HeroContent; projects: Project[] }) {
   return (
     <section className="relative min-h-screen bg-charcoal flex items-center justify-center overflow-hidden">
       {/* Background photo */}
@@ -90,13 +91,30 @@ export default function HeroSection({ content }: { content: HeroContent }) {
             {content.body}
           </motion.p>
 
+          <motion.p
+            variants={item}
+            className="font-sans text-xs tracking-[0.1em] uppercase text-crg-red mb-6"
+          >
+            {content.urgencyText}
+          </motion.p>
+
           <motion.div
             variants={item}
-            className="flex flex-col sm:flex-row gap-4 justify-center"
+            className="flex flex-col items-center gap-4"
           >
-            <Link href={content.ctaSecondaryHref} className="btn-outline-light">
-              {content.ctaSecondaryLabel}
-            </Link>
+            {projects.map((project) => {
+              const available = project.units.filter((u) => u.status === "available").length;
+              return (
+                <div key={project.id} className="flex flex-col sm:flex-row items-center gap-3">
+                  <Link href={`/progetti/${project.slug}`} className="btn-outline-light">
+                    {project.title}
+                  </Link>
+                  <span className="font-sans text-xs text-white/50">
+                    {available} su {project.units.length} disponibili
+                  </span>
+                </div>
+              );
+            })}
           </motion.div>
         </motion.div>
       </div>
