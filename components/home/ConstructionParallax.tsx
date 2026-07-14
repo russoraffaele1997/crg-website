@@ -85,13 +85,17 @@ function PhaseText({
       style={{ opacity, y }}
       className="absolute left-6 md:left-14 top-1/2 -translate-y-1/2 max-w-xs md:max-w-sm pointer-events-none"
     >
+      {/* Backdrop so the text stays readable whether it lands over the light
+          sky or the dark building/window elements behind it. */}
+      <div className="absolute -inset-x-4 -inset-y-5 bg-white/75 backdrop-blur-sm -z-10" />
+
       <span className="block font-sans text-[9px] md:text-[10px] tracking-[0.42em] uppercase text-crg-red mb-4 md:mb-5">
         {phase.tag}
       </span>
-      <h2 className="font-heading text-3xl md:text-5xl font-bold text-white leading-tight whitespace-pre-line mb-4">
+      <h2 className="font-heading text-3xl md:text-5xl font-bold text-charcoal leading-tight whitespace-pre-line mb-4">
         {phase.title}
       </h2>
-      <p className="font-sans text-xs md:text-sm text-white/40 leading-relaxed hidden md:block">
+      <p className="font-sans text-xs md:text-sm text-mid-gray leading-relaxed hidden md:block">
         {phase.sub}
       </p>
     </motion.div>
@@ -172,7 +176,7 @@ export default function ConstructionParallax({ content }: { content: Constructio
       className="relative"
       style={{ height: `${phases.length * 100}vh` }}
     >
-      <div className="sticky top-0 h-screen overflow-hidden" style={{ background: "#0C0C10" }}>
+      <div className="sticky top-0 h-screen overflow-hidden" style={{ background: "#FFFFFF" }}>
 
         {/* ── SVG Scene ──────────────────────────────────────────────────── */}
         <svg
@@ -184,15 +188,15 @@ export default function ConstructionParallax({ content }: { content: Constructio
           <defs>
             {/* Sky gradient */}
             <linearGradient id="cp-sky" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%"   stopColor="#0A0A0F" />
-              <stop offset="60%"  stopColor="#111118" />
-              <stop offset="100%" stopColor="#16161E" />
+              <stop offset="0%"   stopColor="#FFFFFF" />
+              <stop offset="60%"  stopColor="#FAFAFA" />
+              <stop offset="100%" stopColor="#F3F3F3" />
             </linearGradient>
 
             {/* Ground gradient */}
             <linearGradient id="cp-ground" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%"   stopColor="#131316" />
-              <stop offset="100%" stopColor="#0A0A0C" />
+              <stop offset="0%"   stopColor="#EDEDED" />
+              <stop offset="100%" stopColor="#E2E2E2" />
             </linearGradient>
 
             {/* Window glow gradient (lit) */}
@@ -214,10 +218,10 @@ export default function ConstructionParallax({ content }: { content: Constructio
           {/* ── Background sky ──────────────────────────────────── */}
           <rect x="0" y="0" width={SCENE.W} height={SCENE.H} fill="url(#cp-sky)" />
 
-          {/* Subtle ambient lightening (mid phases) */}
+          {/* Subtle ambient warmth (mid phases) */}
           <motion.rect
             x="0" y="0" width={SCENE.W} height={GROUND}
-            fill="#1A2030"
+            fill="#FDF2F4"
             style={{ opacity: skyTopOpacity }}
           />
 
@@ -229,7 +233,7 @@ export default function ConstructionParallax({ content }: { content: Constructio
                 cx={col * 65 + 32}
                 cy={row * 55 + 20}
                 r={0.7}
-                fill="rgba(255,255,255,0.06)"
+                fill="rgba(26,26,26,0.08)"
               />
             ))
           )}
@@ -244,8 +248,8 @@ export default function ConstructionParallax({ content }: { content: Constructio
           <rect x="0" y={GROUND} width={SCENE.W} height={SCENE.H - GROUND} fill="url(#cp-ground)" />
 
           {/* Ground texture lines */}
-          <line x1="0" y1={GROUND + 18} x2={SCENE.W} y2={GROUND + 18} stroke="#1C1C20" strokeWidth="1" />
-          <line x1="0" y1={GROUND + 40} x2={SCENE.W} y2={GROUND + 40} stroke="#181818" strokeWidth="1" />
+          <line x1="0" y1={GROUND + 18} x2={SCENE.W} y2={GROUND + 18} stroke="#D8D8D8" strokeWidth="1" />
+          <line x1="0" y1={GROUND + 40} x2={SCENE.W} y2={GROUND + 40} stroke="#CCCCCC" strokeWidth="1" />
 
           {/* ── Survey / planning grid ──────────────────────────── */}
           <motion.g style={{ opacity: gridOpacity }}>
@@ -431,36 +435,36 @@ export default function ConstructionParallax({ content }: { content: Constructio
             {[B.x - 55, B.x - 85, B.x - 30].map((tx, i) => (
               <g key={i}>
                 <rect x={tx + 6} y={GROUND - 22} width="4" height="22"
-                      fill="#1A1A20" />
+                      fill="#8A7256" />
                 <ellipse cx={tx + 8} cy={GROUND - 26} rx={12 - i * 2} ry={20 - i * 2}
-                         fill="#18201A" stroke="#222A22" strokeWidth="0.8" />
+                         fill="#5B7A5B" stroke="#4A6549" strokeWidth="0.8" />
               </g>
             ))}
             {/* Right tree group */}
             {[B.x + B.w + 30, B.x + B.w + 55, B.x + B.w + 80].map((tx, i) => (
               <g key={i}>
                 <rect x={tx + 6} y={GROUND - 22} width="4" height="22"
-                      fill="#1A1A20" />
+                      fill="#8A7256" />
                 <ellipse cx={tx + 8} cy={GROUND - 26} rx={14 - i * 2} ry={22 - i * 2}
-                         fill="#18201A" stroke="#222A22" strokeWidth="0.8" />
+                         fill="#5B7A5B" stroke="#4A6549" strokeWidth="0.8" />
               </g>
             ))}
             {/* Entrance plaza */}
             <rect x={B.x + B.w / 2 - 40} y={GROUND} width="80" height="6"
-                  fill="#1C1C22" />
+                  fill="#D8D8D8" />
             {/* Red entrance accent line */}
             <line x1={B.x} y1={GROUND} x2={B.x + B.w} y2={GROUND}
                   stroke="#C8102E" strokeWidth="1.5" strokeOpacity="0.5" />
           </motion.g>
 
           {/* ── Distant building silhouettes (depth) ─────────────── */}
-          <rect x="80"  y={GROUND - 95}  width="55" height="95"  fill="#111115" />
-          <rect x="100" y={GROUND - 130} width="20" height="130" fill="#0F0F13" />
-          <rect x="160" y={GROUND - 75}  width="40" height="75"  fill="#111115" />
-          <rect x="870" y={GROUND - 110} width="60" height="110" fill="#111115" />
-          <rect x="950" y={GROUND - 80}  width="45" height="80"  fill="#111115" />
-          <rect x="1030" y={GROUND - 140} width="30" height="140" fill="#0F0F13" />
-          <rect x="1070" y={GROUND - 65}  width="50" height="65"  fill="#111115" />
+          <rect x="80"  y={GROUND - 95}  width="55" height="95"  fill="#D4D4D4" />
+          <rect x="100" y={GROUND - 130} width="20" height="130" fill="#C8C8C8" />
+          <rect x="160" y={GROUND - 75}  width="40" height="75"  fill="#D4D4D4" />
+          <rect x="870" y={GROUND - 110} width="60" height="110" fill="#D4D4D4" />
+          <rect x="950" y={GROUND - 80}  width="45" height="80"  fill="#D4D4D4" />
+          <rect x="1030" y={GROUND - 140} width="30" height="140" fill="#C8C8C8" />
+          <rect x="1070" y={GROUND - 65}  width="50" height="65"  fill="#D4D4D4" />
 
           {/* ── Right-side vertical measurement line ─────────────── */}
           <motion.g style={{ opacity: useTransform(scrollYProgress, [0.35, 0.55, 0.85, 0.95], [0, 0.6, 0.6, 0]) }}>
@@ -502,10 +506,10 @@ export default function ConstructionParallax({ content }: { content: Constructio
             transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
             className="flex flex-col items-center gap-2"
           >
-            <span className="font-sans text-[9px] tracking-[0.42em] uppercase text-white/25">
+            <span className="font-sans text-[9px] tracking-[0.42em] uppercase text-mid-gray/70">
               Scorri
             </span>
-            <div className="w-px h-10 bg-gradient-to-b from-white/20 to-transparent" />
+            <div className="w-px h-10 bg-gradient-to-b from-charcoal/20 to-transparent" />
           </motion.div>
         </motion.div>
 
