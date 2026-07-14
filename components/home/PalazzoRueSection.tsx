@@ -10,7 +10,7 @@ export default function PalazzoRueSection({ content }: { content: PalazzoRueSpot
   const inView = useInView(ref, { once: true, margin: "-80px" });
 
   return (
-    <section className="py-28 lg:py-40 bg-anthracite overflow-hidden" ref={ref}>
+    <section className="py-28 lg:py-40 bg-white overflow-hidden" ref={ref}>
       <div className="container-custom">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 items-center">
 
@@ -22,15 +22,15 @@ export default function PalazzoRueSection({ content }: { content: PalazzoRueSpot
             transition={{ duration: 0.8 }}
           >
             <span className="section-label block mb-6">{content.eyebrow}</span>
-            <h2 className="font-heading font-bold text-[46px] md:text-[58px] text-white leading-[1.04] mb-6">
+            <h2 className="font-heading font-bold text-[46px] md:text-[58px] text-charcoal leading-[1.04] mb-6">
               {content.titleLine1}
               <br />
               <span className="text-crg-red">{content.titleLine2}</span>
             </h2>
-            <p className="font-sans text-[15px] text-white/45 leading-relaxed mb-4 max-w-md">
+            <p className="font-sans text-[15px] text-mid-gray leading-relaxed mb-4 max-w-md">
               {content.paragraph1}
             </p>
-            <p className="font-sans text-[15px] text-white/45 leading-relaxed mb-10 max-w-md">
+            <p className="font-sans text-[15px] text-mid-gray leading-relaxed mb-10 max-w-md">
               {content.paragraph2}
             </p>
 
@@ -38,7 +38,7 @@ export default function PalazzoRueSection({ content }: { content: PalazzoRueSpot
               <Link href={content.ctaPrimaryHref} className="btn-primary">
                 {content.ctaPrimaryLabel}
               </Link>
-              <Link href="/contatti" className="btn-outline-light">
+              <Link href="/contatti" className="btn-outline">
                 {content.ctaSecondaryLabel}
               </Link>
             </div>
@@ -55,14 +55,14 @@ export default function PalazzoRueSection({ content }: { content: PalazzoRueSpot
               {/* Accent line */}
               <div className="absolute top-0 left-0 w-12 h-[3px] bg-crg-red" />
 
-              <div className="border border-white/10 p-10 pt-12 bg-charcoal/60">
+              <div className="border border-white/10 p-10 pt-12 bg-charcoal">
                 <p className="font-sans text-[10px] tracking-[0.4em] uppercase text-crg-red mb-8">
                   {content.badge}
                 </p>
 
                 <div className="grid grid-cols-2 gap-px bg-white/8">
                   {content.specs.map((s, i) => (
-                    <div key={i} className="bg-charcoal/60 p-6">
+                    <div key={i} className="bg-charcoal p-6">
                       <div className="font-heading font-bold text-4xl text-white mb-1">
                         {s.value}
                       </div>

@@ -8,50 +8,25 @@ import { motion, AnimatePresence } from "framer-motion";
 import type { Project } from "@/lib/types/project";
 
 export default function Header({ projects }: { projects: Project[] }) {
-  const [scrolled, setScrolled]           = useState(false);
   const [mobileOpen, setMobileOpen]       = useState(false);
   const [dropdownOpen, setDropdownOpen]   = useState(false);
   const [mobileProjects, setMobileProjects] = useState(false);
   const pathname = usePathname();
 
-  // Transparent-over-dark-hero treatment only makes sense on the homepage,
-  // whose hero is dark — every other page's header must stay solid, or its
-  // dark nav text disappears against that page's own (often dark) hero.
-  const isHome = pathname === "/";
-  const transparent = isHome && !scrolled && !mobileOpen;
-  const isLight = transparent;
-
-  useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 60);
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
-
   useEffect(() => { setMobileOpen(false); }, [pathname]);
 
   const navBase =
     "font-sans text-[11px] tracking-[0.22em] uppercase transition-colors duration-300";
-  const navColor = isLight
-    ? "text-white/70 hover:text-white"
-    : "text-charcoal hover:text-crg-red";
+  const navColor = "text-charcoal hover:text-crg-red";
 
   return (
-    <header
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
-        transparent
-          ? "bg-transparent"
-          : "bg-white border-b border-border-warm shadow-sm"
-      }`}
-    >
+    <header className="fixed top-0 left-0 right-0 z-50 bg-white border-b border-border-warm shadow-sm">
       <div className="container-custom">
         <div className="flex items-center justify-between h-[72px]">
 
           {/* ── Logo ─────────────────────────────────────────────────── */}
           <Link href="/" className="flex items-center group">
-            <div className={`
-              transition-all duration-300 rounded px-2 py-1.5 -mx-2 -my-1.5
-              ${isLight ? "hover:bg-white/10" : "hover:bg-black/5"}
-            `}>
+            <div className="transition-all duration-300 rounded px-2 py-1.5 -mx-2 -my-1.5 hover:bg-black/5">
               <Image
                 src="/logo-crg.png"
                 alt="CRG | Crafted Residential Group"
@@ -158,9 +133,7 @@ export default function Header({ projects }: { projects: Project[] }) {
                     : mobileOpen ? { rotate: -45, y: -7 } : { rotate: 0, y: 0 }
                 }
                 transition={{ duration: 0.25 }}
-                className={`block w-5 h-px transition-colors ${
-                  isLight ? "bg-white" : "bg-charcoal"
-                }`}
+                className="block w-5 h-px transition-colors bg-charcoal"
               />
             ))}
           </button>

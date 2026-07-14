@@ -10,13 +10,13 @@ export default function FinalCTA({ content }: { content: FinalCtaContent }) {
   const inView = useInView(ref, { once: true, margin: "-80px" });
 
   return (
-    <section className="py-28 lg:py-40 bg-charcoal relative overflow-hidden" ref={ref}>
+    <section className="py-28 lg:py-40 bg-white relative overflow-hidden" ref={ref}>
       {/* Top accent line */}
       <div className="absolute top-0 left-0 right-0 h-[2px] bg-crg-red" />
 
       {/* Decorative CRG mark */}
       <div className="absolute inset-0 flex items-center justify-center pointer-events-none select-none" aria-hidden="true">
-        <span className="font-heading font-bold text-[28vw] text-white/[0.025] leading-none">
+        <span className="font-heading font-bold text-[28vw] text-charcoal/[0.03] leading-none">
           CRG
         </span>
       </div>
@@ -28,10 +28,10 @@ export default function FinalCTA({ content }: { content: FinalCtaContent }) {
           transition={{ duration: 0.8 }}
         >
           <span className="section-label block mb-6">{content.eyebrow}</span>
-          <h2 className="section-title-light max-w-3xl mx-auto mb-6">
+          <h2 className="section-title max-w-3xl mx-auto mb-6">
             {content.title}
           </h2>
-          <p className="font-sans text-sm text-white/35 max-w-lg mx-auto mb-12">
+          <p className="font-sans text-sm text-mid-gray max-w-lg mx-auto mb-12">
             {content.body}
           </p>
           <Link href="/contatti" className="btn-primary">

@@ -31,7 +31,7 @@ export default function WhatWeDoSection({ content }: { content: WhatWeDoContent 
   const inView = useInView(ref, { once: true, margin: "-100px" });
 
   return (
-    <section className="py-28 lg:py-36 bg-cream" ref={ref}>
+    <section className="py-28 lg:py-36 bg-white" ref={ref}>
       <div className="container-custom">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -52,7 +52,7 @@ export default function WhatWeDoSection({ content }: { content: WhatWeDoContent 
               initial={{ opacity: 0, y: 30 }}
               animate={inView ? { opacity: 1, y: 0 } : {}}
               transition={{ duration: 0.6, delay: index * 0.14 }}
-              className="bg-cream p-10 group hover:bg-crg-red-light transition-colors duration-500"
+              className="bg-white p-10 group hover:bg-crg-red-light transition-colors duration-500"
             >
               <div className="text-mid-gray group-hover:text-crg-red transition-colors duration-300 mb-8">
                 {icons[index]}
