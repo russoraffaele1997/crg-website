@@ -372,7 +372,7 @@ export const blockDefinitions: BlockDefinition[] = [
     defaultData: {
       brandDescription: "Sviluppo immobiliare residenziale, commerciale e industriale. Trasformiamo aree e fabbricati in spazi moderni, efficienti e sostenibili.",
       address: "Via Traversa Michelangelo, 66 — 80026 Casoria, NA",
-      email: "crgsrl2025@gmail.com",
+      email: "clienti@crgcostruzioni.it",
       phone: "+39 331 836 4042",
       hoursWeekday: "Lun – Ven: 9:00 – 18:00",
       hoursSaturday: "Sab: 9:00 – 13:00",

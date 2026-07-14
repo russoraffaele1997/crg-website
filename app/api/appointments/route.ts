@@ -1,4 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
+import { Resend } from "resend";
+import { createServiceClient } from "@/lib/supabase/service";
+
+const LEADS_EMAIL = "clienti@crgcostruzioni.it";
 
 interface AppointmentPayload {
   type?: "contact" | "appointment";
@@ -18,6 +22,10 @@ interface AppointmentPayload {
 
 function validateEmail(email: string): boolean {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+}
+
+function escapeHtml(value: string): string {
+  return value.replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]!));
 }
 
 export async function POST(request: NextRequest) {
@@ -45,28 +53,72 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Il consenso alla privacy è obbligatorio." }, { status: 422 });
   }
 
-  // ─── Log the request ───────────────────────────────────────────────────────
-  // In produzione: collegare a email (Nodemailer/Resend), CRM (HubSpot/Pipedrive),
-  // database (Prisma/Drizzle) o webhook esterno.
-  console.log("[CRG] Nuova richiesta ricevuta:", {
-    type: body.type ?? "appointment",
-    name: `${firstName} ${lastName}`,
-    email,
-    phone: body.phone,
-    projectId: body.projectId,
-    projectTitle: body.projectTitle,
-    unitId: body.unitId,
-    preferredDay: body.preferredDay,
-    preferredTime: body.preferredTime,
-    subject: body.subject,
-    message: body.message,
-    timestamp: new Date().toISOString(),
+  const type = body.type ?? "appointment";
+
+  // ─── Persist the lead ───────────────────────────────────────────────────
+  // unitId sent by the form is the unit's public-facing code (e.g. "A01"),
+  // not its database UUID, so it can't go straight into the unit_id FK —
+  // fold it into the message instead rather than risk an insert failure.
+  const service = createServiceClient();
+  const messageWithUnit = body.unitId
+    ? `Unità di interesse: ${body.unitId}\n\n${body.message ?? ""}`.trim()
+    : body.message ?? null;
+
+  const { error: insertError } = await service.from("lead_submissions").insert({
+    type,
+    first_name: firstName.trim(),
+    last_name: lastName.trim(),
+    email: email.trim(),
+    phone: body.phone || null,
+    project_id: body.projectId || null,
+    preferred_day: body.preferredDay || null,
+    preferred_time: body.preferredTime || null,
+    subject: body.subject || null,
+    message: messageWithUnit,
+    privacy_accepted: privacy,
   });
 
-  // ─── Future integration points ─────────────────────────────────────────────
-  // await sendEmailNotification(body);      // es. Resend / Nodemailer
-  // await saveToCRM(body);                  // es. HubSpot API
-  // await saveToDatabase(body);             // es. Prisma + PostgreSQL
+  if (insertError) {
+    console.error("[CRG] Errore salvataggio richiesta:", insertError.message);
+  }
+
+  // ─── Send the notification email ───────────────────────────────────────
+  if (process.env.RESEND_API_KEY) {
+    try {
+      const resend = new Resend(process.env.RESEND_API_KEY);
+      const rows: [string, string | undefined][] = [
+        ["Tipo", type === "contact" ? "Contatto" : "Appuntamento"],
+        ["Nome", `${firstName} ${lastName}`],
+        ["Email", email],
+        ["Telefono", body.phone],
+        ["Progetto", body.projectTitle],
+        ["Unità", body.unitId],
+        ["Giorno preferito", body.preferredDay],
+        ["Fascia oraria", body.preferredTime],
+        ["Oggetto", body.subject],
+        ["Messaggio", body.message],
+      ];
+      const htmlRows = rows
+        .filter(([, value]) => value)
+        .map(([label, value]) => `<tr><td style="padding:4px 12px 4px 0;color:#6B6B6B;white-space:nowrap">${label}</td><td style="padding:4px 0">${escapeHtml(String(value)).replace(/\n/g, "<br>")}</td></tr>`)
+        .join("");
+
+      const { error: sendError } = await resend.emails.send({
+        from: process.env.RESEND_FROM_EMAIL || "CRG Website <onboarding@resend.dev>",
+        to: LEADS_EMAIL,
+        replyTo: email,
+        subject: `Nuova richiesta dal sito — ${type === "contact" ? "Contatto" : "Appuntamento"} — ${firstName} ${lastName}`,
+        html: `<table style="font-family:sans-serif;font-size:14px">${htmlRows}</table>`,
+      });
+      if (sendError) {
+        console.error("[CRG] Errore invio email:", sendError.message);
+      }
+    } catch (err) {
+      console.error("[CRG] Errore invio email:", err instanceof Error ? err.message : err);
+    }
+  } else {
+    console.warn("[CRG] RESEND_API_KEY non configurata — email non inviata.");
+  }
 
   return NextResponse.json(
     { success: true, message: "Richiesta ricevuta correttamente." },
