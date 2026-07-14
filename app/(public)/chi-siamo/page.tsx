@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import {
   getAboutHeroContent,
   getAboutMissionContent,
@@ -50,14 +51,18 @@ export default async function ChiSiamoPage() {
         <div className="container-custom">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 items-center">
             <div className="lg:col-span-5">
-              <div className="aspect-[4/5] bg-gradient-to-br from-stone-200 to-stone-400 relative overflow-hidden">
-                <div className="absolute inset-4 border border-charcoal/10" />
-                <div className="absolute top-8 left-8">
+              <div className="aspect-[3/2] relative overflow-hidden">
+                <Image
+                  src="/team-crg.jpg"
+                  alt="Il team di CRG | Crafted Residential Group"
+                  fill
+                  sizes="(min-width: 1024px) 40vw, 90vw"
+                  className="object-cover"
+                />
+                <div className="absolute inset-4 border border-charcoal/10 pointer-events-none" />
+                <div className="absolute top-8 left-8 pointer-events-none">
                   <div className="w-12 h-1 bg-crg-red mb-2" />
                   <div className="w-6 h-1 bg-crg-red/40" />
-                </div>
-                <div className="absolute bottom-10 left-10 right-10">
-                  <div className="font-heading font-bold text-6xl text-white/20">CRG</div>
                 </div>
               </div>
             </div>
