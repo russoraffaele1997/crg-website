@@ -238,7 +238,13 @@ function UnitsTable({ units }: { units: ProjectUnit[] }) {
   }
   groups.sort((a, b) => floorSortKey(a[0]) - floorSortKey(b[0]));
 
-  const [expanded, setExpanded] = useState<Set<string>>(() => new Set(groups[0] ? [groups[0][0]] : []));
+  // Prefer opening the first floor that still has availability; if every
+  // floor is sold out, fall back to the first floor group.
+  const defaultOpenFloor =
+    groups.find(([, floorUnits]) => floorUnits.some((u) => u.status === "available"))?.[0] ??
+    groups[0]?.[0];
+
+  const [expanded, setExpanded] = useState<Set<string>>(() => new Set(defaultOpenFloor ? [defaultOpenFloor] : []));
   const [selected, setSelected] = useState<ProjectUnit | null>(null);
 
   const toggle = (floor: string) => {
@@ -254,6 +260,8 @@ function UnitsTable({ units }: { units: ProjectUnit[] }) {
     <div className="border-t border-border-warm">
       {groups.map(([floor, floorUnits]) => {
         const available = floorUnits.filter((u) => u.status === "available").length;
+        const total = floorUnits.length;
+        const isFull = available === 0;
         const isOpen = expanded.has(floor);
 
         return (
@@ -272,10 +280,10 @@ function UnitsTable({ units }: { units: ProjectUnit[] }) {
                   <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
                 </svg>
                 <span className="font-heading text-lg font-bold text-charcoal">{floor}</span>
+                <span className={`font-sans text-[11px] tracking-wider uppercase font-semibold ${isFull ? "text-red-600" : "text-emerald-700"}`}>
+                  {isFull ? `Completo ${total}/${total}` : `Disponibile ${available}/${total}`}
+                </span>
               </div>
-              <span className="font-sans text-[11px] tracking-wider uppercase text-mid-gray shrink-0">
-                {available} su {floorUnits.length} disponibil{available === 1 ? "e" : "i"}
-              </span>
             </button>
 
             {isOpen && (
