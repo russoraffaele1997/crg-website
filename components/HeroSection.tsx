@@ -106,7 +106,7 @@ export default function HeroSection({ content, projects }: { content: HeroConten
               const available = project.units.filter((u) => u.status === "available").length;
               return (
                 <div key={project.id} className="flex flex-col sm:flex-row items-center gap-3">
-                  <Link href={`/progetti/${project.slug}`} className="btn-outline-light">
+                  <Link href={`/progetti/${project.slug}`} className="btn-outline-light w-64">
                     {project.title}
                   </Link>
                   <span className="font-sans text-xs text-white/50">
