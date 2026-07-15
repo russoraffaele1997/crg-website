@@ -55,6 +55,8 @@ export interface AdminProjectDetail {
   description: string;
   isFeatured: boolean;
   featuredOrder: number | null;
+  isSpotlight: boolean;
+  spotlightSpecs: { label: string; value: string }[];
   publishStatus: string;
   seoMetaId: string | null;
   seoMetaTitle: string;
@@ -106,7 +108,8 @@ export async function getAdminProjectById(id: string): Promise<AdminProjectDetai
     .from("projects")
     .select(`
       id, slug, title, location, category, status, status_label,
-      short_description, description, is_featured, featured_order, publish_status,
+      short_description, description, is_featured, featured_order,
+      is_spotlight, spotlight_specs, publish_status,
       seo_meta_id, seo_meta:seo_meta_id(meta_title, meta_description, og_title, og_description),
       cover_media:media_library!cover_image_id(id, storage_path, bucket, original_filename, kind),
       project_gallery_images(id, order_index, media:media_library(id, storage_path, bucket, original_filename, kind)),
@@ -131,6 +134,8 @@ export async function getAdminProjectById(id: string): Promise<AdminProjectDetai
     description: string;
     is_featured: boolean;
     featured_order: number | null;
+    is_spotlight: boolean;
+    spotlight_specs: { label: string; value: string }[] | null;
     publish_status: string;
     seo_meta_id: string | null;
     seo_meta: { meta_title: string | null; meta_description: string | null; og_title: string | null; og_description: string | null } | null;
@@ -158,6 +163,8 @@ export async function getAdminProjectById(id: string): Promise<AdminProjectDetai
     description: row.description,
     isFeatured: row.is_featured,
     featuredOrder: row.featured_order,
+    isSpotlight: row.is_spotlight,
+    spotlightSpecs: row.spotlight_specs ?? [],
     publishStatus: row.publish_status,
     seoMetaId: row.seo_meta_id,
     seoMetaTitle: row.seo_meta?.meta_title ?? "",

@@ -42,6 +42,8 @@ export interface ProjectGeneralInput {
   coverImageId: string | null;
   isFeatured: boolean;
   featuredOrder: number | null;
+  isSpotlight: boolean;
+  spotlightSpecs: { label: string; value: string }[];
   publishStatus: "draft" | "published" | "archived";
   seoMetaTitle: string;
   seoMetaDescription: string;
@@ -51,6 +53,15 @@ export interface ProjectGeneralInput {
 
 function slugFromTitle(title: string) {
   return slugify(title, { lower: true, strict: true, locale: "it" });
+}
+
+/** Only one project can be the homepage spotlight — enforced by a DB unique
+ * index too, so any other row must be cleared before this one is set. */
+async function clearOtherSpotlights(exceptId: string | null) {
+  const service = createServiceClient();
+  let query = service.from("projects").update({ is_spotlight: false }).eq("is_spotlight", true);
+  if (exceptId) query = query.neq("id", exceptId);
+  await query;
 }
 
 export async function suggestProjectSlug(title: string) {
@@ -63,6 +74,8 @@ export async function createProject(input: ProjectGeneralInput): Promise<{ id: s
   const service = createServiceClient();
 
   const seoMetaId = await upsertSeoMeta(null, input);
+
+  if (input.isSpotlight) await clearOtherSpotlights(null);
 
   const { data, error } = await service
     .from("projects")
@@ -78,6 +91,8 @@ export async function createProject(input: ProjectGeneralInput): Promise<{ id: s
       cover_image_id: input.coverImageId,
       is_featured: input.isFeatured,
       featured_order: input.featuredOrder,
+      is_spotlight: input.isSpotlight,
+      spotlight_specs: input.spotlightSpecs,
       publish_status: resolvePublishStatus(admin, input.publishStatus),
       seo_meta_id: seoMetaId,
       created_by: admin.id,
@@ -101,6 +116,8 @@ export async function updateProjectGeneral(id: string, input: ProjectGeneralInpu
   const { data: existing } = await service.from("projects").select("seo_meta_id").eq("id", id).single();
   const seoMetaId = await upsertSeoMeta(existing?.seo_meta_id ?? null, input);
 
+  if (input.isSpotlight) await clearOtherSpotlights(id);
+
   const { error } = await service
     .from("projects")
     .update({
@@ -115,6 +132,8 @@ export async function updateProjectGeneral(id: string, input: ProjectGeneralInpu
       cover_image_id: input.coverImageId,
       is_featured: input.isFeatured,
       featured_order: input.featuredOrder,
+      is_spotlight: input.isSpotlight,
+      spotlight_specs: input.spotlightSpecs,
       publish_status: resolvePublishStatus(admin, input.publishStatus),
       seo_meta_id: seoMetaId,
     })

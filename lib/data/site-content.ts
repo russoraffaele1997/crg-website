@@ -67,24 +67,6 @@ export async function getWhyCrgContent(): Promise<WhyCrgContent> {
   return getBlockData("home", "why_crg");
 }
 
-export interface PalazzoRueSpotlightContent {
-  eyebrow: string;
-  titleLine1: string;
-  titleLine2: string;
-  paragraph1: string;
-  paragraph2: string;
-  ctaPrimaryLabel: string;
-  ctaPrimaryHref: string;
-  ctaSecondaryLabel: string;
-  badge: string;
-  specs: StatItem[];
-  availabilityLabel: string;
-  availabilityNote: string;
-}
-export async function getPalazzoRueSpotlightContent(): Promise<PalazzoRueSpotlightContent> {
-  return getBlockData("home", "palazzo_rue_spotlight");
-}
-
 export interface FinalCtaContent {
   eyebrow: string;
   title: string;

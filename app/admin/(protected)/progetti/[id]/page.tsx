@@ -26,6 +26,8 @@ export default async function ProjectGeneralPage({
         description: project.description,
         isFeatured: project.isFeatured,
         featuredOrder: project.featuredOrder,
+        isSpotlight: project.isSpotlight,
+        spotlightSpecs: project.spotlightSpecs,
         publishStatus: project.publishStatus as "draft" | "published" | "archived",
         seoMetaTitle: project.seoMetaTitle,
         seoMetaDescription: project.seoMetaDescription,

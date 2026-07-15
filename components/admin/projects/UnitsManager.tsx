@@ -23,6 +23,39 @@ interface Unit {
   description: string | null;
 }
 
+const typologyOptions = ["Appartamento", "Attico", "Attico e Superattico", "ERS", "Locale commerciale"];
+const floorOptions = ["Piano Terra", ...Array.from({ length: 15 }, (_, i) => `Piano ${i + 1}`)];
+const roomsOptions = ["1", "2", "3", "4", "5", "6"];
+
+/** Dropdown that still shows the currently stored value even if it predates
+ * this preset list (e.g. legacy free-text data), instead of silently
+ * discarding it. */
+function PresetSelect({
+  value,
+  onChange,
+  options,
+  placeholder,
+}: {
+  value: string;
+  onChange: (v: string) => void;
+  options: string[];
+  placeholder: string;
+}) {
+  const allOptions = value && !options.includes(value) ? [value, ...options] : options;
+  return (
+    <select
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+      className="border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-crg-red bg-white"
+    >
+      <option value="">{placeholder}</option>
+      {allOptions.map((o) => (
+        <option key={o} value={o}>{o}</option>
+      ))}
+    </select>
+  );
+}
+
 const emptyForm: UnitInput = {
   unitCode: "",
   name: "",
@@ -51,12 +84,12 @@ function UnitFields({
     <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
       <input placeholder="Codice (A01)" value={value.unitCode} onChange={(e) => set("unitCode", e.target.value)} className="border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-crg-red" />
       <input placeholder="Nome" value={value.name} onChange={(e) => set("name", e.target.value)} className="border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-crg-red" />
-      <input placeholder="Tipologia" value={value.typology} onChange={(e) => set("typology", e.target.value)} className="border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-crg-red" />
-      <input placeholder="Piano" value={value.floor} onChange={(e) => set("floor", e.target.value)} className="border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-crg-red" />
+      <PresetSelect value={value.typology} onChange={(v) => set("typology", v)} options={typologyOptions} placeholder="Tipologia" />
+      <PresetSelect value={value.floor} onChange={(v) => set("floor", v)} options={floorOptions} placeholder="Piano" />
       <input placeholder="Interno" value={value.interno} onChange={(e) => set("interno", e.target.value)} className="border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-crg-red" />
       <input type="number" placeholder="Mq" value={value.sqm || ""} onChange={(e) => set("sqm", Number(e.target.value))} className="border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-crg-red" />
       <input type="number" placeholder="Mq esterni" value={value.outdoorSqm ?? ""} onChange={(e) => set("outdoorSqm", e.target.value ? Number(e.target.value) : null)} className="border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-crg-red" />
-      <input placeholder="Vani" value={value.rooms} onChange={(e) => set("rooms", e.target.value)} className="border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-crg-red" />
+      <PresetSelect value={value.rooms} onChange={(v) => set("rooms", v)} options={roomsOptions} placeholder="Vani" />
       <input placeholder="Destinazione" value={value.destination} onChange={(e) => set("destination", e.target.value)} className="border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-crg-red" />
       <input placeholder="Prezzo" value={value.price} onChange={(e) => set("price", e.target.value)} className="border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-crg-red" />
       <textarea

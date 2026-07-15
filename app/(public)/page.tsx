@@ -6,15 +6,14 @@ import ConstructionParallax from "@/components/home/ConstructionParallax";
 import WhatWeDoSection from "@/components/WhatWeDoSection";
 import WhyCRGSection from "@/components/WhyCRGSection";
 import FeaturedProjects from "@/components/FeaturedProjects";
-import PalazzoRueSection from "@/components/home/PalazzoRueSection";
+import ProjectSpotlightSection from "@/components/home/ProjectSpotlightSection";
 import FinalCTA from "@/components/FinalCTA";
-import { getFeaturedProjects } from "@/lib/data/projects";
+import { getFeaturedProjects, getSpotlightProject } from "@/lib/data/projects";
 import {
   getHeroContent,
   getConstructionParallaxContent,
   getWhatWeDoContent,
   getWhyCrgContent,
-  getPalazzoRueSpotlightContent,
   getHomeFinalCtaContent,
 } from "@/lib/data/site-content";
 
@@ -30,13 +29,13 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function HomePage() {
-  const [featured, hero, parallax, whatWeDo, whyCrg, palazzoRue, finalCta] = await Promise.all([
+  const [featured, hero, parallax, whatWeDo, whyCrg, spotlightProject, finalCta] = await Promise.all([
     getFeaturedProjects(3),
     getHeroContent(),
     getConstructionParallaxContent(),
     getWhatWeDoContent(),
     getWhyCrgContent(),
-    getPalazzoRueSpotlightContent(),
+    getSpotlightProject(),
     getHomeFinalCtaContent(),
   ]);
 
@@ -47,7 +46,7 @@ export default async function HomePage() {
       <FeaturedProjects featured={featured} />
       <WhatWeDoSection content={whatWeDo} />
       <WhyCRGSection content={whyCrg} />
-      <PalazzoRueSection content={palazzoRue} />
+      {spotlightProject && <ProjectSpotlightSection project={spotlightProject} />}
       <FinalCTA content={finalCta} />
     </>
   );

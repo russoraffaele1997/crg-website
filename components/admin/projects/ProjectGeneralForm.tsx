@@ -29,6 +29,15 @@ export default function ProjectGeneralForm({ mode, projectId, initial }: Props) 
   const [featuredOrder, setFeaturedOrder] = useState<string>(
     initial?.featuredOrder != null ? String(initial.featuredOrder) : ""
   );
+  const [isSpotlight, setIsSpotlight] = useState(initial?.isSpotlight ?? false);
+  const [spotlightSpecs, setSpotlightSpecs] = useState<{ label: string; value: string }[]>(
+    initial?.spotlightSpecs?.length ? initial.spotlightSpecs : [
+      { value: "", label: "" },
+      { value: "", label: "" },
+      { value: "", label: "" },
+      { value: "", label: "" },
+    ]
+  );
   const [publishStatus, setPublishStatus] = useState(initial?.publishStatus ?? "draft");
   const [coverImage, setCoverImage] = useState<MediaLibraryItem | null>(initial?.coverImage ?? null);
   const [seoMetaTitle, setSeoMetaTitle] = useState(initial?.seoMetaTitle ?? "");
@@ -64,6 +73,8 @@ export default function ProjectGeneralForm({ mode, projectId, initial }: Props) 
       coverImageId: coverImage?.id ?? null,
       isFeatured,
       featuredOrder: featuredOrder ? Number(featuredOrder) : null,
+      isSpotlight,
+      spotlightSpecs: spotlightSpecs.filter((s) => s.label.trim() || s.value.trim()),
       publishStatus: publishStatus as ProjectGeneralInput["publishStatus"],
       seoMetaTitle,
       seoMetaDescription,
@@ -264,6 +275,53 @@ export default function ProjectGeneralForm({ mode, projectId, initial }: Props) 
             ))}
           </select>
         </div>
+      </div>
+
+      <div className="border-t border-slate-200 pt-6">
+        <h2 className="text-sm font-semibold text-slate-900 mb-1">Progetto in evidenza (homepage)</h2>
+        <p className="text-xs text-slate-500 mb-4">
+          Il progetto in evidenza appare nella sezione dedicata in fondo alla homepage. Titolo e descrizione vengono
+          presi automaticamente da questo progetto: qui vanno inseriti solo i dati tecnici della scheda.
+        </p>
+        <button
+          type="button"
+          onClick={() => setIsSpotlight((v) => !v)}
+          className={`text-sm font-medium px-4 py-2.5 rounded-lg transition-colors ${
+            isSpotlight
+              ? "bg-crg-red text-white"
+              : "border border-slate-300 text-slate-700 hover:border-crg-red hover:text-crg-red"
+          }`}
+        >
+          {isSpotlight ? "✓ Progetto in evidenza" : "Metti progetto in evidenza"}
+        </button>
+
+        {isSpotlight && (
+          <div className="mt-4 bg-slate-50 border border-slate-200 rounded-lg p-4">
+            <p className="text-xs tracking-wider uppercase text-slate-500 mb-3">Dati tecnici (scheda in evidenza)</p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {spotlightSpecs.map((spec, i) => (
+                <div key={i} className="flex gap-2">
+                  <input
+                    placeholder="Valore (es. 5)"
+                    value={spec.value}
+                    onChange={(e) =>
+                      setSpotlightSpecs((prev) => prev.map((s, idx) => (idx === i ? { ...s, value: e.target.value } : s)))
+                    }
+                    className="w-1/3 border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-crg-red"
+                  />
+                  <input
+                    placeholder="Etichetta (es. Unità residenziali)"
+                    value={spec.label}
+                    onChange={(e) =>
+                      setSpotlightSpecs((prev) => prev.map((s, idx) => (idx === i ? { ...s, label: e.target.value } : s)))
+                    }
+                    className="flex-1 border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-crg-red"
+                  />
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
 
       {error && <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg px-4 py-3">{error}</p>}

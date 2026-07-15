@@ -32,6 +32,11 @@ export interface ProjectTimelineItem {
   completed: boolean;
 }
 
+export interface ProjectSpec {
+  label: string;
+  value: string;
+}
+
 export interface Project {
   id: string;
   slug: string;
@@ -49,4 +54,5 @@ export interface Project {
   timeline: ProjectTimelineItem[];
   units: ProjectUnit[];
   totalUnits: number;
+  spotlightSpecs: ProjectSpec[];
 }

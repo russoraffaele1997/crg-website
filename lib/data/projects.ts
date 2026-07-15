@@ -6,6 +6,7 @@ import type { Project, ProjectUnit, ProjectTimelineItem, UnitFloorplan } from "@
 const PROJECT_SELECT = `
   id, slug, title, location, category, status, status_label,
   short_description, description, total_units, is_featured, featured_order,
+  spotlight_specs,
   cover_media:media_library!cover_image_id(storage_path, bucket),
   project_gallery_images(order_index, media:media_library(storage_path, bucket)),
   project_features(kind, title, order_index),
@@ -31,6 +32,7 @@ interface ProjectRow {
   total_units: number;
   is_featured: boolean;
   featured_order: number | null;
+  spotlight_specs: { label: string; value: string }[] | null;
   cover_media: MediaRef;
   project_gallery_images: { order_index: number; media: MediaRef }[];
   project_features: { kind: string; title: string; order_index: number }[];
@@ -136,6 +138,7 @@ function mapProject(row: ProjectRow): Project {
     timeline,
     units,
     totalUnits: row.total_units,
+    spotlightSpecs: row.spotlight_specs ?? [],
   };
 }
 
@@ -158,6 +161,20 @@ export async function getProjectBySlug(slug: string): Promise<Project | undefine
     .select(PROJECT_SELECT)
     .eq("slug", slug)
     .eq("publish_status", "published")
+    .maybeSingle();
+
+  if (error || !data) return undefined;
+  return mapProject(data as unknown as ProjectRow);
+}
+
+export async function getSpotlightProject(): Promise<Project | undefined> {
+  const supabase = createServiceClient();
+  const { data, error } = await supabase
+    .from("projects")
+    .select(PROJECT_SELECT)
+    .eq("publish_status", "published")
+    .eq("is_spotlight", true)
+    .limit(1)
     .maybeSingle();
 
   if (error || !data) return undefined;
