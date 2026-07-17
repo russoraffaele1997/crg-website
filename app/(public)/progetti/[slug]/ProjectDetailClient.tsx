@@ -291,8 +291,8 @@ function UnitsTable({ units }: { units: ProjectUnit[] }) {
                 <table className="w-full">
                   <thead>
                     <tr className="border-b border-border-warm/50">
-                      {["Unità", "Tipologia", "Superficie", "Dettagli", "Prezzo", "Stato"].map((col) => (
-                        <th key={col} className="font-sans text-[10px] tracking-[0.2em] uppercase text-mid-gray py-3 px-4 text-left">
+                      {["", "Unità", "Tipologia", "Superficie", "Dettagli", "Prezzo", "Stato"].map((col, i) => (
+                        <th key={i} className="font-sans text-[10px] tracking-[0.2em] uppercase text-mid-gray py-3 px-4 text-left">
                           {col}
                         </th>
                       ))}
@@ -305,6 +305,15 @@ function UnitsTable({ units }: { units: ProjectUnit[] }) {
                         onClick={() => setSelected(unit)}
                         className={`border-b border-border-warm/30 last:border-0 transition-colors cursor-pointer ${unit.status === "available" ? "hover:bg-crg-red-light" : "opacity-55"}`}
                       >
+                        <td className="py-4 px-4">
+                          <button
+                            type="button"
+                            onClick={(e) => { e.stopPropagation(); setSelected(unit); }}
+                            className="font-sans text-[10px] tracking-wider uppercase px-3 py-1.5 border border-crg-red text-crg-red hover:bg-crg-red hover:text-white transition-colors whitespace-nowrap"
+                          >
+                            Visualizza
+                          </button>
+                        </td>
                         <td className="font-heading text-sm font-semibold text-charcoal py-4 px-4">{unit.name}</td>
                         <td className="font-sans text-sm text-mid-gray py-4 px-4">{unit.typology}</td>
                         <td className="font-sans text-sm text-mid-gray py-4 px-4">
