@@ -88,7 +88,7 @@ function Timeline({ items }: { items: Project["timeline"] }) {
 function UnitDetailModal({ unit, onClose }: { unit: ProjectUnit; onClose: () => void }) {
   const images = unit.floorplans.filter((f) => f.kind === "image");
   const otherDocs = unit.floorplans.filter((f) => f.kind !== "image");
-  const photos = unit.photos.filter((p) => p.kind === "image");
+  const photos = unit.photos.filter((p) => p.kind === "image" || p.kind === "video");
 
   return (
     <div className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4" onClick={onClose}>
@@ -116,15 +116,26 @@ function UnitDetailModal({ unit, onClose }: { unit: ProjectUnit; onClose: () => 
 
           {photos.length > 0 && (
             <div className="grid grid-cols-3 gap-2 mb-8">
-              {photos.map((photo) => (
-                <ClientImage
-                  key={photo.id}
-                  src={photo.url}
-                  alt={`Foto ${unit.name}`}
-                  className="aspect-square w-full object-cover"
-                  fallbackClass="aspect-square w-full bg-light-gray"
-                />
-              ))}
+              {photos.map((photo) =>
+                photo.kind === "video" ? (
+                  <video
+                    key={photo.id}
+                    src={photo.url}
+                    className="aspect-square w-full object-cover"
+                    controls
+                    muted
+                    playsInline
+                  />
+                ) : (
+                  <ClientImage
+                    key={photo.id}
+                    src={photo.url}
+                    alt={`Foto ${unit.name}`}
+                    className="aspect-square w-full object-cover"
+                    fallbackClass="aspect-square w-full bg-light-gray"
+                  />
+                )
+              )}
             </div>
           )}
 

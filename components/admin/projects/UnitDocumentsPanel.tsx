@@ -43,6 +43,8 @@ function DocSection({
               <div key={doc.id} className="group relative aspect-square rounded-lg border border-slate-200 overflow-hidden bg-slate-50">
                 {doc.media?.kind === "image" ? (
                   <img src={doc.media.url} alt={doc.media.original_filename} className="w-full h-full object-cover" />
+                ) : doc.media?.kind === "video" ? (
+                  <video src={doc.media.url} className="w-full h-full object-cover" muted />
                 ) : (
                   <div className="w-full h-full flex flex-col items-center justify-center gap-1 text-slate-400 px-2 text-center">
                     <FileText className="w-5 h-5" />

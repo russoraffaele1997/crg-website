@@ -38,9 +38,11 @@ export async function uploadFileToMedia(file: File, folderId: string | null = nu
 
   const kind: MediaKind = file.type.startsWith("image/")
     ? "image"
-    : file.type === "application/pdf"
-      ? "pdf"
-      : "document";
+    : file.type.startsWith("video/")
+      ? "video"
+      : file.type === "application/pdf"
+        ? "pdf"
+        : "document";
 
   return createMediaRecord({
     storagePath: path,

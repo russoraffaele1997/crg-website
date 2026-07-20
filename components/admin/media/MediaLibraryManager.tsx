@@ -95,7 +95,13 @@ export default function MediaLibraryManager({
       const { error: uploadError } = await supabase.storage.from("media").upload(path, processed);
       if (uploadError) throw new Error(uploadError.message);
 
-      const kindValue: MediaKind = file.type.startsWith("image/") ? "image" : file.type === "application/pdf" ? "pdf" : "document";
+      const kindValue: MediaKind = file.type.startsWith("image/")
+        ? "image"
+        : file.type.startsWith("video/")
+          ? "video"
+          : file.type === "application/pdf"
+            ? "pdf"
+            : "document";
       await replaceMediaFile(id, {
         storagePath: path,
         kind: kindValue,
@@ -273,6 +279,8 @@ export default function MediaLibraryManager({
                   <div className="aspect-square rounded-lg border border-slate-200 overflow-hidden bg-slate-50">
                     {item.kind === "image" ? (
                       <img src={item.url} alt={item.original_filename} className="w-full h-full object-cover" />
+                    ) : item.kind === "video" ? (
+                      <video src={item.url} className="w-full h-full object-cover" muted />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center text-[10px] text-slate-500 px-2 text-center">
                         {item.original_filename}
