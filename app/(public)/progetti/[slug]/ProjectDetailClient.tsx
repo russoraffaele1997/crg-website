@@ -158,7 +158,7 @@ function UnitDetailModal({ unit, onClose }: { unit: ProjectUnit; onClose: () => 
             )}
             {unit.price && (
               <div>
-                <div className="font-heading font-bold text-xl text-crg-red">{unit.price}</div>
+                <div className="font-heading font-bold text-base text-crg-red whitespace-nowrap">{unit.price}</div>
                 <div className="font-sans text-[10px] tracking-widest uppercase text-mid-gray mt-1">Prezzo</div>
               </div>
             )}
