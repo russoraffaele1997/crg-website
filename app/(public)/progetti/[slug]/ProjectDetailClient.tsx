@@ -141,29 +141,31 @@ function UnitDetailModal({ unit, onClose }: { unit: ProjectUnit; onClose: () => 
 
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 mb-8 pb-8 border-b border-border-warm">
             <div>
-              <div className="font-heading font-bold text-xl text-charcoal">
-                {unit.sqm} mq{unit.outdoorSqm ? ` + ${unit.outdoorSqm}` : ""}
-              </div>
-              <div className="font-sans text-[10px] tracking-widest uppercase text-mid-gray mt-1">
-                {unit.outdoorSqm ? "Interni + esterni" : "Superficie"}
-              </div>
+              <div className="font-heading font-bold text-xl text-charcoal">{unit.sqm} mq</div>
+              <div className="font-sans text-[10px] tracking-widest uppercase text-mid-gray mt-1">Mq interni</div>
             </div>
+            {unit.outdoorSqm && (
+              <div>
+                <div className="font-heading font-bold text-xl text-charcoal">{unit.outdoorSqm} mq</div>
+                <div className="font-sans text-[10px] tracking-widest uppercase text-mid-gray mt-1">Mq esterni</div>
+              </div>
+            )}
             {unit.rooms && (
               <div>
                 <div className="font-heading font-bold text-xl text-charcoal">{unit.rooms}</div>
                 <div className="font-sans text-[10px] tracking-widest uppercase text-mid-gray mt-1">Vani</div>
               </div>
             )}
-            {unit.destination && (
-              <div>
-                <div className="font-heading font-bold text-xl text-charcoal">{unit.destination}</div>
-                <div className="font-sans text-[10px] tracking-widest uppercase text-mid-gray mt-1">Destinazione</div>
-              </div>
-            )}
             {unit.price && (
               <div>
                 <div className="font-heading font-bold text-xl text-crg-red">{unit.price}</div>
                 <div className="font-sans text-[10px] tracking-widest uppercase text-mid-gray mt-1">Prezzo</div>
+              </div>
+            )}
+            {unit.destination && (
+              <div>
+                <div className="font-heading font-bold text-xl text-charcoal">{unit.destination}</div>
+                <div className="font-sans text-[10px] tracking-widest uppercase text-mid-gray mt-1">Destinazione</div>
               </div>
             )}
           </div>
