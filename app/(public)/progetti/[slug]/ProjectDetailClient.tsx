@@ -700,7 +700,7 @@ export default function ProjectDetailClient({ project }: { project: Project }) {
             </svg>
             {project.location}
           </p>
-          <a href="#appuntamento" className="btn-primary">Richiedi appuntamento</a>
+          <a href="#unita-disponibili" className="btn-primary">Richiedi appuntamento</a>
         </div>
       </section>
 
@@ -787,7 +787,7 @@ export default function ProjectDetailClient({ project }: { project: Project }) {
       </section>
 
       {/* Units */}
-      <section className="py-16 bg-cream border-t border-border-warm">
+      <section id="unita-disponibili" className="py-16 bg-cream border-t border-border-warm">
         <div className="container-custom">
           <span className="section-label block mb-4">Disponibilità</span>
           <h2 className="font-heading text-3xl font-bold text-charcoal mb-8">Unità disponibili</h2>
