@@ -13,6 +13,8 @@ interface AppointmentPayload {
   projectId?: string;
   projectTitle?: string;
   unitId?: string;
+  unitDetails?: string;
+  carBoxDetails?: string;
   preferredDay?: string;
   preferredTime?: string;
   subject?: string;
@@ -58,11 +60,15 @@ export async function POST(request: NextRequest) {
   // ─── Persist the lead ───────────────────────────────────────────────────
   // unitId sent by the form is the unit's public-facing code (e.g. "A01"),
   // not its database UUID, so it can't go straight into the unit_id FK —
-  // fold it into the message instead rather than risk an insert failure.
+  // fold the full unit sheet into the message instead rather than risk an
+  // insert failure (and rather than showing staff a bare, unreadable code).
   const service = createServiceClient();
-  const messageWithUnit = body.unitId
-    ? `Unità di interesse: ${body.unitId}\n\n${body.message ?? ""}`.trim()
-    : body.message ?? null;
+  const messageParts = [
+    body.unitDetails ? `Unità di interesse:\n${body.unitDetails}` : null,
+    body.carBoxDetails ? `Box auto scelto: ${body.carBoxDetails}` : null,
+    body.message || null,
+  ].filter(Boolean);
+  const fullMessage = messageParts.length ? messageParts.join("\n\n") : null;
 
   const { error: insertError } = await service.from("lead_submissions").insert({
     type,
@@ -74,7 +80,7 @@ export async function POST(request: NextRequest) {
     preferred_day: body.preferredDay || null,
     preferred_time: body.preferredTime || null,
     subject: body.subject || null,
-    message: messageWithUnit,
+    message: fullMessage,
     privacy_accepted: privacy,
   });
 
@@ -92,7 +98,8 @@ export async function POST(request: NextRequest) {
         ["Email", email],
         ["Telefono", body.phone],
         ["Progetto", body.projectTitle],
-        ["Unità", body.unitId],
+        ["Unità di interesse", body.unitDetails],
+        ["Box auto", body.carBoxDetails],
         ["Giorno preferito", body.preferredDay],
         ["Fascia oraria", body.preferredTime],
         ["Oggetto", body.subject],

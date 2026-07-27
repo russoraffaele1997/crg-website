@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import { motion, useInView } from "framer-motion";
 import type { Project, ProjectUnit, CarBox } from "@/lib/types/project";
@@ -175,11 +175,13 @@ function UnitDetailModal({
   carBoxPlanUrl,
   carBoxes,
   onClose,
+  onRequestAppointment,
 }: {
   unit: ProjectUnit;
   carBoxPlanUrl: string;
   carBoxes: CarBox[];
   onClose: () => void;
+  onRequestAppointment: (unit: ProjectUnit, carBox: CarBox | null) => void;
 }) {
   const images = unit.floorplans.filter((f) => f.kind === "image");
   const otherDocs = unit.floorplans.filter((f) => f.kind !== "image");
@@ -360,13 +362,25 @@ function UnitDetailModal({
           )}
 
           {unit.status === "available" && (
-            <a
-              href="#appuntamento"
-              onClick={onClose}
-              className="btn-primary mt-8 inline-block"
-            >
-              Richiedi appuntamento
-            </a>
+            carBoxes.length > 0 && !selectedCarBox ? (
+              <div className="mt-8">
+                <button type="button" disabled className="btn-primary opacity-40 cursor-not-allowed">
+                  Richiedi appuntamento
+                </button>
+                <p className="font-sans text-xs text-mid-gray mt-2">Scegli prima il box auto per continuare.</p>
+              </div>
+            ) : (
+              <a
+                href="#appuntamento"
+                onClick={() => {
+                  onRequestAppointment(unit, selectedCarBox);
+                  onClose();
+                }}
+                className="btn-primary mt-8 inline-block"
+              >
+                Richiedi appuntamento
+              </a>
+            )
           )}
         </div>
       </div>
@@ -401,10 +415,12 @@ function UnitsTable({
   units,
   carBoxPlanUrl,
   carBoxes,
+  onRequestAppointment,
 }: {
   units: ProjectUnit[];
   carBoxPlanUrl: string;
   carBoxes: CarBox[];
+  onRequestAppointment: (unit: ProjectUnit, carBox: CarBox | null) => void;
 }) {
   const groups: [string, ProjectUnit[]][] = [];
   for (const unit of units) {
@@ -523,6 +539,7 @@ function UnitsTable({
           carBoxPlanUrl={carBoxPlanUrl}
           carBoxes={carBoxes}
           onClose={() => setSelected(null)}
+          onRequestAppointment={onRequestAppointment}
         />
       )}
     </div>
@@ -530,7 +547,30 @@ function UnitsTable({
 }
 
 // ─── Appointment form ─────────────────────────────────────────────────────────
-function AppointmentForm({ project, availableUnits }: { project: Project; availableUnits: ProjectUnit[] }) {
+function formatUnitDetails(unit: ProjectUnit): string {
+  const lines = [
+    `Unità: ${unit.name} (cod. ${unit.id})`,
+    `Tipologia: ${unit.typology}`,
+    unit.floor ? `Piano: ${unit.floor}${unit.interno ? `, int. ${unit.interno}` : ""}` : null,
+    `Superficie: ${unit.sqm} mq interni${unit.outdoorSqm ? ` + ${unit.outdoorSqm} mq esterni` : ""}`,
+    unit.rooms ? `Vani: ${unit.rooms}` : null,
+    unit.destination ? `Destinazione: ${unit.destination}` : null,
+    unit.price ? `Prezzo: ${unit.price}` : null,
+  ];
+  return lines.filter(Boolean).join("\n");
+}
+
+function AppointmentForm({
+  project,
+  availableUnits,
+  presetUnitId,
+  presetCarBox,
+}: {
+  project: Project;
+  availableUnits: ProjectUnit[];
+  presetUnitId: string;
+  presetCarBox: CarBox | null;
+}) {
   const [form, setForm] = useState({
     firstName: "", lastName: "", email: "", phone: "",
     unitId: "", preferredDay: "", preferredTime: "", message: "", privacy: false,
@@ -541,15 +581,26 @@ function AppointmentForm({ project, availableUnits }: { project: Project; availa
 
   const set = (k: string, v: string | boolean) => setForm((f) => ({ ...f, [k]: v }));
 
+  useEffect(() => {
+    if (presetUnitId) setForm((f) => ({ ...f, unitId: presetUnitId }));
+  }, [presetUnitId]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!form.privacy) { setError("Devi accettare la privacy policy."); return; }
     setSubmitting(true); setError("");
     try {
+      const selectedUnit = availableUnits.find((u) => u.id === form.unitId) ?? null;
       const res = await fetch("/api/appointments", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...form, projectId: project.id, projectTitle: project.title }),
+        body: JSON.stringify({
+          ...form,
+          projectId: project.id,
+          projectTitle: project.title,
+          unitDetails: selectedUnit ? formatUnitDetails(selectedUnit) : null,
+          carBoxDetails: presetCarBox ? `${presetCarBox.name} (${presetCarBox.sqm} mq)` : null,
+        }),
       });
       if (!res.ok) throw new Error();
       setSuccess(true);
@@ -621,6 +672,15 @@ function AppointmentForm({ project, availableUnits }: { project: Project; availa
         </div>
       )}
 
+      {presetCarBox && (
+        <div className="flex items-center gap-2 font-sans text-sm text-emerald-700 bg-emerald-50 border border-emerald-200 px-4 py-3">
+          <svg className="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+          </svg>
+          Box auto selezionato: {presetCarBox.name} ({presetCarBox.sqm} mq)
+        </div>
+      )}
+
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
         <div>
           <label htmlFor="ap-day" className="input-label">Giorno preferito</label>
@@ -664,6 +724,13 @@ export default function ProjectDetailClient({ project }: { project: Project }) {
   const descRef = useRef<HTMLDivElement>(null);
   const descInView = useInView(descRef, { once: true, margin: "-60px" });
   const availableUnits = project.units.filter((u) => u.status === "available");
+  const [presetUnitId, setPresetUnitId] = useState("");
+  const [presetCarBox, setPresetCarBox] = useState<CarBox | null>(null);
+
+  const handleRequestAppointment = (unit: ProjectUnit, carBox: CarBox | null) => {
+    setPresetUnitId(unit.id);
+    setPresetCarBox(carBox);
+  };
 
   const categoryLabels: Record<string, string> = {
     residential: "Residenziale", commercial: "Commerciale", industrial: "Industriale",
@@ -791,7 +858,12 @@ export default function ProjectDetailClient({ project }: { project: Project }) {
         <div className="container-custom">
           <span className="section-label block mb-4">Disponibilità</span>
           <h2 className="font-heading text-3xl font-bold text-charcoal mb-8">Unità disponibili</h2>
-          <UnitsTable units={project.units} carBoxPlanUrl={project.carBoxPlanUrl} carBoxes={project.carBoxes} />
+          <UnitsTable
+            units={project.units}
+            carBoxPlanUrl={project.carBoxPlanUrl}
+            carBoxes={project.carBoxes}
+            onRequestAppointment={handleRequestAppointment}
+          />
         </div>
       </section>
 
@@ -822,7 +894,12 @@ export default function ProjectDetailClient({ project }: { project: Project }) {
             <p className="font-sans text-sm text-mid-gray mb-10 leading-relaxed">
               Compila il form per richiedere un incontro con il nostro team commerciale.
             </p>
-            <AppointmentForm project={project} availableUnits={availableUnits} />
+            <AppointmentForm
+              project={project}
+              availableUnits={availableUnits}
+              presetUnitId={presetUnitId}
+              presetCarBox={presetCarBox}
+            />
           </div>
         </div>
       </section>
