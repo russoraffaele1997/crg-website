@@ -24,7 +24,17 @@ const categoryGradients: Record<string, string> = {
 interface Props { project: Project; className?: string }
 
 export default function ProjectCard({ project, className = "" }: Props) {
+  const total = project.units.length;
   const availableUnits = project.units.filter((u) => u.status === "available").length;
+  const percentAvailable = total > 0 ? Math.round((availableUnits / total) * 100) : 0;
+  const availability =
+    total === 0
+      ? null
+      : availableUnits === 0
+        ? { label: "Esaurito", text: "text-red-600", bar: "bg-red-500" }
+        : percentAvailable <= 33
+          ? { label: `${availableUnits} su ${total} disponibili`, text: "text-amber-600", bar: "bg-amber-500" }
+          : { label: `${availableUnits} su ${total} disponibili`, text: "text-emerald-600", bar: "bg-emerald-500" };
 
   return (
     <article className={`group bg-white border border-border-warm hover:shadow-lg transition-all duration-500 flex flex-col h-full ${className}`}>
@@ -48,16 +58,30 @@ export default function ProjectCard({ project, className = "" }: Props) {
           <span className="font-sans text-[10px] tracking-[0.25em] uppercase text-mid-gray">
             {categoryLabels[project.category]}
           </span>
-          {availableUnits > 0 && (
-            <span className="font-sans text-[10px] text-mid-gray">
-              {availableUnits} disponibili
-            </span>
-          )}
         </div>
 
-        <h3 className="font-heading text-xl font-bold text-charcoal mb-1 group-hover:text-crg-red transition-colors duration-300">
+        <h3 className="font-heading text-xl font-bold text-charcoal mb-3 group-hover:text-crg-red transition-colors duration-300">
           {project.title}
         </h3>
+
+        {availability && (
+          <div className="mb-4">
+            <div className="flex items-center justify-between mb-1.5">
+              <span className={`font-sans text-[11px] font-bold uppercase tracking-wide ${availability.text}`}>
+                {availability.label}
+              </span>
+              <span className={`font-heading text-sm font-bold ${availability.text}`}>
+                {percentAvailable}%
+              </span>
+            </div>
+            <div className="h-1.5 w-full bg-border-warm rounded-full overflow-hidden">
+              <div
+                className={`h-full rounded-full transition-all duration-700 ${availability.bar}`}
+                style={{ width: `${percentAvailable}%` }}
+              />
+            </div>
+          </div>
+        )}
 
         <p className="font-sans text-sm text-mid-gray mb-4 flex items-center gap-1.5">
           <svg className="w-3.5 h-3.5 shrink-0" fill="none" viewBox="0 0 24 24"

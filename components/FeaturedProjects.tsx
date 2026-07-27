@@ -19,7 +19,7 @@ export default function FeaturedProjects({
   const titleLines = content.title.split("\n");
 
   return (
-    <section className="py-28 lg:py-36 bg-white" ref={ref}>
+    <section id="progetti" className="py-28 lg:py-36 bg-white scroll-mt-24" ref={ref}>
       <div className="container-custom">
         <motion.div
           initial={{ opacity: 0, y: 20 }}

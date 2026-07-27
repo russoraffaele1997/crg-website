@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import Image from "next/image";
 import { motion } from "framer-motion";
 import type { HeroContent } from "@/lib/data/site-content";
@@ -98,24 +97,13 @@ export default function HeroSection({ content, projects }: { content: HeroConten
             {content.urgencyText}
           </motion.p>
 
-          <motion.div
-            variants={item}
-            className="flex flex-col items-center gap-4"
-          >
-            {projects.map((project) => {
-              const available = project.units.filter((u) => u.status === "available").length;
-              return (
-                <div key={project.id} className="flex flex-col sm:flex-row items-center gap-3">
-                  <Link href={`/progetti/${project.slug}`} className="btn-outline-light w-64">
-                    {project.title}
-                  </Link>
-                  <span className="font-sans text-xs text-white/50">
-                    {available} su {project.units.length} disponibili
-                  </span>
-                </div>
-              );
-            })}
-          </motion.div>
+          {projects.length > 0 && (
+            <motion.div variants={item}>
+              <a href="#progetti" className="btn-primary px-14 py-5 text-sm tracking-[0.2em]">
+                Scegli la tua prossima casa
+              </a>
+            </motion.div>
+          )}
         </motion.div>
       </div>
 
