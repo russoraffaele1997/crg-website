@@ -600,6 +600,9 @@ function AppointmentForm({
           projectTitle: project.title,
           unitDetails: selectedUnit ? formatUnitDetails(selectedUnit) : null,
           carBoxDetails: presetCarBox ? `${presetCarBox.name} (${presetCarBox.sqm} mq)` : null,
+          floorplanFiles: selectedUnit
+            ? selectedUnit.floorplans.map((f) => ({ url: f.url, filename: f.filename }))
+            : [],
         }),
       });
       if (!res.ok) throw new Error();
