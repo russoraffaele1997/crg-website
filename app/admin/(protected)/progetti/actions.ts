@@ -333,6 +333,57 @@ export async function deleteUnit(id: string, projectId: string) {
   revalidatePublicSite();
 }
 
+// ─── Car boxes (posti auto) ─────────────────────────────────────────────────
+
+export async function updateCarBoxPlan(projectId: string, mediaId: string | null) {
+  const admin = await requireContentEditor();
+  await assertCollaboratorDraftOnly(admin, "projects", projectId);
+  const service = createServiceClient();
+  const { error } = await service.from("projects").update({ car_box_plan_media_id: mediaId }).eq("id", projectId);
+  if (error) throw new Error(error.message);
+  revalidatePublicSite();
+}
+
+export interface CarBoxInput {
+  name: string;
+  sqm: number;
+}
+
+export async function createCarBox(projectId: string, input: CarBoxInput, orderIndex: number) {
+  const admin = await requireContentEditor();
+  await assertCollaboratorDraftOnly(admin, "projects", projectId);
+  const service = createServiceClient();
+  const { error } = await service.from("project_car_boxes").insert({
+    project_id: projectId,
+    name: input.name,
+    sqm: input.sqm,
+    order_index: orderIndex,
+  });
+  if (error) throw new Error(error.message);
+  revalidatePublicSite();
+}
+
+export async function updateCarBox(id: string, projectId: string, input: CarBoxInput) {
+  const admin = await requireContentEditor();
+  await assertCollaboratorDraftOnly(admin, "projects", projectId);
+  const service = createServiceClient();
+  const { error } = await service
+    .from("project_car_boxes")
+    .update({ name: input.name, sqm: input.sqm })
+    .eq("id", id);
+  if (error) throw new Error(error.message);
+  revalidatePublicSite();
+}
+
+export async function deleteCarBox(id: string, projectId: string) {
+  const admin = await requireContentEditor();
+  await assertCollaboratorDraftOnly(admin, "projects", projectId);
+  const service = createServiceClient();
+  const { error } = await service.from("project_car_boxes").delete().eq("id", id);
+  if (error) throw new Error(error.message);
+  revalidatePublicSite();
+}
+
 // ─── Timeline ─────────────────────────────────────────────────────────────
 
 export interface TimelineInput {

@@ -1,13 +1,15 @@
 import "server-only";
 import { createServiceClient } from "@/lib/supabase/service";
 import { getPublicMediaUrl } from "@/lib/supabase/storage-url";
-import type { Project, ProjectUnit, ProjectTimelineItem, UnitFloorplan } from "@/lib/types/project";
+import type { Project, ProjectUnit, ProjectTimelineItem, UnitFloorplan, CarBox } from "@/lib/types/project";
 
 const PROJECT_SELECT = `
   id, slug, title, location, category, status, status_label,
   short_description, description, total_units, is_featured, featured_order,
   spotlight_specs,
   cover_media:media_library!cover_image_id(storage_path, bucket),
+  car_box_plan:media_library!car_box_plan_media_id(storage_path, bucket),
+  project_car_boxes(id, name, sqm, order_index),
   project_gallery_images(order_index, media:media_library(storage_path, bucket)),
   project_features(kind, title, order_index),
   project_units(
@@ -34,6 +36,8 @@ interface ProjectRow {
   featured_order: number | null;
   spotlight_specs: { label: string; value: string }[] | null;
   cover_media: MediaRef;
+  car_box_plan: MediaRef;
+  project_car_boxes: { id: string; name: string; sqm: number; order_index: number }[];
   project_gallery_images: { order_index: number; media: MediaRef }[];
   project_features: { kind: string; title: string; order_index: number }[];
   project_units: {
@@ -121,6 +125,10 @@ function mapProject(row: ProjectRow): Project {
     .sort((a, b) => a.order_index - b.order_index)
     .map((t) => ({ label: t.label, date: t.date_label, completed: t.completed }));
 
+  const carBoxes: CarBox[] = [...row.project_car_boxes]
+    .sort((a, b) => a.order_index - b.order_index)
+    .map((c) => ({ id: c.id, name: c.name, sqm: Number(c.sqm) }));
+
   return {
     id: row.id,
     slug: row.slug,
@@ -139,6 +147,8 @@ function mapProject(row: ProjectRow): Project {
     units,
     totalUnits: row.total_units,
     spotlightSpecs: row.spotlight_specs ?? [],
+    carBoxPlanUrl: row.car_box_plan ? getPublicMediaUrl(row.car_box_plan.storage_path, row.car_box_plan.bucket) : "",
+    carBoxes,
   };
 }
 

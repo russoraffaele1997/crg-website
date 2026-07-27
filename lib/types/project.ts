@@ -37,6 +37,12 @@ export interface ProjectSpec {
   value: string;
 }
 
+export interface CarBox {
+  id: string;
+  name: string;
+  sqm: number;
+}
+
 export interface Project {
   id: string;
   slug: string;
@@ -55,4 +61,6 @@ export interface Project {
   units: ProjectUnit[];
   totalUnits: number;
   spotlightSpecs: ProjectSpec[];
+  carBoxPlanUrl: string;
+  carBoxes: CarBox[];
 }

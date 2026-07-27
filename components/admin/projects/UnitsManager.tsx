@@ -1,11 +1,22 @@
 "use client";
 
 import { useState } from "react";
-import { Plus, Pencil, Trash2, X, Check, FileImage } from "lucide-react";
+import { Plus, Pencil, Trash2, X, Check, FileImage, Car } from "lucide-react";
 import UnitStatusSelect from "./UnitStatusSelect";
 import UnitDocumentsPanel from "./UnitDocumentsPanel";
-import { createUnit, updateUnit, deleteUnit, type UnitInput } from "@/app/admin/(protected)/progetti/actions";
+import MediaField from "@/components/admin/MediaField";
+import {
+  createUnit,
+  updateUnit,
+  deleteUnit,
+  updateCarBoxPlan,
+  createCarBox,
+  updateCarBox,
+  deleteCarBox,
+  type UnitInput,
+} from "@/app/admin/(protected)/progetti/actions";
 import type { UnitStatus } from "@/lib/types/project";
+import type { MediaLibraryItem } from "@/lib/types/media";
 
 interface Unit {
   id: string;
@@ -21,6 +32,12 @@ interface Unit {
   price: string | null;
   status: string;
   description: string | null;
+}
+
+interface CarBox {
+  id: string;
+  name: string;
+  sqm: number;
 }
 
 const typologyOptions = ["Appartamento", "Attico", "Attico e Superattico", "ERS", "Locale commerciale"];
@@ -103,12 +120,167 @@ function UnitFields({
   );
 }
 
+function CarBoxManager({
+  projectId,
+  initialPlan,
+  initialBoxes,
+}: {
+  projectId: string;
+  initialPlan: MediaLibraryItem | null;
+  initialBoxes: CarBox[];
+}) {
+  const [plan, setPlan] = useState(initialPlan);
+  const [boxes, setBoxes] = useState(initialBoxes);
+  const [adding, setAdding] = useState(false);
+  const [newBox, setNewBox] = useState({ name: "", sqm: 0 });
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editBox, setEditBox] = useState({ name: "", sqm: 0 });
+  const [saving, setSaving] = useState(false);
+
+  const handlePlanChange = async (media: MediaLibraryItem | null) => {
+    setPlan(media);
+    await updateCarBoxPlan(projectId, media?.id ?? null);
+  };
+
+  const handleAdd = async () => {
+    if (!newBox.name.trim()) return;
+    setSaving(true);
+    await createCarBox(projectId, newBox, boxes.length);
+    setBoxes((prev) => [...prev, { id: crypto.randomUUID(), ...newBox }]);
+    setNewBox({ name: "", sqm: 0 });
+    setAdding(false);
+    setSaving(false);
+  };
+
+  const startEdit = (box: CarBox) => {
+    setEditingId(box.id);
+    setEditBox({ name: box.name, sqm: box.sqm });
+  };
+
+  const saveEdit = async () => {
+    if (!editingId) return;
+    setSaving(true);
+    await updateCarBox(editingId, projectId, editBox);
+    setBoxes((prev) => prev.map((b) => (b.id === editingId ? { ...b, ...editBox } : b)));
+    setEditingId(null);
+    setSaving(false);
+  };
+
+  const handleDelete = async (id: string) => {
+    if (!confirm("Eliminare questo box auto?")) return;
+    setBoxes((prev) => prev.filter((b) => b.id !== id));
+    await deleteCarBox(id, projectId);
+  };
+
+  return (
+    <div className="bg-slate-50 border border-slate-200 rounded-lg p-4 mb-4">
+      <div className="mb-4">
+        <MediaField label="Planimetria generale box auto" value={plan} onChange={handlePlanChange} />
+      </div>
+
+      <div className="flex items-center justify-between mb-3">
+        <p className="text-sm font-medium text-slate-700">{boxes.length} box auto</p>
+        <button
+          type="button"
+          onClick={() => setAdding((v) => !v)}
+          className="flex items-center gap-1.5 bg-slate-900 text-white text-sm px-3 py-1.5 rounded-lg"
+        >
+          <Plus className="w-3.5 h-3.5" />
+          Nuovo box auto
+        </button>
+      </div>
+
+      {adding && (
+        <div className="bg-white border border-slate-200 rounded-lg p-3 mb-3 flex gap-2">
+          <input
+            placeholder="Nome (es. Box auto 1)"
+            value={newBox.name}
+            onChange={(e) => setNewBox((b) => ({ ...b, name: e.target.value }))}
+            className="flex-1 border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-crg-red"
+          />
+          <input
+            type="number"
+            placeholder="Mq"
+            value={newBox.sqm || ""}
+            onChange={(e) => setNewBox((b) => ({ ...b, sqm: Number(e.target.value) }))}
+            className="w-28 border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-crg-red"
+          />
+          <button
+            type="button"
+            onClick={handleAdd}
+            disabled={saving || !newBox.name.trim()}
+            className="bg-crg-red hover:bg-crg-red-dark text-white text-sm px-4 py-2 rounded-lg disabled:opacity-50"
+          >
+            Aggiungi
+          </button>
+          <button type="button" onClick={() => setAdding(false)} className="text-sm text-slate-500 px-2">
+            Annulla
+          </button>
+        </div>
+      )}
+
+      {boxes.length === 0 ? (
+        <p className="text-sm text-slate-500">Nessun box auto ancora.</p>
+      ) : (
+        <div className="space-y-2">
+          {boxes.map((box) =>
+            editingId === box.id ? (
+              <div key={box.id} className="bg-white border border-slate-200 rounded-lg p-3 flex gap-2">
+                <input
+                  value={editBox.name}
+                  onChange={(e) => setEditBox((b) => ({ ...b, name: e.target.value }))}
+                  className="flex-1 border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-crg-red"
+                />
+                <input
+                  type="number"
+                  value={editBox.sqm || ""}
+                  onChange={(e) => setEditBox((b) => ({ ...b, sqm: Number(e.target.value) }))}
+                  className="w-28 border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-crg-red"
+                />
+                <button
+                  type="button"
+                  onClick={saveEdit}
+                  disabled={saving}
+                  className="flex items-center gap-1.5 bg-crg-red hover:bg-crg-red-dark text-white text-sm px-4 py-2 rounded-lg disabled:opacity-50"
+                >
+                  <Check className="w-4 h-4" />
+                </button>
+                <button type="button" onClick={() => setEditingId(null)} className="text-sm text-slate-500 px-2">
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+            ) : (
+              <div key={box.id} className="bg-white border border-slate-200 rounded-lg px-3 py-2 flex items-center justify-between">
+                <span className="text-sm text-slate-800">
+                  {box.name} <span className="text-slate-400">— {box.sqm} mq</span>
+                </span>
+                <div className="flex items-center gap-1">
+                  <button type="button" onClick={() => startEdit(box)} className="text-slate-400 hover:text-slate-700 p-1.5" aria-label="Modifica">
+                    <Pencil className="w-4 h-4" />
+                  </button>
+                  <button type="button" onClick={() => handleDelete(box.id)} className="text-slate-400 hover:text-red-600 p-1.5" aria-label="Elimina">
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+            )
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function UnitsManager({
   projectId,
   initialUnits,
+  initialCarBoxPlan,
+  initialCarBoxes,
 }: {
   projectId: string;
   initialUnits: Unit[];
+  initialCarBoxPlan: MediaLibraryItem | null;
+  initialCarBoxes: CarBox[];
 }) {
   const [units, setUnits] = useState(initialUnits);
   const [adding, setAdding] = useState(false);
@@ -117,6 +289,7 @@ export default function UnitsManager({
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editUnit, setEditUnit] = useState<UnitInput>(emptyForm);
   const [docsUnit, setDocsUnit] = useState<Unit | null>(null);
+  const [carBoxPanelOpen, setCarBoxPanelOpen] = useState(false);
 
   const handleAdd = async () => {
     if (!newUnit.unitCode.trim() || !newUnit.name.trim()) return;
@@ -176,6 +349,22 @@ export default function UnitsManager({
           <Plus className="w-4 h-4" />
           Nuovo appartamento
         </button>
+      </div>
+
+      <div className="mb-4">
+        <button
+          type="button"
+          onClick={() => setCarBoxPanelOpen((v) => !v)}
+          className="flex items-center gap-1.5 border border-slate-300 text-slate-700 text-sm px-3 py-2 rounded-lg hover:border-crg-red hover:text-crg-red transition-colors"
+        >
+          <Car className="w-4 h-4" />
+          Box auto
+        </button>
+        {carBoxPanelOpen && (
+          <div className="mt-3">
+            <CarBoxManager projectId={projectId} initialPlan={initialCarBoxPlan} initialBoxes={initialCarBoxes} />
+          </div>
+        )}
       </div>
 
       {adding && (

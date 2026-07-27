@@ -3,7 +3,7 @@
 import { useState, useRef } from "react";
 import Link from "next/link";
 import { motion, useInView } from "framer-motion";
-import type { Project, ProjectUnit } from "@/lib/types/project";
+import type { Project, ProjectUnit, CarBox } from "@/lib/types/project";
 import ClientImage from "@/components/ClientImage";
 
 const categoryGradients: Record<string, string> = {
@@ -84,11 +84,104 @@ function Timeline({ items }: { items: Project["timeline"] }) {
   );
 }
 
+// ─── Car box picker popup ───────────────────────────────────────────────────
+function CarBoxPickerModal({
+  planUrl,
+  boxes,
+  selectedId,
+  onConfirm,
+  onClose,
+}: {
+  planUrl: string;
+  boxes: CarBox[];
+  selectedId: string | null;
+  onConfirm: (id: string) => void;
+  onClose: () => void;
+}) {
+  const [pending, setPending] = useState<string | null>(selectedId);
+
+  return (
+    <div className="fixed inset-0 bg-black/70 z-[60] flex items-center justify-center p-4" onClick={onClose}>
+      <div
+        className="bg-white max-w-xl w-full max-h-[85vh] overflow-y-auto relative"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <button
+          className="absolute top-5 right-5 text-mid-gray hover:text-charcoal font-sans text-sm tracking-widest uppercase z-10"
+          onClick={onClose}
+        >
+          Chiudi ✕
+        </button>
+
+        <div className="p-8 sm:p-10">
+          <h3 className="font-heading text-2xl font-bold text-charcoal mb-1">Scegli il box auto</h3>
+          <p className="font-sans text-sm text-mid-gray mb-6">Seleziona il posto auto che preferisci.</p>
+
+          {planUrl && (
+            <ClientImage
+              src={planUrl}
+              alt="Planimetria box auto"
+              className="w-full border border-border-warm object-contain mb-6"
+              fallbackClass="w-full h-56 bg-light-gray mb-6"
+            />
+          )}
+
+          <div className="space-y-2 mb-8">
+            {boxes.map((box) => (
+              <label
+                key={box.id}
+                className={`flex items-center justify-between gap-4 border px-4 py-3 cursor-pointer transition-colors ${
+                  pending === box.id ? "border-crg-red bg-crg-red-light" : "border-border-warm hover:bg-cream"
+                }`}
+              >
+                <span className="flex items-center gap-3">
+                  <input
+                    type="radio"
+                    name="car-box"
+                    checked={pending === box.id}
+                    onChange={() => setPending(box.id)}
+                    className="w-4 h-4 accent-crg-red"
+                  />
+                  <span className="font-sans text-sm font-medium text-charcoal">{box.name}</span>
+                </span>
+                <span className="font-sans text-sm text-mid-gray">{box.sqm} mq</span>
+              </label>
+            ))}
+          </div>
+
+          <button
+            type="button"
+            disabled={!pending}
+            onClick={() => pending && onConfirm(pending)}
+            className="btn-primary disabled:opacity-40 disabled:cursor-not-allowed"
+          >
+            Conferma selezione
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ─── Unit detail popup ──────────────────────────────────────────────────────
-function UnitDetailModal({ unit, onClose }: { unit: ProjectUnit; onClose: () => void }) {
+function UnitDetailModal({
+  unit,
+  carBoxPlanUrl,
+  carBoxes,
+  onClose,
+}: {
+  unit: ProjectUnit;
+  carBoxPlanUrl: string;
+  carBoxes: CarBox[];
+  onClose: () => void;
+}) {
   const images = unit.floorplans.filter((f) => f.kind === "image");
   const otherDocs = unit.floorplans.filter((f) => f.kind !== "image");
   const photos = unit.photos.filter((p) => p.kind === "image" || p.kind === "video");
+  const [photoLightbox, setPhotoLightbox] = useState<string | null>(null);
+  const [carBoxPickerOpen, setCarBoxPickerOpen] = useState(false);
+  const [selectedCarBoxId, setSelectedCarBoxId] = useState<string | null>(null);
+  const selectedCarBox = carBoxes.find((b) => b.id === selectedCarBoxId) ?? null;
 
   return (
     <div className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4" onClick={onClose}>
@@ -127,15 +220,41 @@ function UnitDetailModal({ unit, onClose }: { unit: ProjectUnit; onClose: () => 
                     playsInline
                   />
                 ) : (
-                  <ClientImage
+                  <button
                     key={photo.id}
-                    src={photo.url}
-                    alt={`Foto ${unit.name}`}
-                    className="aspect-square w-full object-cover"
-                    fallbackClass="aspect-square w-full bg-light-gray"
-                  />
+                    type="button"
+                    onClick={() => setPhotoLightbox(photo.url)}
+                    className="aspect-square w-full cursor-zoom-in focus:outline-none focus:ring-2 focus:ring-crg-red"
+                  >
+                    <ClientImage
+                      src={photo.url}
+                      alt={`Foto ${unit.name}`}
+                      className="w-full h-full object-cover"
+                      fallbackClass="w-full h-full bg-light-gray"
+                    />
+                  </button>
                 )
               )}
+            </div>
+          )}
+
+          {photoLightbox && (
+            <div
+              className="fixed inset-0 bg-black/92 z-[60] flex items-center justify-center p-4"
+              onClick={() => setPhotoLightbox(null)}
+            >
+              <button
+                className="absolute top-6 right-6 text-white/50 hover:text-white font-sans text-sm tracking-widest uppercase"
+                onClick={() => setPhotoLightbox(null)}
+              >
+                Chiudi ✕
+              </button>
+              <ClientImage
+                src={photoLightbox}
+                alt={`Foto ${unit.name}`}
+                className="max-w-4xl w-full max-h-[80vh] object-contain"
+                fallbackClass="w-96 h-64 bg-light-gray"
+              />
             </div>
           )}
 
@@ -169,6 +288,24 @@ function UnitDetailModal({ unit, onClose }: { unit: ProjectUnit; onClose: () => 
               </div>
             )}
           </div>
+
+          {carBoxes.length > 0 && (
+            <div className="mb-8">
+              <h4 className="font-sans text-[10px] tracking-[0.2em] uppercase text-mid-gray mb-3">
+                Box auto <span className="text-crg-red">*</span>
+              </h4>
+              <button
+                type="button"
+                onClick={() => setCarBoxPickerOpen(true)}
+                className={selectedCarBox ? "btn-outline" : "btn-primary"}
+              >
+                {selectedCarBox ? `✓ ${selectedCarBox.name} selezionato — Cambia` : "Scegli box auto"}
+              </button>
+              {!selectedCarBox && (
+                <p className="font-sans text-xs text-mid-gray mt-2">La scelta del box auto è obbligatoria.</p>
+              )}
+            </div>
+          )}
 
           {unit.description && (
             <div className="mb-8">
@@ -227,6 +364,19 @@ function UnitDetailModal({ unit, onClose }: { unit: ProjectUnit; onClose: () => 
           )}
         </div>
       </div>
+
+      {carBoxPickerOpen && (
+        <CarBoxPickerModal
+          planUrl={carBoxPlanUrl}
+          boxes={carBoxes}
+          selectedId={selectedCarBoxId}
+          onConfirm={(id) => {
+            setSelectedCarBoxId(id);
+            setCarBoxPickerOpen(false);
+          }}
+          onClose={() => setCarBoxPickerOpen(false)}
+        />
+      )}
     </div>
   );
 }
@@ -241,7 +391,15 @@ function floorSortKey(floor: string | undefined): number {
   return match ? parseInt(match[0], 10) : -1;
 }
 
-function UnitsTable({ units }: { units: ProjectUnit[] }) {
+function UnitsTable({
+  units,
+  carBoxPlanUrl,
+  carBoxes,
+}: {
+  units: ProjectUnit[];
+  carBoxPlanUrl: string;
+  carBoxes: CarBox[];
+}) {
   const groups: [string, ProjectUnit[]][] = [];
   for (const unit of units) {
     const key = unit.floor ?? "Piano non specificato";
@@ -353,7 +511,14 @@ function UnitsTable({ units }: { units: ProjectUnit[] }) {
         );
       })}
 
-      {selected && <UnitDetailModal unit={selected} onClose={() => setSelected(null)} />}
+      {selected && (
+        <UnitDetailModal
+          unit={selected}
+          carBoxPlanUrl={carBoxPlanUrl}
+          carBoxes={carBoxes}
+          onClose={() => setSelected(null)}
+        />
+      )}
     </div>
   );
 }
@@ -620,7 +785,7 @@ export default function ProjectDetailClient({ project }: { project: Project }) {
         <div className="container-custom">
           <span className="section-label block mb-4">Disponibilità</span>
           <h2 className="font-heading text-3xl font-bold text-charcoal mb-8">Unità disponibili</h2>
-          <UnitsTable units={project.units} />
+          <UnitsTable units={project.units} carBoxPlanUrl={project.carBoxPlanUrl} carBoxes={project.carBoxes} />
         </div>
       </section>
 

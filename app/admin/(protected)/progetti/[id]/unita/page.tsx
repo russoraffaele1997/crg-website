@@ -29,6 +29,24 @@ export default async function ProjectUnitaPage({
         status: u.status,
         description: u.description,
       }))}
+      initialCarBoxPlan={
+        project.carBoxPlan
+          ? {
+              id: project.carBoxPlan.id,
+              url: project.carBoxPlan.url,
+              original_filename: project.carBoxPlan.original_filename,
+              kind: project.carBoxPlan.kind,
+              storage_path: "",
+              bucket: "media",
+              mime_type: "",
+              size_bytes: 0,
+              width: null,
+              height: null,
+              alt_text: null,
+            }
+          : null
+      }
+      initialCarBoxes={project.carBoxes}
     />
   );
 }
