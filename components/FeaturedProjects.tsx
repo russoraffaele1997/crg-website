@@ -4,11 +4,19 @@ import Link from "next/link";
 import { motion, useInView } from "framer-motion";
 import { useRef } from "react";
 import type { Project } from "@/lib/types/project";
+import type { FeaturedProjectsContent } from "@/lib/data/site-content";
 import ProjectCard from "./ProjectCard";
 
-export default function FeaturedProjects({ featured }: { featured: Project[] }) {
+export default function FeaturedProjects({
+  featured,
+  content,
+}: {
+  featured: Project[];
+  content: FeaturedProjectsContent;
+}) {
   const ref = useRef<HTMLDivElement>(null);
   const inView = useInView(ref, { once: true, margin: "-80px" });
+  const titleLines = content.title.split("\n");
 
   return (
     <section className="py-28 lg:py-36 bg-white" ref={ref}>
@@ -20,11 +28,18 @@ export default function FeaturedProjects({ featured }: { featured: Project[] }) 
           className="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-6"
         >
           <div>
-            <span className="section-label block mb-4">I nostri progetti</span>
+            <span className="section-label block mb-4">{content.eyebrow}</span>
             <h2 className="section-title">
-              Sviluppi in corso
-              <br />e disponibili
+              {titleLines.map((line, i) => (
+                <span key={i}>
+                  {i > 0 && <br />}
+                  {line}
+                </span>
+              ))}
             </h2>
+            {content.tagline && (
+              <p className="font-sans text-base text-mid-gray mt-4 max-w-md">{content.tagline}</p>
+            )}
           </div>
           <Link
             href="/progetti"

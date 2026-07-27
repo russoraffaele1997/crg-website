@@ -138,6 +138,22 @@ export const blockDefinitions: BlockDefinition[] = [
   },
   {
     page: "home",
+    blockKey: "featured_projects",
+    pageLabel: "Homepage",
+    blockLabel: "Griglia progetti",
+    fields: [
+      { key: "eyebrow", label: "Sopratitolo", type: "text" },
+      { key: "title", label: "Titolo (usa \\n per andare a capo)", type: "textarea" },
+      { key: "tagline", label: "Testo di richiamo (sotto il titolo)", type: "text" },
+    ],
+    defaultData: {
+      eyebrow: "I nostri progetti",
+      title: "Sviluppi in corso\ne disponibili",
+      tagline: "Clicca sul progetto che preferisci e scegli la tua prossima casa.",
+    },
+  },
+  {
+    page: "home",
     blockKey: "final_cta",
     pageLabel: "Homepage",
     blockLabel: "CTA finale",

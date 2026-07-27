@@ -53,6 +53,15 @@ export async function getWhatWeDoContent(): Promise<WhatWeDoContent> {
   return getBlockData("home", "what_we_do");
 }
 
+export interface FeaturedProjectsContent {
+  eyebrow: string;
+  title: string;
+  tagline: string;
+}
+export async function getFeaturedProjectsContent(): Promise<FeaturedProjectsContent> {
+  return getBlockData("home", "featured_projects");
+}
+
 export interface FeatureItem {
   title: string;
   description: string;

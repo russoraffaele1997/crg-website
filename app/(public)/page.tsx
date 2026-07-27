@@ -14,6 +14,7 @@ import {
   getConstructionParallaxContent,
   getWhatWeDoContent,
   getWhyCrgContent,
+  getFeaturedProjectsContent,
   getHomeFinalCtaContent,
 } from "@/lib/data/site-content";
 
@@ -29,12 +30,13 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function HomePage() {
-  const [featured, hero, parallax, whatWeDo, whyCrg, spotlightProject, finalCta] = await Promise.all([
+  const [featured, hero, parallax, whatWeDo, whyCrg, featuredProjectsContent, spotlightProject, finalCta] = await Promise.all([
     getFeaturedProjects(3),
     getHeroContent(),
     getConstructionParallaxContent(),
     getWhatWeDoContent(),
     getWhyCrgContent(),
+    getFeaturedProjectsContent(),
     getSpotlightProject(),
     getHomeFinalCtaContent(),
   ]);
@@ -43,7 +45,7 @@ export default async function HomePage() {
     <>
       <HeroSection content={hero} projects={featured} />
       <ConstructionParallax content={parallax} />
-      <FeaturedProjects featured={featured} />
+      <FeaturedProjects featured={featured} content={featuredProjectsContent} />
       <WhatWeDoSection content={whatWeDo} />
       <WhyCRGSection content={whyCrg} />
       {spotlightProject && <ProjectSpotlightSection project={spotlightProject} />}
