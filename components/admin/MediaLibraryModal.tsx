@@ -7,6 +7,13 @@ import { uploadFileToMedia } from "@/lib/admin/upload-file";
 import type { MediaLibraryItem, MediaKind } from "@/lib/types/media";
 import type { MediaFolder } from "@/lib/admin/data/media";
 
+const acceptByKind: Record<MediaKind, string> = {
+  image: "image/*",
+  video: "video/*",
+  pdf: "application/pdf",
+  document: "",
+};
+
 export default function MediaLibraryModal({
   open,
   onClose,
@@ -16,7 +23,7 @@ export default function MediaLibraryModal({
   open: boolean;
   onClose: () => void;
   onSelect: (media: MediaLibraryItem) => void;
-  kindFilter?: MediaKind;
+  kindFilter?: MediaKind | MediaKind[];
 }) {
   const [tab, setTab] = useState<"browse" | "upload">("browse");
   const [folders, setFolders] = useState<MediaFolder[]>([]);
@@ -166,7 +173,11 @@ export default function MediaLibraryModal({
             <input
               ref={inputRef}
               type="file"
-              accept={kindFilter === "image" ? "image/*" : undefined}
+              accept={
+                kindFilter
+                  ? (Array.isArray(kindFilter) ? kindFilter : [kindFilter]).map((k) => acceptByKind[k]).join(",")
+                  : undefined
+              }
               className="hidden"
               onChange={(e) => {
                 const file = e.target.files?.[0];

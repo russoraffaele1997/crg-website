@@ -118,12 +118,18 @@ function CarBoxPickerModal({
           <p className="font-sans text-sm text-mid-gray mb-6">Seleziona il posto auto che preferisci.</p>
 
           {planUrl && (
-            <ClientImage
-              src={planUrl}
-              alt="Planimetria box auto"
-              className="w-full border border-border-warm object-contain mb-6"
-              fallbackClass="w-full h-56 bg-light-gray mb-6"
-            />
+            <a
+              href={planUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              download
+              className="flex items-center gap-2 font-sans text-sm text-crg-red hover:underline mb-6"
+            >
+              <svg className="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
+              </svg>
+              Scarica la planimetria dei box auto
+            </a>
           )}
 
           <div className="space-y-2 mb-8">

@@ -14,7 +14,7 @@ export default function MediaField({
   value: MediaLibraryItem | null;
   onChange: (media: MediaLibraryItem | null) => void;
   label?: string;
-  kindFilter?: MediaKind;
+  kindFilter?: MediaKind | MediaKind[];
 }) {
   const [open, setOpen] = useState(false);
 

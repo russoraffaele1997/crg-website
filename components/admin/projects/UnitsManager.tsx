@@ -175,7 +175,7 @@ function CarBoxManager({
   return (
     <div className="bg-slate-50 border border-slate-200 rounded-lg p-4 mb-4">
       <div className="mb-4">
-        <MediaField label="Planimetria generale box auto" value={plan} onChange={handlePlanChange} />
+        <MediaField label="Planimetria generale box auto" value={plan} onChange={handlePlanChange} kindFilter={["image", "pdf"]} />
       </div>
 
       <div className="flex items-center justify-between mb-3">

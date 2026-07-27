@@ -22,7 +22,7 @@ export async function getMediaFolders(): Promise<MediaFolder[]> {
 
 export interface GetMediaItemsParams {
   folderId?: string | null;
-  kind?: MediaKind;
+  kind?: MediaKind | MediaKind[];
   search?: string;
   page?: number;
   pageSize?: number;
@@ -44,7 +44,8 @@ export async function getMediaItems(
   if (folderId !== undefined) {
     query = folderId === null ? query.is("folder_id", null) : query.eq("folder_id", folderId);
   }
-  if (kind) query = query.eq("kind", kind);
+  if (Array.isArray(kind)) query = query.in("kind", kind);
+  else if (kind) query = query.eq("kind", kind);
   if (search) query = query.ilike("original_filename", `%${search}%`);
 
   const from = (page - 1) * pageSize;
