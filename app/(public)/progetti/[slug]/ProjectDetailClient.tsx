@@ -20,6 +20,12 @@ const unitStatusConfig: Record<string, { label: string; cls: string }> = {
   reserved:  { label: "Riservata",   cls: "bg-purple-50 text-purple-700 border-purple-200" },
 };
 
+const carBoxStatusConfig: Record<string, { label: string; cls: string }> = {
+  available: { label: "Disponibile", cls: "bg-emerald-50 text-emerald-700 border-emerald-200" },
+  optioned:  { label: "Opzionato",   cls: "bg-amber-50 text-amber-700 border-amber-200" },
+  sold:      { label: "Venduto",     cls: "bg-red-50 text-red-700 border-red-200" },
+};
+
 // ─── Gallery ─────────────────────────────────────────────────────────────────
 function Gallery({ images, title, category }: { images: string[]; title: string; category: string }) {
   const [lightbox, setLightbox] = useState<number | null>(null);
@@ -133,26 +139,38 @@ function CarBoxPickerModal({
           )}
 
           <div className="space-y-2 mb-8">
-            {boxes.map((box) => (
-              <label
-                key={box.id}
-                className={`flex items-center justify-between gap-4 border px-4 py-3 cursor-pointer transition-colors ${
-                  pending === box.id ? "border-crg-red bg-crg-red-light" : "border-border-warm hover:bg-cream"
-                }`}
-              >
-                <span className="flex items-center gap-3">
-                  <input
-                    type="radio"
-                    name="car-box"
-                    checked={pending === box.id}
-                    onChange={() => setPending(box.id)}
-                    className="w-4 h-4 accent-crg-red"
-                  />
-                  <span className="font-sans text-sm font-medium text-charcoal">{box.name}</span>
-                </span>
-                <span className="font-sans text-sm text-mid-gray">{box.sqm} mq</span>
-              </label>
-            ))}
+            {boxes.map((box) => {
+              const selectable = box.status !== "sold";
+              const config = carBoxStatusConfig[box.status] ?? carBoxStatusConfig.available;
+              return (
+                <label
+                  key={box.id}
+                  className={`flex items-center justify-between gap-4 border px-4 py-3 transition-colors ${
+                    !selectable
+                      ? "border-border-warm opacity-50 cursor-not-allowed"
+                      : pending === box.id
+                        ? "border-crg-red bg-crg-red-light cursor-pointer"
+                        : "border-border-warm hover:bg-cream cursor-pointer"
+                  }`}
+                >
+                  <span className="flex items-center gap-3">
+                    <input
+                      type="radio"
+                      name="car-box"
+                      checked={pending === box.id}
+                      disabled={!selectable}
+                      onChange={() => setPending(box.id)}
+                      className="w-4 h-4 accent-crg-red"
+                    />
+                    <span className="font-sans text-sm font-medium text-charcoal">{box.name}</span>
+                    <span className={`font-sans text-[10px] tracking-wider uppercase px-2 py-0.5 border ${config.cls}`}>
+                      {config.label}
+                    </span>
+                  </span>
+                  <span className="font-sans text-sm text-mid-gray">{box.sqm} mq</span>
+                </label>
+              );
+            })}
           </div>
 
           <button
@@ -361,7 +379,7 @@ function UnitDetailModal({
             </div>
           )}
 
-          {unit.status === "available" && (
+          {(unit.status === "available" || unit.status === "optioned") && (
             carBoxes.length > 0 && !selectedCarBox ? (
               <div className="mt-8">
                 <button type="button" disabled className="btn-primary opacity-40 cursor-not-allowed">
@@ -496,7 +514,7 @@ function UnitsTable({
                       <tr
                         key={unit.id}
                         onClick={() => setSelected(unit)}
-                        className={`border-b border-border-warm/30 last:border-0 transition-colors cursor-pointer ${unit.status === "available" ? "hover:bg-crg-red-light" : "opacity-55"}`}
+                        className={`border-b border-border-warm/30 last:border-0 transition-colors cursor-pointer ${unit.status === "available" || unit.status === "optioned" ? "hover:bg-crg-red-light" : "opacity-55"}`}
                       >
                         <td className="py-4 px-4">
                           <button
@@ -727,6 +745,10 @@ export default function ProjectDetailClient({ project }: { project: Project }) {
   const descRef = useRef<HTMLDivElement>(null);
   const descInView = useInView(descRef, { once: true, margin: "-60px" });
   const availableUnits = project.units.filter((u) => u.status === "available");
+  // Optioned units are still worth a visit — only sold/reserved/rented are
+  // truly off the table — so they stay pickable in the appointment form,
+  // even though the stat counter above only counts strictly "available".
+  const selectableUnits = project.units.filter((u) => u.status === "available" || u.status === "optioned");
   const [presetUnitId, setPresetUnitId] = useState("");
   const [presetCarBox, setPresetCarBox] = useState<CarBox | null>(null);
 
@@ -899,7 +921,7 @@ export default function ProjectDetailClient({ project }: { project: Project }) {
             </p>
             <AppointmentForm
               project={project}
-              availableUnits={availableUnits}
+              availableUnits={selectableUnits}
               presetUnitId={presetUnitId}
               presetCarBox={presetCarBox}
             />

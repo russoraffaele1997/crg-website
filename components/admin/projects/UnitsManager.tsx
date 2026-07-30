@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Plus, Pencil, Trash2, X, Check, FileImage, Car } from "lucide-react";
 import UnitStatusSelect from "./UnitStatusSelect";
+import CarBoxStatusSelect from "./CarBoxStatusSelect";
 import UnitDocumentsPanel from "./UnitDocumentsPanel";
 import MediaField from "@/components/admin/MediaField";
 import {
@@ -15,7 +16,7 @@ import {
   deleteCarBox,
   type UnitInput,
 } from "@/app/admin/(protected)/progetti/actions";
-import type { UnitStatus } from "@/lib/types/project";
+import type { UnitStatus, CarBoxStatus } from "@/lib/types/project";
 import type { MediaLibraryItem } from "@/lib/types/media";
 
 interface Unit {
@@ -38,6 +39,7 @@ interface CarBox {
   id: string;
   name: string;
   sqm: number;
+  status: string;
 }
 
 const typologyOptions = ["Appartamento", "Attico", "Attico e Superattico", "ERS", "Locale commerciale"];
@@ -146,7 +148,7 @@ function CarBoxManager({
     if (!newBox.name.trim()) return;
     setSaving(true);
     await createCarBox(projectId, newBox, boxes.length);
-    setBoxes((prev) => [...prev, { id: crypto.randomUUID(), ...newBox }]);
+    setBoxes((prev) => [...prev, { id: crypto.randomUUID(), status: "available" as CarBoxStatus, ...newBox }]);
     setNewBox({ name: "", sqm: 0 });
     setAdding(false);
     setSaving(false);
@@ -191,19 +193,19 @@ function CarBoxManager({
       </div>
 
       {adding && (
-        <div className="bg-white border border-slate-200 rounded-lg p-3 mb-3 flex gap-2">
+        <div className="bg-white border border-slate-200 rounded-lg p-3 mb-3 flex flex-wrap gap-2">
           <input
             placeholder="Nome (es. Box auto 1)"
             value={newBox.name}
             onChange={(e) => setNewBox((b) => ({ ...b, name: e.target.value }))}
-            className="flex-1 border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-crg-red"
+            className="flex-1 min-w-[160px] border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-crg-red"
           />
           <input
             type="number"
             placeholder="Mq"
             value={newBox.sqm || ""}
             onChange={(e) => setNewBox((b) => ({ ...b, sqm: Number(e.target.value) }))}
-            className="w-28 border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-crg-red"
+            className="w-24 border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-crg-red"
           />
           <button
             type="button"
@@ -225,17 +227,17 @@ function CarBoxManager({
         <div className="space-y-2">
           {boxes.map((box) =>
             editingId === box.id ? (
-              <div key={box.id} className="bg-white border border-slate-200 rounded-lg p-3 flex gap-2">
+              <div key={box.id} className="bg-white border border-slate-200 rounded-lg p-3 flex flex-wrap gap-2">
                 <input
                   value={editBox.name}
                   onChange={(e) => setEditBox((b) => ({ ...b, name: e.target.value }))}
-                  className="flex-1 border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-crg-red"
+                  className="flex-1 min-w-[160px] border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-crg-red"
                 />
                 <input
                   type="number"
                   value={editBox.sqm || ""}
                   onChange={(e) => setEditBox((b) => ({ ...b, sqm: Number(e.target.value) }))}
-                  className="w-28 border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-crg-red"
+                  className="w-24 border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-crg-red"
                 />
                 <button
                   type="button"
@@ -250,11 +252,12 @@ function CarBoxManager({
                 </button>
               </div>
             ) : (
-              <div key={box.id} className="bg-white border border-slate-200 rounded-lg px-3 py-2 flex items-center justify-between">
+              <div key={box.id} className="bg-white border border-slate-200 rounded-lg px-3 py-2 flex flex-wrap items-center justify-between gap-2">
                 <span className="text-sm text-slate-800">
                   {box.name} <span className="text-slate-400">— {box.sqm} mq</span>
                 </span>
-                <div className="flex items-center gap-1">
+                <div className="flex items-center gap-2">
+                  <CarBoxStatusSelect carBoxId={box.id} projectId={projectId} status={box.status as CarBoxStatus} />
                   <button type="button" onClick={() => startEdit(box)} className="text-slate-400 hover:text-slate-700 p-1.5" aria-label="Modifica">
                     <Pencil className="w-4 h-4" />
                   </button>
@@ -389,8 +392,8 @@ export default function UnitsManager({
       {units.length === 0 ? (
         <p className="text-sm text-slate-500">Nessun appartamento ancora.</p>
       ) : (
-        <div className="bg-white border border-slate-200 rounded-xl overflow-hidden">
-          <table className="w-full text-sm">
+        <div className="bg-white border border-slate-200 rounded-xl overflow-x-auto">
+          <table className="w-full text-sm min-w-[720px]">
             <thead>
               <tr className="border-b border-slate-200 bg-slate-50">
                 <th className="text-left font-medium text-slate-500 px-4 py-3">Unità</th>

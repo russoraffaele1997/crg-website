@@ -28,3 +28,13 @@ export const unitStatusOptions = [
 export function unitStatusConfig(status: string) {
   return unitStatusOptions.find((o) => o.value === status) ?? unitStatusOptions[0];
 }
+
+export const carBoxStatusOptions = [
+  { value: "available", label: "Disponibile", color: "bg-emerald-100 text-emerald-700 border-emerald-200" },
+  { value: "optioned", label: "Opzionato", color: "bg-amber-100 text-amber-700 border-amber-200" },
+  { value: "sold", label: "Venduto", color: "bg-red-100 text-red-700 border-red-200" },
+] as const;
+
+export function carBoxStatusConfig(status: string) {
+  return carBoxStatusOptions.find((o) => o.value === status) ?? carBoxStatusOptions[0];
+}

@@ -58,7 +58,7 @@ export interface AdminProjectDetail {
   isSpotlight: boolean;
   spotlightSpecs: { label: string; value: string }[];
   carBoxPlan: MediaRef | null;
-  carBoxes: { id: string; name: string; sqm: number; orderIndex: number }[];
+  carBoxes: { id: string; name: string; sqm: number; status: string; orderIndex: number }[];
   publishStatus: string;
   seoMetaId: string | null;
   seoMetaTitle: string;
@@ -115,7 +115,7 @@ export async function getAdminProjectById(id: string): Promise<AdminProjectDetai
       seo_meta_id, seo_meta:seo_meta_id(meta_title, meta_description, og_title, og_description),
       cover_media:media_library!cover_image_id(id, storage_path, bucket, original_filename, kind),
       car_box_plan:media_library!car_box_plan_media_id(id, storage_path, bucket, original_filename, kind),
-      project_car_boxes(id, name, sqm, order_index),
+      project_car_boxes(id, name, sqm, status, order_index),
       project_gallery_images(id, order_index, media:media_library(id, storage_path, bucket, original_filename, kind)),
       project_features(id, kind, title, order_index),
       project_units(id, unit_code, name, typology, floor, interno, sqm, outdoor_sqm, rooms, destination, price, status, order_index, description),
@@ -145,7 +145,7 @@ export async function getAdminProjectById(id: string): Promise<AdminProjectDetai
     seo_meta: { meta_title: string | null; meta_description: string | null; og_title: string | null; og_description: string | null } | null;
     cover_media: { id: string; storage_path: string; bucket: string; original_filename: string; kind: string } | null;
     car_box_plan: { id: string; storage_path: string; bucket: string; original_filename: string; kind: string } | null;
-    project_car_boxes: { id: string; name: string; sqm: number; order_index: number }[];
+    project_car_boxes: { id: string; name: string; sqm: number; status: string; order_index: number }[];
     project_gallery_images: { id: string; order_index: number; media: { id: string; storage_path: string; bucket: string; original_filename: string; kind: string } | null }[];
     project_features: { id: string; kind: string; title: string; order_index: number }[];
     project_units: {
@@ -174,7 +174,7 @@ export async function getAdminProjectById(id: string): Promise<AdminProjectDetai
     carBoxPlan: toMediaRef(row.car_box_plan),
     carBoxes: [...row.project_car_boxes]
       .sort((a, b) => a.order_index - b.order_index)
-      .map((c) => ({ id: c.id, name: c.name, sqm: Number(c.sqm), orderIndex: c.order_index })),
+      .map((c) => ({ id: c.id, name: c.name, sqm: Number(c.sqm), status: c.status, orderIndex: c.order_index })),
     publishStatus: row.publish_status,
     seoMetaId: row.seo_meta_id,
     seoMetaTitle: row.seo_meta?.meta_title ?? "",

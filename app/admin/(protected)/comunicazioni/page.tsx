@@ -40,8 +40,8 @@ export default async function ComunicazioniAdminPage() {
           <p className="text-sm font-medium text-slate-700">Nessuna comunicazione ancora</p>
         </div>
       ) : (
-        <div className="bg-white border border-slate-200 rounded-xl overflow-hidden">
-          <table className="w-full text-sm">
+        <div className="bg-white border border-slate-200 rounded-xl overflow-x-auto">
+          <table className="w-full text-sm min-w-[640px]">
             <thead>
               <tr className="border-b border-slate-200 bg-slate-50">
                 <th className="text-left font-medium text-slate-500 px-5 py-3">Titolo</th>

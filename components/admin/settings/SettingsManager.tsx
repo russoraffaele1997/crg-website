@@ -117,8 +117,8 @@ export default function SettingsManager({ initialSettings }: Props) {
           <p className="text-sm text-slate-500 mt-1">Aggiungi la prima chiave/valore dal modulo qui sopra.</p>
         </div>
       ) : (
-        <div className="bg-white border border-slate-200 rounded-xl overflow-hidden">
-          <table className="w-full text-sm">
+        <div className="bg-white border border-slate-200 rounded-xl overflow-x-auto">
+          <table className="w-full text-sm min-w-[480px]">
             <thead>
               <tr className="border-b border-slate-200 bg-slate-50">
                 <th className="text-left font-medium text-slate-500 px-5 py-3">Chiave</th>

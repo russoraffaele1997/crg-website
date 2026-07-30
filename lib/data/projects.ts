@@ -9,7 +9,7 @@ const PROJECT_SELECT = `
   spotlight_specs,
   cover_media:media_library!cover_image_id(storage_path, bucket),
   car_box_plan:media_library!car_box_plan_media_id(storage_path, bucket),
-  project_car_boxes(id, name, sqm, order_index),
+  project_car_boxes(id, name, sqm, status, order_index),
   project_gallery_images(order_index, media:media_library(storage_path, bucket)),
   project_features(kind, title, order_index),
   project_units(
@@ -37,7 +37,7 @@ interface ProjectRow {
   spotlight_specs: { label: string; value: string }[] | null;
   cover_media: MediaRef;
   car_box_plan: MediaRef;
-  project_car_boxes: { id: string; name: string; sqm: number; order_index: number }[];
+  project_car_boxes: { id: string; name: string; sqm: number; status: CarBox["status"]; order_index: number }[];
   project_gallery_images: { order_index: number; media: MediaRef }[];
   project_features: { kind: string; title: string; order_index: number }[];
   project_units: {
@@ -127,7 +127,7 @@ function mapProject(row: ProjectRow): Project {
 
   const carBoxes: CarBox[] = [...row.project_car_boxes]
     .sort((a, b) => a.order_index - b.order_index)
-    .map((c) => ({ id: c.id, name: c.name, sqm: Number(c.sqm) }));
+    .map((c) => ({ id: c.id, name: c.name, sqm: Number(c.sqm), status: c.status }));
 
   return {
     id: row.id,

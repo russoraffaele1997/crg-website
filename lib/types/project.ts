@@ -1,4 +1,5 @@
 export type UnitStatus = "available" | "optioned" | "sold" | "rented" | "reserved";
+export type CarBoxStatus = "available" | "optioned" | "sold";
 export type ProjectCategory = "residential" | "commercial" | "industrial";
 export type ProjectStatus = "for-sale" | "under-construction" | "coming-soon" | "for-rent";
 
@@ -41,6 +42,7 @@ export interface CarBox {
   id: string;
   name: string;
   sqm: number;
+  status: CarBoxStatus;
 }
 
 export interface Project {

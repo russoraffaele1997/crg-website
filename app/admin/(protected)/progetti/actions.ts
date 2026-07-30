@@ -8,7 +8,7 @@ import { createServiceClient } from "@/lib/supabase/service";
 import { getUnitDocuments } from "@/lib/admin/data/units";
 import { upsertSeoMeta } from "@/lib/actions/seo";
 import type { AdminUser } from "@/lib/types/admin";
-import type { ProjectCategory, ProjectStatus, UnitStatus } from "@/lib/types/project";
+import type { ProjectCategory, ProjectStatus, UnitStatus, CarBoxStatus } from "@/lib/types/project";
 
 function revalidatePublicSite() {
   // Projects surface on the homepage (featured), the listing, each detail
@@ -371,6 +371,15 @@ export async function updateCarBox(id: string, projectId: string, input: CarBoxI
     .from("project_car_boxes")
     .update({ name: input.name, sqm: input.sqm })
     .eq("id", id);
+  if (error) throw new Error(error.message);
+  revalidatePublicSite();
+}
+
+export async function updateCarBoxStatus(id: string, projectId: string, status: CarBoxStatus) {
+  const admin = await requireContentEditor();
+  await assertCollaboratorDraftOnly(admin, "projects", projectId);
+  const service = createServiceClient();
+  const { error } = await service.from("project_car_boxes").update({ status }).eq("id", id);
   if (error) throw new Error(error.message);
   revalidatePublicSite();
 }

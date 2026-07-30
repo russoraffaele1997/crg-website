@@ -36,7 +36,7 @@ function DocSection({
       {items.length === 0 ? (
         <p className="text-xs text-slate-400">Nessun file.</p>
       ) : (
-        <div className="grid grid-cols-4 gap-3">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
           {items
             .filter((i) => i.docType === docType)
             .map((doc) => (
