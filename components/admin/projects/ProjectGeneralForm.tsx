@@ -7,6 +7,7 @@ import { createProject, updateProjectGeneral, deleteProject, type ProjectGeneral
 import { categoryOptions, projectStatusOptions, publishStatusOptions } from "@/lib/admin/project-options";
 import MediaField from "@/components/admin/MediaField";
 import { PROJECT_STATUS_LABELS } from "@/lib/projects/derive";
+import { mapOpenUrl, mapQuery } from "@/lib/projects/map";
 import type { ProjectStatus } from "@/lib/types/project";
 import type { MediaLibraryItem } from "@/lib/types/media";
 
@@ -230,11 +231,12 @@ export default function ProjectGeneralForm({ mode, projectId, initial }: Props) 
         />
         <p className="text-xs text-slate-400 mt-1">
           Mostra la mappa Google nella pagina del progetto. Se vuoto, la mappa non compare.
+          {mapAddress.trim() && <> Google cercherà: <span className="text-slate-600">{mapQuery(mapAddress)}</span>.</>}
           {mapAddress.trim() && (
             <>
               {" "}
               <a
-                href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(mapAddress.trim())}`}
+                href={mapOpenUrl(mapAddress)}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-crg-red hover:underline"

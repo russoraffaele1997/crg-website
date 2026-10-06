@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { openCookieBanner, useConsent } from "@/lib/consent";
+import { mapEmbedUrl, mapOpenUrl } from "@/lib/projects/map";
 
 /**
  * Google Maps embed of the building site. It sets Google cookies, so it loads
@@ -12,9 +13,8 @@ import { openCookieBanner, useConsent } from "@/lib/consent";
 export default function ProjectMap({ address, title }: { address: string; title: string }) {
   const consent = useConsent();
   const [loadedOnce, setLoadedOnce] = useState(false);
-  const query = encodeURIComponent(address);
-  const embedUrl = `https://www.google.com/maps?q=${query}&z=16&output=embed`;
-  const openUrl = `https://www.google.com/maps/search/?api=1&query=${query}`;
+  const embedUrl = mapEmbedUrl(address);
+  const openUrl = mapOpenUrl(address);
   const showMap = consent === "accepted" || loadedOnce;
 
   return (
