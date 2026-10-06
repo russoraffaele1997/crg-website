@@ -207,7 +207,10 @@ export function nextAction(input: {
         counts.available === 1
           ? `È rimasto un solo ${unitNoun(category, 1)} disponibile.`
           : `Ultime ${counts.available} ${unitNoun(category, counts.available)} disponibili.`,
-      text: "Prenota una visita per vederle di persona con il nostro team.",
+      text:
+        counts.available === 1
+          ? "Prenota una visita con il nostro team prima che venga venduto."
+          : "Prenota una visita per vederle di persona con il nostro team.",
       cta: { label: "Prenota subito", href: ANCHORS.visit },
     };
   }
