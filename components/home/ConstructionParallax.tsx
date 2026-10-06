@@ -524,7 +524,7 @@ export default function ConstructionParallax({ content }: { content: Constructio
         <motion.a
           href="#progetti"
           style={{ opacity: useTransform(scrollYProgress, [0, 0.9, 0.97], [1, 1, 0]) }}
-          className="absolute bottom-6 right-5 md:right-8 z-20 font-sans text-[10px] md:text-[11px] tracking-[0.25em] uppercase text-mid-gray hover:text-crg-red bg-white/85 px-3 py-1.5 transition-colors"
+          className="absolute bottom-6 left-5 md:left-8 z-20 font-sans text-[10px] md:text-[11px] tracking-[0.25em] uppercase text-mid-gray hover:text-crg-red bg-white/85 px-3 py-1.5 transition-colors"
         >
           Salta ai progetti →
         </motion.a>

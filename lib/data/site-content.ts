@@ -168,6 +168,8 @@ export interface CompanyInfoContent {
   rea: string;
   shareCapital: string;
   pec: string;
+  whatsappNumber: string;
+  whatsappMessage: string;
 }
 export async function getCompanyInfoContent(): Promise<CompanyInfoContent> {
   return getBlockData("global", "company_info");

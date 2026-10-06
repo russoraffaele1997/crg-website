@@ -340,8 +340,13 @@ export const blockDefinitions: BlockDefinition[] = [
       { key: "rea", label: "Numero REA", type: "text" },
       { key: "shareCapital", label: "Capitale sociale (indicare quello effettivamente versato, art. 2250 c.c.)", type: "text" },
       { key: "pec", label: "PEC", type: "text" },
+      { key: "whatsappNumber", label: "Numero WhatsApp (pulsante in homepage; vuoto = pulsante nascosto)", type: "text" },
+      { key: "whatsappMessage", label: "Messaggio WhatsApp precompilato", type: "textarea" },
     ],
     defaultData: {
+      whatsappNumber: "+39 331 836 4042",
+      whatsappMessage:
+        "Ciao CRG! 👋\nHo visitato il vostro sito e sono interessato/a all'acquisto di un immobile.\nPotreste darmi qualche informazione in più su disponibilità, prezzi e possibilità di visita?\nGrazie!",
       // From the Registro Imprese extract (visura) of 09/09/2026.
       legalName: "CRG S.R.L.",
       legalAddress: "Traversa Via Michelangelo 66, 80026 Casoria (NA)",

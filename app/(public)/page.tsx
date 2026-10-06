@@ -8,6 +8,7 @@ import WhyCRGSection from "@/components/WhyCRGSection";
 import FeaturedProjects from "@/components/FeaturedProjects";
 import ProjectSpotlightSection from "@/components/home/ProjectSpotlightSection";
 import FinalCTA from "@/components/FinalCTA";
+import WhatsAppButton from "@/components/WhatsAppButton";
 import { getFeaturedProjects, getSpotlightProject } from "@/lib/data/projects";
 import {
   getHeroContent,
@@ -16,6 +17,7 @@ import {
   getWhyCrgContent,
   getFeaturedProjectsContent,
   getHomeFinalCtaContent,
+  getCompanyInfoContent,
 } from "@/lib/data/site-content";
 
 export const revalidate = 300;
@@ -30,7 +32,7 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function HomePage() {
-  const [featured, hero, parallax, whatWeDo, whyCrg, featuredProjectsContent, spotlightProject, finalCta] = await Promise.all([
+  const [featured, hero, parallax, whatWeDo, whyCrg, featuredProjectsContent, spotlightProject, finalCta, companyInfo] = await Promise.all([
     getFeaturedProjects(3),
     getHeroContent(),
     getConstructionParallaxContent(),
@@ -39,6 +41,7 @@ export default async function HomePage() {
     getFeaturedProjectsContent(),
     getSpotlightProject(),
     getHomeFinalCtaContent(),
+    getCompanyInfoContent(),
   ]);
 
   return (
@@ -50,6 +53,9 @@ export default async function HomePage() {
       <WhyCRGSection content={whyCrg} />
       {spotlightProject && <ProjectSpotlightSection project={spotlightProject} />}
       <FinalCTA content={finalCta} />
+      {companyInfo.whatsappNumber?.trim() && (
+        <WhatsAppButton phone={companyInfo.whatsappNumber} message={companyInfo.whatsappMessage} />
+      )}
     </>
   );
 }
