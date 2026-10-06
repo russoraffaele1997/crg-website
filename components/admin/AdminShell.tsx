@@ -59,11 +59,12 @@ export default function AdminShell({
       <aside className="hidden lg:flex fixed inset-y-0 left-0 w-64 bg-slate-900 flex-col">
         <div className="h-16 flex items-center px-6 border-b border-white/10">
           <Image
-            src="/logo-crg.png"
+            src="/brand/crg-logo-bianco.svg"
             alt="CRG"
-            width={120}
-            height={44}
-            className="h-8 w-auto brightness-0 invert"
+            width={64}
+            height={48}
+            className="h-12 w-auto"
+            unoptimized
           />
           <span className="ml-2.5 text-[10px] tracking-[0.2em] uppercase text-slate-500">
             Admin
@@ -84,11 +85,12 @@ export default function AdminShell({
       {/* Mobile topbar */}
       <header className="lg:hidden fixed top-0 inset-x-0 h-16 bg-slate-900 flex items-center justify-between px-4 z-40">
         <Image
-          src="/logo-crg.png"
+          src="/brand/crg-logo-bianco.svg"
           alt="CRG"
-          width={110}
-          height={40}
-          className="h-7 w-auto brightness-0 invert"
+          width={56}
+          height={42}
+          className="h-11 w-auto"
+          unoptimized
         />
         <button
           onClick={() => setMobileOpen(true)}

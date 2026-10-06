@@ -20,11 +20,12 @@ export default function Footer({
           <div className="lg:col-span-2">
             <div className="mb-6">
               <Image
-                src="/logo-crg.png"
+                src="/brand/crg-logo-bianco.svg"
                 alt="CRG | Crafted Residential Group"
-                width={160}
-                height={58}
-                className="h-12 w-auto brightness-0 invert"
+                width={107}
+                height={80}
+                className="h-20 w-auto"
+                unoptimized
               />
             </div>
             <p className="font-sans text-sm text-white/40 leading-relaxed max-w-sm">

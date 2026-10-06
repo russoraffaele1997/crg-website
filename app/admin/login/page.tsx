@@ -14,11 +14,12 @@ export default function AdminLoginPage() {
       <div className="w-full max-w-sm">
         <div className="flex justify-center mb-8">
           <Image
-            src="/logo-crg.png"
+            src="/brand/crg-logo-bianco.svg"
             alt="CRG"
-            width={140}
-            height={51}
-            className="h-10 w-auto brightness-0 invert"
+            width={134}
+            height={100}
+            className="h-16 w-auto"
+            unoptimized
             priority
           />
         </div>

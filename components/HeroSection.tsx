@@ -53,11 +53,12 @@ export default function HeroSection({ content, projects }: { content: HeroConten
 
           <motion.div variants={item} className="flex items-center justify-center mb-8">
             <Image
-              src="/logo-crg.png"
+              src="/brand/crg-logo-bianco.svg"
               alt="CRG | Crafted Residential Group"
-              width={320}
-              height={116}
-              className="h-24 sm:h-28 w-auto brightness-0 invert"
+              width={192}
+              height={144}
+              className="h-32 sm:h-36 w-auto"
+              unoptimized
               priority
             />
           </motion.div>

@@ -28,11 +28,12 @@ export default function Header({ projects }: { projects: ProjectSummary[] }) {
           <Link href="/" className="flex items-center group">
             <div className="transition-all duration-300 rounded px-2 py-1.5 -mx-2 -my-1.5 hover:bg-black/5">
               <Image
-                src="/logo-crg.png"
+                src="/brand/crg-logo.svg"
                 alt="CRG | Crafted Residential Group"
-                width={160}
-                height={58}
+                width={86}
+                height={64}
                 className="h-16 w-auto transition-opacity duration-300 group-hover:opacity-80"
+                unoptimized
                 priority
               />
             </div>
