@@ -21,7 +21,21 @@ export const metadata: Metadata = {
 
 export default async function PrivacyPage() {
   const [content, company] = await Promise.all([getPrivacyContent(), getCompanyInfoContent()]);
-  const blocks = content.body.split(/\n\s*\n/).map((b) => b.trim()).filter(Boolean);
+  // Placeholders in the admin-editable text, filled from Contenuti sito → Dati aziendali.
+  const holder = [
+    company.legalName?.trim() || "CRG | Crafted Residential Group",
+    company.vatNumber?.trim() && `P.IVA e C.F. ${company.vatNumber.trim()}`,
+  ]
+    .filter(Boolean)
+    .join(", ");
+  const tokens: Record<string, string> = {
+    "{titolare}": holder,
+    "{indirizzo}": `con sede legale in ${company.legalAddress?.trim() || company.address}`,
+    "{email}": company.email,
+    "{pec}": company.pec?.trim() || company.email,
+  };
+  const body = Object.entries(tokens).reduce((text, [token, value]) => text.split(token).join(value), content.body);
+  const blocks = body.split(/\n\s*\n/).map((b) => b.trim()).filter(Boolean);
 
   return (
     <>
@@ -44,8 +58,15 @@ export default async function PrivacyPage() {
             )
           )}
           <p className="font-sans text-sm text-mid-gray mt-10 pt-6 border-t border-border-warm">
+            Titolare del trattamento: {holder}
+            {company.rea?.trim() ? ` · REA ${company.rea.trim()}` : ""}
+            <br />
             Contatti per la privacy: <a href={`mailto:${company.email}`} className="text-crg-red hover:underline">{company.email}</a>
-            {company.address ? ` · ${company.address}` : ""}
+            {company.pec?.trim() ? (
+              <>
+                {" "}· PEC <a href={`mailto:${company.pec.trim()}`} className="text-crg-red hover:underline">{company.pec.trim()}</a>
+              </>
+            ) : null}
           </p>
         </div>
       </section>

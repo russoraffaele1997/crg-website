@@ -162,6 +162,12 @@ export interface CompanyInfoContent {
   phone: string;
   hoursWeekday: string;
   hoursSaturday: string;
+  legalName: string;
+  legalAddress: string;
+  vatNumber: string;
+  rea: string;
+  shareCapital: string;
+  pec: string;
 }
 export async function getCompanyInfoContent(): Promise<CompanyInfoContent> {
   return getBlockData("global", "company_info");

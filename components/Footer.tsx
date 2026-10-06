@@ -89,9 +89,23 @@ export default function Footer({
         </div>
 
         <div className="mt-16 pt-8 border-t border-white/8 flex flex-col md:flex-row justify-between items-center gap-4">
-          <p className="font-sans text-xs text-white/20">
-            © {new Date().getFullYear()} CRG | Crafted Residential Group. Tutti i diritti riservati.
-          </p>
+          <div className="font-sans text-xs text-white/20 space-y-1 text-center md:text-left">
+            <p>
+              © {new Date().getFullYear()} {companyInfo.legalName?.trim() || "CRG | Crafted Residential Group"}. Tutti i diritti riservati.
+            </p>
+            {/* Company identification required on company websites (art. 2250 c.c.) */}
+            <p>
+              {[
+                companyInfo.legalAddress?.trim() && `Sede legale ${companyInfo.legalAddress.trim()}`,
+                companyInfo.vatNumber?.trim() && `P.IVA e C.F. ${companyInfo.vatNumber.trim()}`,
+                companyInfo.rea?.trim() && `REA ${companyInfo.rea.trim()}`,
+                companyInfo.shareCapital?.trim() && `Capitale sociale ${companyInfo.shareCapital.trim()}`,
+                companyInfo.pec?.trim() && `PEC ${companyInfo.pec.trim()}`,
+              ]
+                .filter(Boolean)
+                .join(" · ")}
+            </p>
+          </div>
           <div className="flex gap-6">
             <Link href="/privacy" className="font-sans text-xs text-white/20 hover:text-crg-red transition-colors">
               Privacy Policy
