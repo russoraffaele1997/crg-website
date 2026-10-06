@@ -96,7 +96,7 @@ export default function Footer({
             <Link href="/privacy" className="font-sans text-xs text-white/20 hover:text-crg-red transition-colors">
               Privacy Policy
             </Link>
-            <Link href="#" className="font-sans text-xs text-white/20 hover:text-crg-red transition-colors">
+            <Link href="/privacy#cookie" className="font-sans text-xs text-white/20 hover:text-crg-red transition-colors">
               Cookie Policy
             </Link>
           </div>

@@ -3,6 +3,16 @@ import { getCompanyInfoContent, getPrivacyContent } from "@/lib/data/site-conten
 
 export const revalidate = 300;
 
+/** "## Cookie" → id="cookie", so sections can be linked (e.g. /privacy#cookie from the footer). */
+function anchorOf(title: string): string {
+  return title
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[̀-ͯ]/g, "")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-|-$/g, "");
+}
+
 export const metadata: Metadata = {
   title: "Privacy — CRG | Crafted Residential Group",
   description: "Come trattiamo i dati personali raccolti attraverso il sito CRG.",
@@ -28,7 +38,7 @@ export default async function PrivacyPage() {
         <div className="container-custom max-w-3xl">
           {blocks.map((block, i) =>
             block.startsWith("## ") ? (
-              <h2 key={i} className="font-heading text-xl font-bold text-charcoal mt-10 mb-3">{block.slice(3)}</h2>
+              <h2 key={i} id={anchorOf(block.slice(3))} className="font-heading text-xl font-bold text-charcoal mt-10 mb-3 scroll-mt-28">{block.slice(3)}</h2>
             ) : (
               <p key={i} className="font-sans text-[15px] text-mid-gray leading-relaxed mb-4 whitespace-pre-line">{block}</p>
             )

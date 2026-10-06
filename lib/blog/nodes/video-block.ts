@@ -15,10 +15,12 @@ declare module "@tiptap/core" {
 
 function toEmbedUrl(url: string): { kind: "iframe" | "video"; src: string } {
   const youtube = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([\w-]+)/);
-  if (youtube) return { kind: "iframe", src: `https://www.youtube.com/embed/${youtube[1]}` };
+  // Privacy-enhanced players (see the Cookie section of /privacy): YouTube sets
+  // no cookies until the visitor presses play, Vimeo's dnt=1 disables tracking.
+  if (youtube) return { kind: "iframe", src: `https://www.youtube-nocookie.com/embed/${youtube[1]}` };
 
   const vimeo = url.match(/vimeo\.com\/(\d+)/);
-  if (vimeo) return { kind: "iframe", src: `https://player.vimeo.com/video/${vimeo[1]}` };
+  if (vimeo) return { kind: "iframe", src: `https://player.vimeo.com/video/${vimeo[1]}?dnt=1` };
 
   return { kind: "video", src: url };
 }
