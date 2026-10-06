@@ -25,7 +25,7 @@ export const revalidate = 300;
 export async function generateMetadata(): Promise<Metadata> {
   const seo = await getPageSeo("/");
   return buildMetadata(seo, {
-    title: "CRG | Crafted Residential Group — Sviluppo Immobiliare Premium",
+    title: "CRG Costruzioni | Crafted Residential Group — Casoria (NA)",
     description:
       "Dal terreno al valore. CRG sviluppa progetti immobiliari residenziali, commerciali e industriali in Italia.",
   });

@@ -2,6 +2,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import ScrollRestoration from "@/components/ScrollRestoration";
 import CookieBanner from "@/components/CookieBanner";
+import StructuredData from "@/components/StructuredData";
 import { getProjectSummaries } from "@/lib/data/projects";
 import { getCompanyInfoContent } from "@/lib/data/site-content";
 
@@ -16,6 +17,7 @@ export default async function PublicLayout({
 
   return (
     <>
+      <StructuredData company={companyInfo} />
       <ScrollRestoration />
       <Header projects={projects} />
       <main>{children}</main>
