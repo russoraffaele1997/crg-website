@@ -213,13 +213,18 @@ export async function createBlogTag(name: string): Promise<{ id: string }> {
 
 // ─── Gallery ────────────────────────────────────────────────────────────────
 
-export async function addBlogGalleryImage(postId: string, mediaId: string, orderIndex: number) {
+export async function addBlogGalleryImage(postId: string, mediaId: string, orderIndex: number): Promise<{ id: string }> {
   const admin = await requireContentEditor();
   await assertCollaboratorDraftOnly(admin, "blog_posts", postId);
   const service = createServiceClient();
-  const { error } = await service.from("blog_gallery_images").insert({ post_id: postId, media_id: mediaId, order_index: orderIndex });
-  if (error) throw new Error(error.message);
+  const { data, error } = await service
+    .from("blog_gallery_images")
+    .insert({ post_id: postId, media_id: mediaId, order_index: orderIndex })
+    .select("id")
+    .single();
+  if (error || !data) throw new Error(error?.message ?? "Immagine non aggiunta.");
   revalidatePublicSite();
+  return { id: data.id };
 }
 
 export async function removeBlogGalleryImage(id: string) {

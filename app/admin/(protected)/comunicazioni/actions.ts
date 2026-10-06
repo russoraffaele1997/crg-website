@@ -181,15 +181,18 @@ export async function createCommunicationCategory(name: string): Promise<{ id: s
 
 // ─── Attachments ────────────────────────────────────────────────────────────
 
-export async function addCommunicationAttachment(communicationId: string, mediaId: string, orderIndex: number) {
+export async function addCommunicationAttachment(communicationId: string, mediaId: string, orderIndex: number): Promise<{ id: string }> {
   const admin = await requireContentEditor();
   await assertCollaboratorDraftOnly(admin, "communications", communicationId);
   const service = createServiceClient();
-  const { error } = await service
+  const { data, error } = await service
     .from("communication_attachments")
-    .insert({ communication_id: communicationId, media_id: mediaId, order_index: orderIndex });
-  if (error) throw new Error(error.message);
+    .insert({ communication_id: communicationId, media_id: mediaId, order_index: orderIndex })
+    .select("id")
+    .single();
+  if (error || !data) throw new Error(error?.message ?? "Allegato non aggiunto.");
   revalidatePublicSite();
+  return { id: data.id };
 }
 
 export async function removeCommunicationAttachment(id: string) {

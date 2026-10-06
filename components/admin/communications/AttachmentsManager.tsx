@@ -22,8 +22,8 @@ export default function AttachmentsManager({
   const [pickerOpen, setPickerOpen] = useState(false);
 
   const handleSelect = async (media: MediaLibraryItem) => {
-    await addCommunicationAttachment(communicationId, media.id, items.length);
-    setItems((prev) => [...prev, { id: crypto.randomUUID(), media: { id: media.id, url: media.url, original_filename: media.original_filename, kind: media.kind } }]);
+    const { id } = await addCommunicationAttachment(communicationId, media.id, items.length);
+    setItems((prev) => [...prev, { id, media: { id: media.id, url: media.url, original_filename: media.original_filename, kind: media.kind } }]);
   };
 
   const handleRemove = async (id: string) => {

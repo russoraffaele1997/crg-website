@@ -22,8 +22,8 @@ export default function BlogGalleryManager({
   const [pickerOpen, setPickerOpen] = useState(false);
 
   const handleSelect = async (media: MediaLibraryItem) => {
-    await addBlogGalleryImage(postId, media.id, items.length);
-    setItems((prev) => [...prev, { id: crypto.randomUUID(), media: { id: media.id, url: media.url, original_filename: media.original_filename } }]);
+    const { id } = await addBlogGalleryImage(postId, media.id, items.length);
+    setItems((prev) => [...prev, { id, media: { id: media.id, url: media.url, original_filename: media.original_filename } }]);
   };
 
   const handleRemove = async (id: string) => {
