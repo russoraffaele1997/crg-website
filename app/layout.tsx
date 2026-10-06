@@ -22,7 +22,8 @@ export const metadata: Metadata = {
   // Resolves relative URLs (Open Graph image, icons) against the real domain.
   metadataBase: new URL(SITE_URL),
   title: {
-    template: "%s | CRG - Crafted Residential Group",
+    // Page titles already include the brand ("Progetti — CRG | …"): no suffix, or it appears twice.
+    template: "%s",
     default: "CRG | Crafted Residential Group — Sviluppo Immobiliare Premium",
   },
   description:
