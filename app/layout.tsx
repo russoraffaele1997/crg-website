@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Inter, Sora } from "next/font/google";
 import "./globals.css";
+import { SITE_URL } from "@/lib/site";
 
 // Body / UI font — geometric sans-serif, clean and professional
 const inter = Inter({
@@ -18,6 +19,8 @@ const sora = Sora({
 });
 
 export const metadata: Metadata = {
+  // Resolves relative URLs (Open Graph image, icons) against the real domain.
+  metadataBase: new URL(SITE_URL),
   title: {
     template: "%s | CRG - Crafted Residential Group",
     default: "CRG | Crafted Residential Group — Sviluppo Immobiliare Premium",
@@ -30,6 +33,7 @@ export const metadata: Metadata = {
     type: "website",
     locale: "it_IT",
     siteName: "CRG | Crafted Residential Group",
+    url: SITE_URL,
   },
 };
 

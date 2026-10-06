@@ -3,7 +3,7 @@ import { getProjectSummaries } from "@/lib/data/projects";
 import { getCommunications } from "@/lib/data/communications";
 import { getBlogPosts } from "@/lib/data/blog";
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://www.crg-srl.it";
+import { SITE_URL } from "@/lib/site";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const [projects, communications, blogPosts] = await Promise.all([

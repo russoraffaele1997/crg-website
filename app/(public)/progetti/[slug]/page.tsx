@@ -49,6 +49,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return buildMetadata(seo, {
     title: `${project.title} — CRG | Crafted Residential Group`,
     description: project.shortDescription,
+    image: project.coverImage || undefined,
   });
 }
 
