@@ -66,19 +66,24 @@ interface Phase {
 function PhaseText({
   phase,
   scrollYProgress,
+  isFirst,
 }: {
   phase: Phase;
   scrollYProgress: MotionValue<number>;
+  isFirst: boolean;
 }) {
   const [start, end] = phase.range;
   const fade = 0.05;
 
+  // The first phase is already on screen when the scene arrives right under
+  // the hero: fading it in from 0 left a blank white screen and visitors
+  // thought the page had ended.
   const opacity = useTransform(
     scrollYProgress,
-    [start, start + fade, end - fade, end],
-    [0, 1, 1, 0]
+    isFirst ? [start, end - fade, end] : [start, start + fade, end - fade, end],
+    isFirst ? [1, 1, 0] : [0, 1, 1, 0]
   );
-  const y = useTransform(scrollYProgress, [start, start + fade * 2], [18, 0]);
+  const y = useTransform(scrollYProgress, [start, start + fade * 2], isFirst ? [0, 0] : [18, 0]);
 
   return (
     <motion.div
@@ -155,7 +160,7 @@ export default function ConstructionParallax({ content }: { content: Constructio
   const buildingH     = useTransform(scrollYProgress, [0.32, 0.88], [0, B.h]);
 
   // ── Layer opacities ───────────────────────────────────────────────────
-  const gridOpacity       = useTransform(scrollYProgress, [0.08, 0.18, 0.27, 0.36], [0, 1, 1, 0]);
+  const gridOpacity       = useTransform(scrollYProgress, [0, 0.27, 0.36], [1, 1, 0]);
   const foundationOpacity = useTransform(scrollYProgress, [0.22, 0.36], [0, 1]);
   const frameOpacity      = useTransform(scrollYProgress, [0.34, 0.52], [0, 1]);
   const windowOpacity     = useTransform(scrollYProgress, [0.60, 0.80], [0, 1]);
@@ -480,7 +485,7 @@ export default function ConstructionParallax({ content }: { content: Constructio
         {/* ── Text overlays (HTML for crisp rendering) ───────────────── */}
         <div className="absolute inset-0 pointer-events-none">
           {phases.map((phase, i) => (
-            <PhaseText key={i} phase={phase} scrollYProgress={scrollYProgress} />
+            <PhaseText key={i} phase={phase} scrollYProgress={scrollYProgress} isFirst={i === 0} />
           ))}
         </div>
 
@@ -496,22 +501,33 @@ export default function ConstructionParallax({ content }: { content: Constructio
           ))}
         </div>
 
-        {/* ── Scroll hint (fades after first 5%) ─────────────────────── */}
+        {/* ── Scroll hint (fades once the visitor starts scrolling) ──── */}
         <motion.div
-          style={{ opacity: useTransform(scrollYProgress, [0, 0.05], [1, 0]) }}
-          className="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 pointer-events-none"
+          style={{ opacity: useTransform(scrollYProgress, [0, 0.08], [1, 0]) }}
+          className="absolute bottom-8 md:bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-3 pointer-events-none z-20"
         >
-          <motion.div
-            animate={{ y: [0, 10, 0] }}
-            transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-            className="flex flex-col items-center gap-2"
+          <span className="font-sans text-[10px] md:text-[11px] tracking-[0.3em] uppercase text-charcoal bg-white/85 px-3 py-1.5 text-center">
+            Scorri: guarda come nasce un edificio CRG
+          </span>
+          <motion.span
+            animate={{ y: [0, 8, 0] }}
+            transition={{ duration: 1.6, repeat: Infinity, ease: "easeInOut" }}
+            className="w-11 h-11 rounded-full bg-crg-red text-white flex items-center justify-center shadow-lg"
           >
-            <span className="font-sans text-[9px] tracking-[0.42em] uppercase text-mid-gray/70">
-              Scorri
-            </span>
-            <div className="w-px h-10 bg-gradient-to-b from-charcoal/20 to-transparent" />
-          </motion.div>
+            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5} aria-hidden>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+            </svg>
+          </motion.span>
         </motion.div>
+
+        {/* ── Skip link: the animation is six screens long ─────────────── */}
+        <motion.a
+          href="#progetti"
+          style={{ opacity: useTransform(scrollYProgress, [0, 0.9, 0.97], [1, 1, 0]) }}
+          className="absolute bottom-6 right-5 md:right-8 z-20 font-sans text-[10px] md:text-[11px] tracking-[0.25em] uppercase text-mid-gray hover:text-crg-red bg-white/85 px-3 py-1.5 transition-colors"
+        >
+          Salta ai progetti →
+        </motion.a>
 
         {/* ── Progress bar ────────────────────────────────────────────── */}
         <motion.div

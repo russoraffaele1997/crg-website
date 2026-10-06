@@ -42,6 +42,9 @@ export default function HeroSection({ content, projects }: { content: HeroConten
         }}
       />
 
+      {/* Fade into the white construction animation right below */}
+      <div className="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-b from-transparent to-white pointer-events-none" />
+
       {/* Radial red glow (bottom center) */}
       <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[600px] h-[300px] bg-crg-red/10 blur-3xl rounded-full" />
 
@@ -114,13 +117,13 @@ export default function HeroSection({ content, projects }: { content: HeroConten
         transition={{ delay: 2.2 }}
         className="absolute bottom-9 left-1/2 -translate-x-1/2 flex flex-col items-center gap-3"
       >
-        <span className="font-sans text-[10px] tracking-[0.3em] uppercase text-white/40">
+        <span className="font-sans text-[10px] md:text-[11px] tracking-[0.3em] uppercase text-charcoal font-medium">
           Scorri per scoprire i nostri progetti
         </span>
         <motion.svg
           animate={{ y: [0, 8, 0] }}
           transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-          className="w-4 h-4 text-white/25"
+          className="w-5 h-5 text-crg-red"
           fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}
         >
           <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
