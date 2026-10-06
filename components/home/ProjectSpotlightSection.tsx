@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRef } from "react";
 import { motion, useInView } from "framer-motion";
 import type { Project } from "@/lib/types/project";
+import { countUnits } from "@/lib/projects/derive";
 
 export default function ProjectSpotlightSection({ project }: { project: Project }) {
   const ref = useRef<HTMLDivElement>(null);
@@ -14,14 +15,17 @@ export default function ProjectSpotlightSection({ project }: { project: Project 
   const restTitle = words.join(" ");
 
   const availableUnits = project.units.filter((u) => u.status === "available");
-  const otherUnits = project.units.length - availableUnits.length;
+  const counts = countUnits(project.units);
   const availabilityLabel =
     availableUnits.length === 0
-      ? "Completo"
+      ? counts.optioned > 0 ? "Tutte prenotate" : "Tutto venduto"
       : availableUnits.length === 1
       ? `${availableUnits[0].name} — Disponibile`
       : `${availableUnits.length} unità disponibili`;
-  const availabilityNote = `${otherUnits} su ${project.units.length} venduti`;
+  const availabilityNote = [
+    counts.closed > 0 ? `${counts.closed} vendut${counts.closed === 1 ? "a" : "e"}` : null,
+    counts.optioned > 0 ? `${counts.optioned} prenotat${counts.optioned === 1 ? "a" : "e"}` : null,
+  ].filter(Boolean).join(" · ") + ` su ${counts.total}`;
 
   return (
     <section className="py-28 lg:py-40 bg-white overflow-hidden" ref={ref}>
@@ -88,6 +92,7 @@ export default function ProjectSpotlightSection({ project }: { project: Project 
                   ))}
                 </div>
 
+                {counts.total > 0 && (
                 <div className="mt-8 pt-8 border-t border-white/10 flex items-center gap-3">
                   <span className={`inline-block w-2 h-2 rounded-full shrink-0 ${availableUnits.length > 0 ? "bg-emerald-400" : "bg-red-400"}`} />
                   <span className="font-sans text-xs text-white/40">
@@ -97,6 +102,7 @@ export default function ProjectSpotlightSection({ project }: { project: Project 
                     {availabilityNote}
                   </span>
                 </div>
+                )}
               </div>
             </div>
           </motion.div>

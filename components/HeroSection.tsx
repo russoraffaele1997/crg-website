@@ -3,7 +3,7 @@
 import Image from "next/image";
 import { motion } from "framer-motion";
 import type { HeroContent } from "@/lib/data/site-content";
-import type { Project } from "@/lib/types/project";
+import type { ProjectSummary } from "@/lib/types/project";
 
 const container = {
   hidden: {},
@@ -14,7 +14,7 @@ const item = {
   show: { opacity: 1, y: 0, transition: { duration: 0.85, ease: [0.25, 0, 0, 1] } },
 };
 
-export default function HeroSection({ content, projects }: { content: HeroContent; projects: Project[] }) {
+export default function HeroSection({ content, projects }: { content: HeroContent; projects: ProjectSummary[] }) {
   return (
     <section className="relative min-h-screen bg-charcoal flex items-center justify-center overflow-hidden">
       {/* Background photo */}

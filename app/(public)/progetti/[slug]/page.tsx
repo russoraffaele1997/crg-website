@@ -1,9 +1,34 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { getProjects, getProjectBySlug } from "@/lib/data/projects";
+import { getProjectBySlug, getProjectSummaries } from "@/lib/data/projects";
+import { getCompanyInfoContent } from "@/lib/data/site-content";
 import { getEntitySeoBySlug } from "@/lib/data/seo";
 import { buildMetadata } from "@/lib/seo/build-metadata";
-import ProjectDetailClient from "./ProjectDetailClient";
+import {
+  computeProgress,
+  countUnits,
+  deliveryLabel,
+  nextAction,
+  phaseState,
+  priceFrom,
+  projectAlerts,
+  todayIso,
+} from "@/lib/projects/derive";
+import ProjectHero from "@/components/project/ProjectHero";
+import ProjectStatus from "@/components/project/ProjectStatus";
+import UnitsSection from "@/components/project/UnitsSection";
+import PhotoGrid from "@/components/project/PhotoGrid";
+import VisitForm from "@/components/project/VisitForm";
+import NotifyForm from "@/components/project/NotifyForm";
+import { VisitProvider } from "@/components/project/VisitContext";
+import {
+  ConstructionDiary,
+  MobileActionBar,
+  ProjectAbout,
+  ProjectDocuments,
+  ProjectPartners,
+} from "@/components/project/ProjectExtras";
+import { categoryGradients } from "@/components/ProjectCard";
 
 interface Props {
   params: Promise<{ slug: string }>;
@@ -12,7 +37,7 @@ interface Props {
 export const revalidate = 300;
 
 export async function generateStaticParams() {
-  const projects = await getProjects();
+  const projects = await getProjectSummaries();
   return projects.map((p) => ({ slug: p.slug }));
 }
 
@@ -28,7 +53,115 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function ProjectDetailPage({ params }: Props) {
   const { slug } = await params;
-  const project = await getProjectBySlug(slug);
+  const [project, companyInfo] = await Promise.all([getProjectBySlug(slug), getCompanyInfoContent()]);
   if (!project) notFound();
-  return <ProjectDetailClient project={project} />;
+
+  const today = todayIso();
+  const counts = countUnits(project.units);
+  const hasSelectableUnits = counts.available + counts.optioned > 0;
+  const progress = computeProgress(project.timeline);
+  const delivery = deliveryLabel(project);
+  const latestUpdate = project.updates[0]?.publishedOn ?? null;
+  const { current, allDone } = phaseState(project.timeline);
+  const action = nextAction({ category: project.category, status: project.status, counts, messaging: project, today });
+  const alerts = projectAlerts({ messaging: project, latestUpdate, today });
+
+  // One plain sentence under the title answering "where are we?".
+  const statusLine = [
+    allDone ? "Lavori completati" : current ? `Fase attuale: ${current.label}` : null,
+    progress !== null && !allDone ? `cantiere al ${progress}%` : null,
+    delivery ? `consegna prevista ${delivery}` : null,
+  ]
+    .filter(Boolean)
+    .join(" · ") || project.shortDescription;
+
+  return (
+    <VisitProvider>
+      <ProjectHero project={project} statusLine={statusLine} hasSelectableUnits={hasSelectableUnits} alerts={alerts} />
+
+      <ProjectStatus
+        phases={project.timeline}
+        progress={progress}
+        delivery={delivery}
+        latestUpdate={latestUpdate}
+        counts={counts}
+        priceFrom={priceFrom(project.units)}
+        category={project.category}
+        action={action}
+      />
+
+      <section id="unita" className="py-16 bg-cream border-t border-border-warm scroll-mt-24">
+        <div className="container-custom">
+          <span className="section-label block mb-4">Disponibilità</span>
+          <h2 className="font-heading text-3xl font-bold text-charcoal mb-6">Scegli la tua unità</h2>
+          <UnitsSection
+            units={project.units}
+            carBoxes={project.carBoxes}
+            carBoxPlanUrl={project.carBoxPlanUrl}
+            category={project.category}
+          />
+        </div>
+      </section>
+
+      <section className="py-16 bg-white border-t border-border-warm">
+        <div className="container-custom">
+          <span className="section-label block mb-6">Galleria</span>
+          {project.gallery.length > 0 ? (
+            <PhotoGrid
+              images={project.gallery}
+              alt={project.title}
+              layout="gallery"
+              fallbackClass={`w-full h-full bg-gradient-to-br ${categoryGradients[project.category]}`}
+            />
+          ) : (
+            <p className="font-sans text-sm text-mid-gray">Le prime immagini del progetto arriveranno a breve.</p>
+          )}
+        </div>
+      </section>
+
+      <ProjectAbout project={project} ctaLabel={hasSelectableUnits ? "Prenota una visita" : "Chiedi informazioni"} />
+      <ProjectPartners partners={project.partners} />
+      <ProjectDocuments projectId={project.id} documents={project.documents} />
+      <ConstructionDiary updates={project.updates} title={project.title} />
+
+      <section id="prenota" className="py-16 bg-cream border-t border-border-warm scroll-mt-24 pb-28 md:pb-16">
+        <div className="container-custom">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
+            <div className="lg:col-span-7">
+              <span className="section-label block mb-4">Contatto</span>
+              <h2 className="font-heading text-3xl font-bold text-charcoal mb-2">
+                {hasSelectableUnits ? "Prenota una visita" : "Chiedi informazioni"}
+              </h2>
+              <p className="font-sans text-sm text-mid-gray mb-10 leading-relaxed">
+                {hasSelectableUnits
+                  ? "Scegli giorno e orario che preferisci: un nostro consulente ti ricontatta per confermare e ti accompagna in visita."
+                  : "Scrivici per qualsiasi domanda su questo progetto: ti rispondiamo entro 24 ore lavorative."}
+              </p>
+              <VisitForm
+                projectId={project.id}
+                projectTitle={project.title}
+                units={project.units}
+                carBoxes={project.carBoxes}
+                mode={hasSelectableUnits ? "visit" : "info"}
+              />
+            </div>
+
+            <aside id="avvisami" className="lg:col-span-5 scroll-mt-24">
+              <div className="bg-white border border-border-warm p-8">
+                <h3 className="font-heading text-xl font-bold text-charcoal mb-2">Avvisami delle novità</h3>
+                <p className="font-sans text-sm text-mid-gray leading-relaxed mb-6">
+                  {hasSelectableUnits
+                    ? "Non sei pronto per una visita? Ti scriviamo quando ci sono aggiornamenti dal cantiere o nuove unità."
+                    : "Ti scriviamo per primi se un'unità torna disponibile o se apriamo nuove vendite."}
+                </p>
+                <NotifyForm projectId={project.id} projectTitle={project.title} />
+              </div>
+            </aside>
+          </div>
+        </div>
+      </section>
+
+      <MobileActionBar phone={companyInfo.phone} visitLabel={hasSelectableUnits ? "Prenota visita" : "Informazioni"} />
+    </VisitProvider>
+  );
 }

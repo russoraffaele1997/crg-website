@@ -6,6 +6,8 @@ import slugify from "slugify";
 import { createProject, updateProjectGeneral, deleteProject, type ProjectGeneralInput } from "@/app/admin/(protected)/progetti/actions";
 import { categoryOptions, projectStatusOptions, publishStatusOptions } from "@/lib/admin/project-options";
 import MediaField from "@/components/admin/MediaField";
+import { PROJECT_STATUS_LABELS } from "@/lib/projects/derive";
+import type { ProjectStatus } from "@/lib/types/project";
 import type { MediaLibraryItem } from "@/lib/types/media";
 
 interface Props {
@@ -22,7 +24,7 @@ export default function ProjectGeneralForm({ mode, projectId, initial }: Props) 
   const [location, setLocation] = useState(initial?.location ?? "");
   const [category, setCategory] = useState(initial?.category ?? "residential");
   const [status, setStatus] = useState(initial?.status ?? "for-sale");
-  const [statusLabel, setStatusLabel] = useState(initial?.statusLabel ?? "In vendita");
+  const [statusLabel, setStatusLabel] = useState(initial?.statusLabel ?? "");
   const [shortDescription, setShortDescription] = useState(initial?.shortDescription ?? "");
   const [description, setDescription] = useState(initial?.description ?? "");
   const [isFeatured, setIsFeatured] = useState(initial?.isFeatured ?? false);
@@ -183,14 +185,14 @@ export default function ProjectGeneralForm({ mode, projectId, initial }: Props) 
           </select>
         </div>
         <div>
-          <label className="block text-xs tracking-wider uppercase text-slate-500 mb-2">Etichetta stato (visibile)</label>
+          <label className="block text-xs tracking-wider uppercase text-slate-500 mb-2">Etichetta stato (facoltativa)</label>
           <input
-            required
             value={statusLabel}
             onChange={(e) => setStatusLabel(e.target.value)}
             className="w-full border border-slate-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-crg-red"
-            placeholder="In vendita"
+            placeholder={PROJECT_STATUS_LABELS[status as ProjectStatus]}
           />
+          <p className="text-xs text-slate-400 mt-1">Se vuota, sul sito compare &quot;{PROJECT_STATUS_LABELS[status as ProjectStatus]}&quot;.</p>
         </div>
       </div>
 

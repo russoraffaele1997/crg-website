@@ -26,8 +26,8 @@ export default function GalleryManager({
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }));
 
   const handleSelect = async (media: MediaLibraryItem) => {
-    await addGalleryImage(projectId, media.id, items.length);
-    setItems((prev) => [...prev, { id: crypto.randomUUID(), media: { id: media.id, url: media.url, original_filename: media.original_filename } }]);
+    const { id } = await addGalleryImage(projectId, media.id, items.length);
+    setItems((prev) => [...prev, { id, media: { id: media.id, url: media.url, original_filename: media.original_filename } }]);
   };
 
   const handleRemove = async (id: string) => {

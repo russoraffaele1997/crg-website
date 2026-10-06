@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { motion, useInView } from "framer-motion";
 import { useRef } from "react";
-import type { Project } from "@/lib/types/project";
+import type { ProjectSummary } from "@/lib/types/project";
 import type { FeaturedProjectsContent } from "@/lib/data/site-content";
 import ProjectCard from "./ProjectCard";
 
@@ -11,7 +11,7 @@ export default function FeaturedProjects({
   featured,
   content,
 }: {
-  featured: Project[];
+  featured: ProjectSummary[];
   content: FeaturedProjectsContent;
 }) {
   const ref = useRef<HTMLDivElement>(null);

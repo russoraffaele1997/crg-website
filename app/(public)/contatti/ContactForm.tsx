@@ -90,7 +90,7 @@ export default function ContactForm() {
         <input id="cf-prv" type="checkbox" checked={form.privacy} onChange={(e) => set("privacy", e.target.checked)} className="mt-0.5 w-4 h-4 accent-crg-red cursor-pointer" required />
         <label htmlFor="cf-prv" className="font-sans text-xs text-mid-gray leading-relaxed cursor-pointer">
           Acconsento al trattamento dei dati personali secondo la{" "}
-          <a href="#" className="underline hover:text-crg-red transition-colors">Privacy Policy</a>.
+          <a href="/privacy" target="_blank" rel="noopener noreferrer" className="underline hover:text-crg-red transition-colors">Privacy Policy</a>.
         </label>
       </div>
 

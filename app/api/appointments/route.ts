@@ -2,28 +2,49 @@ import { NextRequest, NextResponse } from "next/server";
 import { Resend } from "resend";
 import { PDFDocument, StandardFonts, rgb } from "pdf-lib";
 import { createServiceClient } from "@/lib/supabase/service";
+import { downloadStoredFile, resolveLeadContext } from "@/lib/leads/server";
+import type { LeadType } from "@/lib/leads/client";
 
 const LEADS_EMAIL = "clienti@crgcostruzioni.it";
 const A4: [number, number] = [595.28, 841.89];
 const MARGIN = 50;
 
+const LEAD_TYPES: LeadType[] = ["contact", "appointment", "notify", "document"];
+
+const TYPE_LABELS: Record<LeadType, string> = {
+  contact: "Contatto",
+  appointment: "Appuntamento",
+  notify: "Iscrizione aggiornamenti progetto",
+  document: "Richiesta documento",
+};
+
+const TIME_LABELS: Record<string, string> = {
+  morning: "Mattina (09:00 – 12:00)",
+  afternoon: "Pomeriggio (14:00 – 17:00)",
+  evening: "Tardo pomeriggio (17:00 – 19:00)",
+};
+
+/** Only identifiers and what the visitor typed: everything else is looked up server-side. */
 interface AppointmentPayload {
-  type?: "contact" | "appointment";
+  type?: LeadType;
   firstName?: string;
   lastName?: string;
   email?: string;
   phone?: string;
   projectId?: string;
-  projectTitle?: string;
-  unitId?: string;
-  unitDetails?: string;
-  carBoxDetails?: string;
-  floorplanFiles?: { url: string; filename: string }[];
+  unitCode?: string;
+  carBoxId?: string;
+  documentId?: string;
   preferredDay?: string;
   preferredTime?: string;
   subject?: string;
   message?: string;
   privacy?: boolean;
+}
+
+/** Trims and caps free text so a single request can't flood the inbox or the database. */
+function clean(value: unknown, max: number): string {
+  return typeof value === "string" ? value.trim().slice(0, max) : "";
 }
 
 function validateEmail(email: string): boolean {
@@ -44,7 +65,7 @@ function pdfSafe(text: string): string {
 async function generateSummaryPdf(data: {
   type: string;
   firstName: string;
-  lastName: string;
+  lastName?: string;
   email: string;
   phone?: string;
   projectTitle?: string;
@@ -98,12 +119,12 @@ async function generateSummaryPdf(data: {
   };
 
   drawHeading("Riepilogo richiesta — CRG", 20, rgb(0.78, 0.06, 0.18));
-  drawLine(`Tipo: ${data.type === "contact" ? "Contatto" : "Appuntamento"}`);
+  drawLine(`Tipo: ${TYPE_LABELS[data.type as LeadType] ?? data.type}`);
   drawLine(`Data invio: ${new Date().toLocaleString("it-IT")}`);
   drawSpacer(18);
 
   drawHeading("Dati cliente", 13);
-  drawLine(`Nome e cognome: ${data.firstName} ${data.lastName}`);
+  drawLine(`Nome e cognome: ${data.firstName} ${data.lastName ?? ""}`.trim());
   drawLine(`Email: ${data.email}`);
   if (data.phone) drawLine(`Telefono: ${data.phone}`);
   drawSpacer(18);
@@ -141,16 +162,6 @@ async function generateSummaryPdf(data: {
   return doc.save();
 }
 
-async function fetchAsAttachment(url: string, filename: string): Promise<{ filename: string; content: Buffer } | null> {
-  try {
-    const res = await fetch(url);
-    if (!res.ok) return null;
-    const arrayBuffer = await res.arrayBuffer();
-    return { filename, content: Buffer.from(arrayBuffer) };
-  } catch {
-    return null;
-  }
-}
 
 export async function POST(request: NextRequest) {
   let body: AppointmentPayload;
@@ -161,49 +172,63 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Payload non valido." }, { status: 400 });
   }
 
-  const { firstName, lastName, email, privacy } = body;
+  const type: LeadType = LEAD_TYPES.includes(body.type as LeadType) ? (body.type as LeadType) : "appointment";
+  const firstName = clean(body.firstName, 100);
+  const lastName = clean(body.lastName, 100);
+  const email = clean(body.email, 200);
+  const phone = clean(body.phone, 40);
+  const subject = clean(body.subject, 200);
+  const message = clean(body.message, 5000);
+  const preferredDay = /^\d{4}-\d{2}-\d{2}$/.test(body.preferredDay ?? "") ? body.preferredDay! : "";
+  const preferredTime = TIME_LABELS[body.preferredTime ?? ""] ? body.preferredTime! : "";
+  // Sign-ups and document requests only ask for a first name.
+  const needsLastName = type === "contact" || type === "appointment";
 
   // Server-side validation
-  if (!firstName?.trim()) {
+  if (!firstName) {
     return NextResponse.json({ error: "Il nome è obbligatorio." }, { status: 422 });
   }
-  if (!lastName?.trim()) {
+  if (needsLastName && !lastName) {
     return NextResponse.json({ error: "Il cognome è obbligatorio." }, { status: 422 });
   }
-  if (!email?.trim() || !validateEmail(email)) {
+  if (!email || !validateEmail(email)) {
     return NextResponse.json({ error: "Email non valida." }, { status: 422 });
   }
-  if (!privacy) {
+  if (body.privacy !== true) {
     return NextResponse.json({ error: "Il consenso alla privacy è obbligatorio." }, { status: 422 });
   }
 
-  const type = body.type ?? "appointment";
+  const ctx = await resolveLeadContext({
+    projectId: body.projectId,
+    unitCode: body.unitCode,
+    carBoxId: body.carBoxId,
+    documentId: body.documentId,
+  });
+
+  if ((type === "notify" || type === "document") && !ctx.project) {
+    return NextResponse.json({ error: "Progetto non trovato." }, { status: 422 });
+  }
+  if (type === "document" && !ctx.document) {
+    return NextResponse.json({ error: "Documento non disponibile al momento. Contattaci." }, { status: 422 });
+  }
 
   // ─── Persist the lead ───────────────────────────────────────────────────
-  // unitId sent by the form is the unit's public-facing code (e.g. "A01"),
-  // not its database UUID, so it can't go straight into the unit_id FK —
-  // fold the full unit sheet into the message instead rather than risk an
-  // insert failure (and rather than showing staff a bare, unreadable code).
   const service = createServiceClient();
-  const messageParts = [
-    body.unitDetails ? `Unità di interesse:\n${body.unitDetails}` : null,
-    body.carBoxDetails ? `Box auto scelto: ${body.carBoxDetails}` : null,
-    body.message || null,
-  ].filter(Boolean);
-  const fullMessage = messageParts.length ? messageParts.join("\n\n") : null;
-
   const { error: insertError } = await service.from("lead_submissions").insert({
     type,
-    first_name: firstName.trim(),
-    last_name: lastName.trim(),
-    email: email.trim(),
-    phone: body.phone || null,
-    project_id: body.projectId || null,
-    preferred_day: body.preferredDay || null,
-    preferred_time: body.preferredTime || null,
-    subject: body.subject || null,
-    message: fullMessage,
-    privacy_accepted: privacy,
+    first_name: firstName,
+    last_name: lastName || null,
+    email,
+    phone: phone || null,
+    project_id: ctx.project?.id ?? null,
+    unit_id: ctx.unit?.id ?? null,
+    car_box_id: ctx.carBox?.id ?? null,
+    document_id: ctx.document?.id ?? null,
+    preferred_day: preferredDay || null,
+    preferred_time: preferredTime || null,
+    subject: subject || null,
+    message: message || null,
+    privacy_accepted: true,
   });
 
   if (insertError) {
@@ -214,54 +239,55 @@ export async function POST(request: NextRequest) {
   if (process.env.RESEND_API_KEY) {
     try {
       const resend = new Resend(process.env.RESEND_API_KEY);
+      const fullName = `${firstName} ${lastName}`.trim();
       const rows: [string, string | undefined][] = [
-        ["Tipo", type === "contact" ? "Contatto" : "Appuntamento"],
-        ["Nome", `${firstName} ${lastName}`],
+        ["Tipo", TYPE_LABELS[type]],
+        ["Nome", fullName],
         ["Email", email],
-        ["Telefono", body.phone],
-        ["Progetto", body.projectTitle],
-        ["Unità di interesse", body.unitDetails],
-        ["Box auto", body.carBoxDetails],
-        ["Giorno preferito", body.preferredDay],
-        ["Fascia oraria", body.preferredTime],
-        ["Oggetto", body.subject],
-        ["Messaggio", body.message],
+        ["Telefono", phone],
+        ["Progetto", ctx.project?.title],
+        ["Unità di interesse", ctx.unit?.details],
+        ["Box auto", ctx.carBox?.details],
+        ["Documento richiesto", ctx.document?.title],
+        ["Giorno preferito", preferredDay],
+        ["Fascia oraria", TIME_LABELS[preferredTime]],
+        ["Oggetto", subject],
+        ["Messaggio", message],
       ];
       const htmlRows = rows
         .filter(([, value]) => value)
         .map(([label, value]) => `<tr><td style="padding:4px 12px 4px 0;color:#6B6B6B;white-space:nowrap">${label}</td><td style="padding:4px 0">${escapeHtml(String(value)).replace(/\n/g, "<br>")}</td></tr>`)
         .join("");
 
-      const summaryPdfBytes = await generateSummaryPdf({
-        type,
-        firstName,
-        lastName,
-        email,
-        phone: body.phone,
-        projectTitle: body.projectTitle,
-        unitDetails: body.unitDetails,
-        carBoxDetails: body.carBoxDetails,
-        preferredDay: body.preferredDay,
-        preferredTime: body.preferredTime,
-        message: body.message,
-      });
-
-      const floorplanAttachments = body.floorplanFiles?.length
-        ? (await Promise.all(body.floorplanFiles.map((f) => fetchAsAttachment(f.url, f.filename)))).filter(
-            (a): a is { filename: string; content: Buffer } => a !== null
-          )
-        : [];
+      // Sign-ups and document requests are short: no PDF, no floorplans.
+      const withAttachments = type === "contact" || type === "appointment";
+      const attachments: { filename: string; content: Buffer }[] = [];
+      if (withAttachments) {
+        const summaryPdfBytes = await generateSummaryPdf({
+          type,
+          firstName,
+          lastName,
+          email,
+          phone,
+          projectTitle: ctx.project?.title,
+          unitDetails: ctx.unit?.details,
+          carBoxDetails: ctx.carBox?.details,
+          preferredDay,
+          preferredTime: TIME_LABELS[preferredTime],
+          message,
+        });
+        attachments.push({ filename: "riepilogo-richiesta.pdf", content: Buffer.from(summaryPdfBytes) });
+        const floorplans = await Promise.all((ctx.unit?.floorplans ?? []).map(downloadStoredFile));
+        attachments.push(...floorplans.filter((a): a is { filename: string; content: Buffer } => a !== null));
+      }
 
       const { error: sendError } = await resend.emails.send({
         from: process.env.RESEND_FROM_EMAIL || "CRG Website <onboarding@resend.dev>",
         to: LEADS_EMAIL,
         replyTo: email,
-        subject: `Nuova richiesta dal sito — ${type === "contact" ? "Contatto" : "Appuntamento"} — ${firstName} ${lastName}`,
+        subject: `Nuova richiesta dal sito — ${TYPE_LABELS[type]} — ${fullName}`,
         html: `<table style="font-family:sans-serif;font-size:14px">${htmlRows}</table>`,
-        attachments: [
-          { filename: "riepilogo-richiesta.pdf", content: Buffer.from(summaryPdfBytes) },
-          ...floorplanAttachments,
-        ],
+        attachments,
       });
       if (sendError) {
         console.error("[CRG] Errore invio email:", sendError.message);
@@ -274,7 +300,11 @@ export async function POST(request: NextRequest) {
   }
 
   return NextResponse.json(
-    { success: true, message: "Richiesta ricevuta correttamente." },
+    {
+      success: true,
+      message: "Richiesta ricevuta correttamente.",
+      ...(type === "document" && ctx.document ? { documentUrl: ctx.document.url } : {}),
+    },
     { status: 200 }
   );
 }

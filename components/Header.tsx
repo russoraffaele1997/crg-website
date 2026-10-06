@@ -5,9 +5,9 @@ import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import type { Project } from "@/lib/types/project";
+import type { ProjectSummary } from "@/lib/types/project";
 
-export default function Header({ projects }: { projects: Project[] }) {
+export default function Header({ projects }: { projects: ProjectSummary[] }) {
   const [mobileOpen, setMobileOpen]       = useState(false);
   const [dropdownOpen, setDropdownOpen]   = useState(false);
   const [mobileProjects, setMobileProjects] = useState(false);

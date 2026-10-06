@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { getProjects } from "@/lib/data/projects";
+import { getProjectSummaries } from "@/lib/data/projects";
 import { getPageSeo } from "@/lib/data/seo";
 import { buildMetadata } from "@/lib/seo/build-metadata";
 import ProgettiFilters from "./ProgettiFilters";
@@ -15,7 +15,7 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function ProgettiPage() {
-  const projects = await getProjects();
+  const projects = await getProjectSummaries();
 
   return (
     <>

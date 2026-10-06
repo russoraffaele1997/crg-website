@@ -3,6 +3,7 @@ import { createServiceClient } from "@/lib/supabase/service";
 
 export interface DashboardStats {
   projectCount: number;
+  newLeads: number;
   publishedCommunications: number;
   blogPostCount: number;
   recentUpdates: { label: string; type: string; updatedAt: string }[];
@@ -13,6 +14,7 @@ export async function getDashboardStats(): Promise<DashboardStats> {
 
   const [
     { count: projectCount },
+    { count: newLeads },
     { count: publishedCommunications },
     { count: blogPostCount },
     { data: recentProjects },
@@ -20,6 +22,7 @@ export async function getDashboardStats(): Promise<DashboardStats> {
     { data: recentPosts },
   ] = await Promise.all([
     supabase.from("projects").select("*", { count: "exact", head: true }),
+    supabase.from("lead_submissions").select("*", { count: "exact", head: true }).eq("status", "new"),
     supabase
       .from("communications")
       .select("*", { count: "exact", head: true })
@@ -40,6 +43,7 @@ export async function getDashboardStats(): Promise<DashboardStats> {
 
   return {
     projectCount: projectCount ?? 0,
+    newLeads: newLeads ?? 0,
     publishedCommunications: publishedCommunications ?? 0,
     blogPostCount: blogPostCount ?? 0,
     recentUpdates,

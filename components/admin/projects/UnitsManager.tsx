@@ -147,8 +147,8 @@ function CarBoxManager({
   const handleAdd = async () => {
     if (!newBox.name.trim()) return;
     setSaving(true);
-    await createCarBox(projectId, newBox, boxes.length);
-    setBoxes((prev) => [...prev, { id: crypto.randomUUID(), status: "available" as CarBoxStatus, ...newBox }]);
+    const { id } = await createCarBox(projectId, newBox, boxes.length);
+    setBoxes((prev) => [...prev, { id, status: "available" as CarBoxStatus, ...newBox }]);
     setNewBox({ name: "", sqm: 0 });
     setAdding(false);
     setSaving(false);
@@ -297,10 +297,10 @@ export default function UnitsManager({
   const handleAdd = async () => {
     if (!newUnit.unitCode.trim() || !newUnit.name.trim()) return;
     setSaving(true);
-    await createUnit(projectId, newUnit, units.length);
+    const { id } = await createUnit(projectId, newUnit, units.length);
     setUnits((prev) => [
       ...prev,
-      { id: crypto.randomUUID(), ...newUnit },
+      { id, ...newUnit },
     ]);
     setNewUnit(emptyForm);
     setAdding(false);

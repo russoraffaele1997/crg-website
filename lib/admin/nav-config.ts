@@ -9,6 +9,7 @@ import {
   Search,
   Settings,
   Users,
+  Inbox,
 } from "lucide-react";
 import type { AppRole } from "@/lib/types/admin";
 
@@ -24,6 +25,7 @@ export const adminNavItems: AdminNavItem[] = [
   { label: "Dashboard", href: "/admin", icon: LayoutDashboard },
   { label: "Contenuti sito", href: "/admin/contenuti", icon: FileText, roles: ["super_admin", "editor"] },
   { label: "Progetti", href: "/admin/progetti", icon: Building2 },
+  { label: "Richieste", href: "/admin/richieste", icon: Inbox },
   { label: "Comunicazioni", href: "/admin/comunicazioni", icon: Megaphone },
   { label: "Blog", href: "/admin/blog", icon: Newspaper },
   { label: "Media Library", href: "/admin/media", icon: ImageIcon },

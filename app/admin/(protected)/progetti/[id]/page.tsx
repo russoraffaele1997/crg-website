@@ -1,6 +1,8 @@
 import { notFound } from "next/navigation";
 import { getAdminProjectById } from "@/lib/admin/data/projects";
 import ProjectGeneralForm from "@/components/admin/projects/ProjectGeneralForm";
+import ReadinessChecklist from "@/components/admin/projects/ReadinessChecklist";
+import { projectReadiness } from "@/lib/admin/project-readiness";
 
 export default async function ProjectGeneralPage({
   params,
@@ -12,6 +14,14 @@ export default async function ProjectGeneralPage({
   if (!project) notFound();
 
   return (
+    <>
+    <ReadinessChecklist
+      projectId={id}
+      slug={project.slug}
+      items={projectReadiness(project)}
+      published={project.publishStatus === "published"}
+      newLeads={project.newLeads}
+    />
     <ProjectGeneralForm
       mode="edit"
       projectId={id}
@@ -50,5 +60,6 @@ export default async function ProjectGeneralPage({
           : null,
       }}
     />
+    </>
   );
 }

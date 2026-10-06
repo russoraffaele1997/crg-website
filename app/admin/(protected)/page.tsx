@@ -1,4 +1,5 @@
-import { Building2, Megaphone, Newspaper, Clock } from "lucide-react";
+import Link from "next/link";
+import { Building2, Megaphone, Newspaper, Clock, Inbox } from "lucide-react";
 import { getDashboardStats } from "@/lib/data/dashboard";
 import { requireAdmin } from "@/lib/auth/require-role";
 
@@ -31,6 +32,23 @@ export default async function AdminDashboardPage() {
           Bentornato, {admin.full_name ?? admin.email}.
         </p>
       </div>
+
+      <Link
+        href="/admin/richieste?stato=new"
+        className={`flex items-center gap-4 rounded-xl p-5 mb-4 border transition-colors ${
+          stats.newLeads > 0 ? "bg-crg-red-light border-crg-red/20 hover:bg-crg-red/10" : "bg-white border-slate-200 hover:border-slate-300"
+        }`}
+      >
+        <div className="w-9 h-9 rounded-lg bg-white flex items-center justify-center text-crg-red">
+          <Inbox className="w-[18px] h-[18px]" />
+        </div>
+        <div>
+          <div className="text-base font-semibold text-slate-900">
+            {stats.newLeads === 0 ? "Nessuna nuova richiesta" : stats.newLeads === 1 ? "1 nuova richiesta da gestire" : `${stats.newLeads} nuove richieste da gestire`}
+          </div>
+          <div className="text-xs text-slate-500 mt-0.5">Appuntamenti, contatti, iscrizioni e documenti dal sito →</div>
+        </div>
+      </Link>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
         {cards.map((card) => {

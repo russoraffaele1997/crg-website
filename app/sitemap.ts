@@ -1,5 +1,5 @@
 import type { MetadataRoute } from "next";
-import { getProjects } from "@/lib/data/projects";
+import { getProjectSummaries } from "@/lib/data/projects";
 import { getCommunications } from "@/lib/data/communications";
 import { getBlogPosts } from "@/lib/data/blog";
 
@@ -7,7 +7,7 @@ const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://www.crg-srl.it";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const [projects, communications, blogPosts] = await Promise.all([
-    getProjects(),
+    getProjectSummaries(),
     getCommunications(),
     getBlogPosts(),
   ]);

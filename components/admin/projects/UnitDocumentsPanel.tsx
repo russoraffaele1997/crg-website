@@ -93,10 +93,10 @@ export default function UnitDocumentsPanel({
 
   const handleSelect = async (media: MediaLibraryItem) => {
     if (!pickerFor) return;
-    await addUnitDocument(unitId, media.id, pickerFor, items.length);
+    const { id } = await addUnitDocument(unitId, media.id, pickerFor, items.length);
     setItems((prev) => [
       ...prev,
-      { id: crypto.randomUUID(), docType: pickerFor, orderIndex: prev.length, media: { id: media.id, url: media.url, original_filename: media.original_filename, kind: media.kind } },
+      { id, docType: pickerFor, orderIndex: prev.length, media: { id: media.id, url: media.url, original_filename: media.original_filename, kind: media.kind } },
     ]);
     setPickerFor(null);
   };

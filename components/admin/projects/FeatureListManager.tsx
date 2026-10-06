@@ -32,8 +32,8 @@ export default function FeatureListManager({
     const value = draft.trim();
     if (!value) return;
     setAdding(true);
-    await addFeature(projectId, kind, value, items.length);
-    setItems((prev) => [...prev, { id: crypto.randomUUID(), title: value }]);
+    const { id } = await addFeature(projectId, kind, value, items.length);
+    setItems((prev) => [...prev, { id, title: value }]);
     setDraft("");
     setAdding(false);
   };

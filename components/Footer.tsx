@@ -1,13 +1,13 @@
 import Link from "next/link";
 import Image from "next/image";
-import type { Project } from "@/lib/types/project";
+import type { ProjectSummary } from "@/lib/types/project";
 import type { CompanyInfoContent } from "@/lib/data/site-content";
 
 export default function Footer({
   projects,
   companyInfo,
 }: {
-  projects: Project[];
+  projects: ProjectSummary[];
   companyInfo: CompanyInfoContent;
 }) {
   return (
@@ -93,7 +93,7 @@ export default function Footer({
             © {new Date().getFullYear()} CRG | Crafted Residential Group. Tutti i diritti riservati.
           </p>
           <div className="flex gap-6">
-            <Link href="#" className="font-sans text-xs text-white/20 hover:text-crg-red transition-colors">
+            <Link href="/privacy" className="font-sans text-xs text-white/20 hover:text-crg-red transition-colors">
               Privacy Policy
             </Link>
             <Link href="#" className="font-sans text-xs text-white/20 hover:text-crg-red transition-colors">

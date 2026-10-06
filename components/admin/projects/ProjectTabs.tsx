@@ -8,7 +8,11 @@ const tabs = [
   { key: "gallery", label: "Gallery" },
   { key: "caratteristiche", label: "Caratteristiche" },
   { key: "unita", label: "Unità" },
-  { key: "timeline", label: "Timeline" },
+  { key: "timeline", label: "Avanzamento" },
+  { key: "diario", label: "Diario" },
+  { key: "documenti", label: "Documenti" },
+  { key: "chi-realizza", label: "Chi realizza" },
+  { key: "messaggi", label: "Messaggi" },
 ];
 
 export default function ProjectTabs({ projectId }: { projectId: string }) {

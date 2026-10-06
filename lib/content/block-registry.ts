@@ -378,6 +378,38 @@ export const blockDefinitions: BlockDefinition[] = [
       ctaLabel: "Chiamaci ora",
     },
   },
+
+  // ── Legale ──────────────────────────────────────────────────────────────
+  {
+    page: "legale",
+    blockKey: "privacy",
+    pageLabel: "Legale",
+    blockLabel: "Informativa privacy (/privacy)",
+    fields: [
+      { key: "title", label: "Titolo", type: "text" },
+      { key: "updatedAt", label: "Ultimo aggiornamento (es. 6 ottobre 2026)", type: "text" },
+      { key: "body", label: "Testo (una riga vuota separa i paragrafi; una riga che inizia con ## diventa un titoletto)", type: "textarea" },
+    ],
+    defaultData: {
+      title: "Informativa sul trattamento dei dati personali",
+      updatedAt: "",
+      body: [
+        "Questa informativa spiega come trattiamo i dati personali che ci lasci attraverso i moduli di questo sito (richiesta di appuntamento, contatto, richiesta documenti e iscrizione agli aggiornamenti dei progetti), ai sensi del Regolamento UE 2016/679 (GDPR).",
+        "## Titolare del trattamento",
+        "CRG | Crafted Residential Group. Per qualsiasi richiesta sui tuoi dati puoi scrivere all'indirizzo email indicato nella pagina Contatti.",
+        "## Quali dati raccogliamo",
+        "Nome, cognome, email, telefono e le informazioni che scegli di indicarci nel messaggio, oltre al progetto o all'unità a cui sei interessato.",
+        "## Perché li usiamo",
+        "Per rispondere alla tua richiesta, organizzare la visita, inviarti i documenti che hai chiesto e, solo se ti sei iscritto, avvisarti delle novità sul progetto scelto. La base giuridica è la tua richiesta e il consenso che esprimi inviando il modulo.",
+        "## Per quanto tempo",
+        "Conserviamo i dati per il tempo necessario a gestire la tua richiesta e la eventuale trattativa, e comunque non oltre 24 mesi dall'ultimo contatto, salvo obblighi di legge.",
+        "## Con chi li condividiamo",
+        "I dati sono trattati dal nostro personale e da fornitori tecnici che ci aiutano a gestire il sito e le email (hosting, database, invio email), nominati responsabili del trattamento. Non vendiamo né cediamo i tuoi dati a terzi per fini commerciali.",
+        "## I tuoi diritti",
+        "Puoi chiedere in qualsiasi momento di accedere ai tuoi dati, correggerli, cancellarli, limitarne l'uso, opporti al trattamento o revocare il consenso, scrivendoci. Hai anche diritto di presentare reclamo al Garante per la protezione dei dati personali.",
+      ].join("\n\n"),
+    },
+  },
 ];
 
 export function getBlockDefinition(page: string, blockKey: string) {

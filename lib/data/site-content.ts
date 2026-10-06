@@ -167,6 +167,15 @@ export async function getCompanyInfoContent(): Promise<CompanyInfoContent> {
   return getBlockData("global", "company_info");
 }
 
+export interface PrivacyContent {
+  title: string;
+  updatedAt: string;
+  body: string;
+}
+export async function getPrivacyContent(): Promise<PrivacyContent> {
+  return getBlockData("legale", "privacy");
+}
+
 export interface ContactHeroContent {
   eyebrow: string;
   title: string;
