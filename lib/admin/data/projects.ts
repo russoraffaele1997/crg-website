@@ -57,6 +57,7 @@ export interface AdminProjectDetail {
   featuredOrder: number | null;
   isSpotlight: boolean;
   spotlightSpecs: { label: string; value: string }[];
+  mapAddress: string;
   carBoxPlan: MediaRef | null;
   carBoxes: { id: string; name: string; sqm: number; status: string; orderIndex: number }[];
   publishStatus: string;
@@ -155,7 +156,7 @@ export async function getAdminProjectById(id: string): Promise<AdminProjectDetai
     .select(`
       id, slug, title, location, category, status, status_label,
       short_description, description, is_featured, featured_order,
-      is_spotlight, spotlight_specs, publish_status,
+      is_spotlight, spotlight_specs, publish_status, map_address,
       expected_delivery, expected_delivery_label, next_action_text, next_action_expires_on, next_action_hidden,
       low_stock_threshold, auto_alerts_enabled, alert_text, alert_tone, alert_expires_on,
       seo_meta_id, seo_meta:seo_meta_id(meta_title, meta_description, og_title, og_description),
@@ -196,6 +197,7 @@ export async function getAdminProjectById(id: string): Promise<AdminProjectDetai
     is_spotlight: boolean;
     spotlight_specs: { label: string; value: string }[] | null;
     publish_status: string;
+    map_address: string | null;
     expected_delivery: string | null;
     expected_delivery_label: string | null;
     next_action_text: string | null;
@@ -254,6 +256,7 @@ export async function getAdminProjectById(id: string): Promise<AdminProjectDetai
     featuredOrder: row.featured_order,
     isSpotlight: row.is_spotlight,
     spotlightSpecs: row.spotlight_specs ?? [],
+    mapAddress: row.map_address ?? "",
     carBoxPlan: toMediaRef(row.car_box_plan),
     carBoxes: [...row.project_car_boxes]
       .sort((a, b) => a.order_index - b.order_index)

@@ -45,6 +45,7 @@ export function projectReadiness(p: AdminProjectDetail): ReadinessItem[] {
     { label: "Fasi con data", done: p.timeline.length > 0 && p.timeline.every((t) => t.sortableDate || t.dateLabel.trim()), tab: "timeline", required: false },
     { label: "Consegna prevista", done: Boolean(p.messaging.expectedDelivery || p.messaging.expectedDeliveryLabel.trim()), tab: "timeline", required: false },
     { label: "Capitolato o brochure", done: p.documents.some((d) => d.isActive && (d.category === "capitolato" || d.category === "brochure")), tab: "documenti", required: false },
+    { label: "Posizione del cantiere sulla mappa", done: Boolean(p.mapAddress.trim()), tab: "", required: false },
     { label: "Chi realizza il progetto", done: p.partners.length > 0, tab: "chi-realizza", required: false },
   ];
 }

@@ -432,6 +432,7 @@ export const blockDefinitions: BlockDefinition[] = [
         "## Cookie",
         "Questo sito usa solo cookie tecnici, necessari al suo funzionamento: in particolare i cookie di sessione che permettono agli amministratori di accedere all'area riservata. Non usiamo cookie di profilazione né strumenti di analisi o pubblicità di terze parti; per questo, come previsto dalle Linee guida del Garante sui cookie, non è necessario chiederti un consenso.",
         "I video presenti in alcuni articoli sono incorporati nella modalità a privacy avanzata di YouTube e Vimeo: YouTube può impostare propri cookie solo se avvii la riproduzione del video, secondo la sua informativa. I pulsanti di condivisione sui social sono semplici link e non caricano nulla finché non li usi.",
+        "Nelle pagine dei progetti la mappa di Google Maps non viene caricata automaticamente: compare solo se premi \"Mostra la mappa\", e da quel momento Google può impostare propri cookie secondo la sua informativa (policies.google.com/privacy).",
         "Puoi in ogni momento cancellare o bloccare i cookie dalle impostazioni del tuo browser.",
         "## Modifiche a questa informativa",
         "Possiamo aggiornare questa informativa, ad esempio se cambiano i servizi del sito. La data dell'ultimo aggiornamento è indicata in cima alla pagina.",

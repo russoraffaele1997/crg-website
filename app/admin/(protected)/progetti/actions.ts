@@ -44,6 +44,7 @@ export interface ProjectGeneralInput {
   featuredOrder: number | null;
   isSpotlight: boolean;
   spotlightSpecs: { label: string; value: string }[];
+  mapAddress: string;
   publishStatus: "draft" | "published" | "archived";
   seoMetaTitle: string;
   seoMetaDescription: string;
@@ -89,6 +90,7 @@ export async function createProject(input: ProjectGeneralInput): Promise<{ id: s
       short_description: input.shortDescription,
       description: input.description,
       cover_image_id: input.coverImageId,
+      map_address: input.mapAddress.trim() || null,
       is_featured: input.isFeatured,
       featured_order: input.featuredOrder,
       is_spotlight: input.isSpotlight,
@@ -130,6 +132,7 @@ export async function updateProjectGeneral(id: string, input: ProjectGeneralInpu
       short_description: input.shortDescription,
       description: input.description,
       cover_image_id: input.coverImageId,
+      map_address: input.mapAddress.trim() || null,
       is_featured: input.isFeatured,
       featured_order: input.featuredOrder,
       is_spotlight: input.isSpotlight,

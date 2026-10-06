@@ -144,7 +144,7 @@ export async function getFeaturedProjects(count = 3): Promise<ProjectSummary[]> 
 
 const PROJECT_SELECT = `
   id, slug, title, location, category, status, status_label,
-  short_description, description, spotlight_specs,
+  short_description, description, spotlight_specs, map_address,
   ${MESSAGING_COLUMNS},
   cover_media:media_library!cover_image_id(storage_path, bucket),
   car_box_plan:media_library!car_box_plan_media_id(storage_path, bucket),
@@ -181,6 +181,7 @@ interface ProjectRow extends MessagingRow {
   short_description: string;
   description: string;
   spotlight_specs: { label: string; value: string }[] | null;
+  map_address: string | null;
   cover_media: MediaRef;
   car_box_plan: MediaRef;
   project_car_boxes: { id: string; name: string; sqm: number; status: CarBox["status"]; order_index: number }[];
@@ -329,6 +330,7 @@ function mapProject(row: ProjectRow): Project {
       website: p.website,
       logoUrl: mediaUrl(p.logo),
     })),
+    mapAddress: row.map_address?.trim() ?? "",
     expectedDelivery: row.expected_delivery,
     expectedDeliveryLabel: row.expected_delivery_label,
     nextActionText: row.next_action_text,

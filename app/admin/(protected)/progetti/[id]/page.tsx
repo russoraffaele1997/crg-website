@@ -29,6 +29,7 @@ export default async function ProjectGeneralPage({
         slug: project.slug,
         title: project.title,
         location: project.location,
+        mapAddress: project.mapAddress,
         category: project.category as "residential" | "commercial" | "industrial",
         status: project.status as "for-sale" | "under-construction" | "coming-soon" | "for-rent",
         statusLabel: project.statusLabel,

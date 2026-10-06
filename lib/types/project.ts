@@ -116,6 +116,8 @@ export interface Project extends ProjectMessaging {
   updates: ProjectUpdate[];
   documents: ProjectDocument[];
   partners: ProjectPartner[];
+  /** Address or coordinates of the building site, shown on a map. Empty = no map. */
+  mapAddress: string;
 }
 
 export interface UnitCounts {

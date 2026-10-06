@@ -22,6 +22,7 @@ export default function ProjectGeneralForm({ mode, projectId, initial }: Props) 
   const [slug, setSlug] = useState(initial?.slug ?? "");
   const [slugTouched, setSlugTouched] = useState(mode === "edit");
   const [location, setLocation] = useState(initial?.location ?? "");
+  const [mapAddress, setMapAddress] = useState(initial?.mapAddress ?? "");
   const [category, setCategory] = useState(initial?.category ?? "residential");
   const [status, setStatus] = useState(initial?.status ?? "for-sale");
   const [statusLabel, setStatusLabel] = useState(initial?.statusLabel ?? "");
@@ -67,6 +68,7 @@ export default function ProjectGeneralForm({ mode, projectId, initial }: Props) 
       slug,
       title,
       location,
+      mapAddress,
       category: category as ProjectGeneralInput["category"],
       status: status as ProjectGeneralInput["status"],
       statusLabel,
@@ -216,6 +218,32 @@ export default function ProjectGeneralForm({ mode, projectId, initial }: Props) 
           onChange={(e) => setDescription(e.target.value)}
           className="w-full border border-slate-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-crg-red resize-none"
         />
+      </div>
+
+      <div>
+        <label className="block text-xs tracking-wider uppercase text-slate-500 mb-2">Indirizzo del cantiere (mappa)</label>
+        <input
+          value={mapAddress}
+          onChange={(e) => setMapAddress(e.target.value)}
+          className="w-full border border-slate-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-crg-red"
+          placeholder="Es. Via Duca d'Aosta 10, 80026 Casoria NA — oppure coordinate: 40.9061, 14.2925"
+        />
+        <p className="text-xs text-slate-400 mt-1">
+          Mostra la mappa Google nella pagina del progetto. Se vuoto, la mappa non compare.
+          {mapAddress.trim() && (
+            <>
+              {" "}
+              <a
+                href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(mapAddress.trim())}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-crg-red hover:underline"
+              >
+                Controlla su Google Maps ↗
+              </a>
+            </>
+          )}
+        </p>
       </div>
 
       <MediaField label="Immagine di copertina" value={coverImage} onChange={setCoverImage} />

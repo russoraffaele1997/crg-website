@@ -18,6 +18,7 @@ import ProjectHero from "@/components/project/ProjectHero";
 import ProjectStatus from "@/components/project/ProjectStatus";
 import UnitsSection from "@/components/project/UnitsSection";
 import PhotoGrid from "@/components/project/PhotoGrid";
+import ProjectMap from "@/components/project/ProjectMap";
 import VisitForm from "@/components/project/VisitForm";
 import NotifyForm from "@/components/project/NotifyForm";
 import { VisitProvider } from "@/components/project/VisitContext";
@@ -118,6 +119,25 @@ export default async function ProjectDetailPage({ params }: Props) {
           )}
         </div>
       </section>
+
+      {project.mapAddress && (
+        <section id="dove" className="py-16 bg-cream border-t border-border-warm scroll-mt-24">
+          <div className="container-custom">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12">
+              <div className="lg:col-span-4">
+                <span className="section-label block mb-4">Posizione</span>
+                <h2 className="font-heading text-3xl font-bold text-charcoal mb-4">Dove si trova</h2>
+                <p className="font-sans text-sm text-mid-gray leading-relaxed">
+                  {project.title} sorge a {project.location}. Vieni a vedere il cantiere: prenota una visita e ti accompagniamo noi.
+                </p>
+              </div>
+              <div className="lg:col-span-8">
+                <ProjectMap address={project.mapAddress} title={project.title} />
+              </div>
+            </div>
+          </div>
+        </section>
+      )}
 
       <ProjectAbout project={project} ctaLabel={hasSelectableUnits ? "Prenota una visita" : "Chiedi informazioni"} />
       <ProjectPartners partners={project.partners} />
