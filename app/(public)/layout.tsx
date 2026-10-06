@@ -1,6 +1,7 @@
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import ScrollRestoration from "@/components/ScrollRestoration";
+import CookieBanner from "@/components/CookieBanner";
 import { getProjectSummaries } from "@/lib/data/projects";
 import { getCompanyInfoContent } from "@/lib/data/site-content";
 
@@ -19,6 +20,7 @@ export default async function PublicLayout({
       <Header projects={projects} />
       <main>{children}</main>
       <Footer projects={projects} companyInfo={companyInfo} />
+      <CookieBanner />
     </>
   );
 }

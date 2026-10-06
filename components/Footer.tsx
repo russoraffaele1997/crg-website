@@ -2,6 +2,7 @@ import Link from "next/link";
 import Image from "next/image";
 import type { ProjectSummary } from "@/lib/types/project";
 import type { CompanyInfoContent } from "@/lib/data/site-content";
+import { CookiePreferencesButton } from "./CookieBanner";
 
 export default function Footer({
   projects,
@@ -110,6 +111,7 @@ export default function Footer({
             <Link href="/privacy#cookie" className="font-sans text-xs text-white/20 hover:text-crg-red transition-colors">
               Cookie Policy
             </Link>
+            <CookiePreferencesButton className="font-sans text-xs text-white/20 hover:text-crg-red transition-colors" />
           </div>
         </div>
       </div>
