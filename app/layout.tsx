@@ -21,6 +21,8 @@ const sora = Sora({
 export const metadata: Metadata = {
   // Resolves relative URLs (Open Graph image, icons) against the real domain.
   metadataBase: new URL(SITE_URL),
+  // Google Search Console ownership (property https://crgcostruzioni.it/). Keep it: removing it unverifies the property.
+  verification: { google: "vmGC8K00wHbOJu25-XHhsS-wwsf9sjD4PbVAZND-swU" },
   title: {
     // Page titles already include the brand ("Progetti — CRG | …"): no suffix, or it appears twice.
     template: "%s",
