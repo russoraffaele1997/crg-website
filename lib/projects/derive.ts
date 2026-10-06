@@ -209,7 +209,7 @@ export function nextAction(input: {
           : `Ultime ${counts.available} ${unitNoun(category, counts.available)} disponibili.`,
       text:
         counts.available === 1
-          ? "Prenota una visita con il nostro team prima che venga venduto."
+          ? "Prenota subito una visita con il nostro team."
           : "Prenota una visita per vederle di persona con il nostro team.",
       cta: { label: "Prenota subito", href: ANCHORS.visit },
     };
