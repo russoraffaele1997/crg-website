@@ -11,9 +11,15 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(new URL(request.nextUrl.pathname + request.nextUrl.search, SITE_URL), 308);
   }
 
-  // Everything below is the admin auth gate: public pages skip it entirely.
+  // Everything below is the admin auth gate: public pages skip it entirely,
+  // but declare their canonical URL (HTTP Link header, read by Google) so the
+  // old www./vercel.app copies are folded into the real address.
   if (!request.nextUrl.pathname.startsWith("/admin")) {
-    return NextResponse.next();
+    const response = NextResponse.next();
+    if (!request.nextUrl.pathname.startsWith("/api")) {
+      response.headers.set("Link", `<${new URL(request.nextUrl.pathname, SITE_URL).href}>; rel="canonical"`);
+    }
+    return response;
   }
 
   // Bootstrap state: no Supabase project connected yet, so there is no
