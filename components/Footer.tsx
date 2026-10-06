@@ -93,14 +93,11 @@ export default function Footer({
             <p>
               © {new Date().getFullYear()} {companyInfo.legalName?.trim() || "CRG | Crafted Residential Group"}. Tutti i diritti riservati.
             </p>
-            {/* Company identification required on company websites (art. 2250 c.c.) */}
+            {/* Company identification shown on every page */}
             <p>
               {[
                 companyInfo.legalAddress?.trim() && `Sede legale ${companyInfo.legalAddress.trim()}`,
                 companyInfo.vatNumber?.trim() && `P.IVA e C.F. ${companyInfo.vatNumber.trim()}`,
-                companyInfo.rea?.trim() && `REA ${companyInfo.rea.trim()}`,
-                companyInfo.shareCapital?.trim() && `Capitale sociale ${companyInfo.shareCapital.trim()}`,
-                companyInfo.pec?.trim() && `PEC ${companyInfo.pec.trim()}`,
               ]
                 .filter(Boolean)
                 .join(" · ")}
