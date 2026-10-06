@@ -76,6 +76,29 @@ export default async function ProjectDetailPage({ params }: Props) {
     .filter(Boolean)
     .join(" · ") || project.shortDescription;
 
+  // "Keep scrolling to pick your apartment" — shown right above the units list.
+  const unitsCue = counts.total > 0 ? (
+    <a
+      href="#unita"
+      className="group mt-10 flex flex-col items-center gap-2 text-center"
+      aria-label="Vai alla scelta delle unità"
+    >
+      <span className="font-heading text-lg font-bold text-charcoal group-hover:text-crg-red transition-colors">
+        {project.category === "residential" ? "Scegli il tuo appartamento" : "Scegli la tua unità"}
+      </span>
+      <span className="font-sans text-sm text-mid-gray">
+        {hasSelectableUnits
+          ? `${counts.available + counts.optioned} su ${counts.total} ancora disponibili: scorri per vedere piante, foto e prezzi`
+          : "Scorri per vedere tutte le unità del progetto"}
+      </span>
+      <span className="mt-1 w-11 h-11 rounded-full bg-crg-red text-white flex items-center justify-center animate-bounce group-hover:bg-crg-red-dark" aria-hidden>
+        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+        </svg>
+      </span>
+    </a>
+  ) : null;
+
   return (
     <VisitProvider>
       <ProjectHero project={project} statusLine={statusLine} hasSelectableUnits={hasSelectableUnits} alerts={alerts} />
@@ -90,6 +113,28 @@ export default async function ProjectDetailPage({ params }: Props) {
         category={project.category}
         action={action}
       />
+
+      {project.mapAddress && (
+        <section id="dove" className="pt-16 pb-10 bg-light-gray border-t border-border-warm scroll-mt-24">
+          <div className="container-custom">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12">
+              <div className="lg:col-span-4">
+                <span className="section-label block mb-4">Posizione</span>
+                <h2 className="font-heading text-3xl font-bold text-charcoal mb-4">Dove si trova</h2>
+                <p className="font-sans text-sm text-mid-gray leading-relaxed">
+                  {project.title} sorge a {project.location}. Vieni a vedere il cantiere: prenota una visita e ti accompagniamo noi.
+                </p>
+              </div>
+              <div className="lg:col-span-8">
+                <ProjectMap address={project.mapAddress} title={project.title} />
+              </div>
+            </div>
+            {unitsCue}
+          </div>
+        </section>
+      )}
+
+      {!project.mapAddress && unitsCue && <div className="bg-white pb-10"><div className="container-custom">{unitsCue}</div></div>}
 
       <section id="unita" className="py-16 bg-cream border-t border-border-warm scroll-mt-24">
         <div className="container-custom">
@@ -119,25 +164,6 @@ export default async function ProjectDetailPage({ params }: Props) {
           )}
         </div>
       </section>
-
-      {project.mapAddress && (
-        <section id="dove" className="py-16 bg-cream border-t border-border-warm scroll-mt-24">
-          <div className="container-custom">
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12">
-              <div className="lg:col-span-4">
-                <span className="section-label block mb-4">Posizione</span>
-                <h2 className="font-heading text-3xl font-bold text-charcoal mb-4">Dove si trova</h2>
-                <p className="font-sans text-sm text-mid-gray leading-relaxed">
-                  {project.title} sorge a {project.location}. Vieni a vedere il cantiere: prenota una visita e ti accompagniamo noi.
-                </p>
-              </div>
-              <div className="lg:col-span-8">
-                <ProjectMap address={project.mapAddress} title={project.title} />
-              </div>
-            </div>
-          </div>
-        </section>
-      )}
 
       <ProjectAbout project={project} ctaLabel={hasSelectableUnits ? "Prenota una visita" : "Chiedi informazioni"} />
       <ProjectPartners partners={project.partners} />
